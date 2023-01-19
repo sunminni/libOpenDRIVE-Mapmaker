@@ -13,7 +13,7 @@ var spotlight_info = document.getElementById('spotlight_info');
 var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
-
+ 
 const COLORS = {
     road : 1.0,
     roadmark : 1.0,
