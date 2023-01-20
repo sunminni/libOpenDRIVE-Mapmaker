@@ -95,9 +95,12 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
         .property("x_offs", &OpenDriveMap::x_offs)
         .property("y_offs", &OpenDriveMap::y_offs);
 
+    emscripten::class_<Road>("Road");
+
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);
     emscripten::function("get_road_ids", &get_road_ids);
+    emscripten::function("create_road_mesh", &create_road_mesh);
     emscripten::function("create_new_road", &create_new_road);
 }
 

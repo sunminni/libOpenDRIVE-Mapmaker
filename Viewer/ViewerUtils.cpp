@@ -113,12 +113,33 @@ std::vector<std::string> get_road_ids(const OpenDriveMap& odr_map)
     return road_ids;
 }
 
-RoadNetworkMesh create_new_road(OpenDriveMap& odr_map, double eps)
-{
+RoadNetworkMesh create_road_mesh(double eps, Road road){
     RoadNetworkMesh  out_mesh;
     LanesMesh&       lanes_mesh = out_mesh.lanes_mesh;
+    lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
 
-    
+    for (const auto& s_lanesec : road.s_to_lanesection)
+    {
+        const LaneSection& lanesec = s_lanesec.second;
+        lanes_mesh.lanesec_start_indices[lanes_mesh.vertices.size()] = lanesec.s0;
+        for (const auto& id_lane : lanesec.id_to_lane)
+        {
+            const Lane&       lane = id_lane.second;
+            const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
+            if (lane.type != "driving"){continue;}
+
+            lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
+            Mesh3D asdf = road.get_lane_mesh(lane, eps);
+
+            lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
+        }
+    }
+
+    return out_mesh;
+}
+
+Road create_new_road(OpenDriveMap& odr_map, double eps)
+{
     std::string new_road_id = "new_road";
     std::string junc = "-1";
     // Road& road = Road(road_id,20,"-1","new_road");
@@ -174,27 +195,7 @@ RoadNetworkMesh create_new_road(OpenDriveMap& odr_map, double eps)
             id_lane.second.outer_border = id_lane.second.outer_border.add(road.lane_offset);
         }
     }
-
-    lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
-
-    for (const auto& s_lanesec : road.s_to_lanesection)
-    {
-        const LaneSection& lanesec = s_lanesec.second;
-        lanes_mesh.lanesec_start_indices[lanes_mesh.vertices.size()] = lanesec.s0;
-        for (const auto& id_lane : lanesec.id_to_lane)
-        {
-            const Lane&       lane = id_lane.second;
-            const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
-            if (lane.type != "driving"){continue;}
-
-            lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
-            Mesh3D asdf = road.get_lane_mesh(lane, eps);
-
-            lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
-        }
-    }
-
-    return out_mesh;
+    return road;
 }
 
 } // namespace odr
