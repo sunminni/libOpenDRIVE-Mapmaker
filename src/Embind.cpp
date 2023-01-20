@@ -97,6 +97,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
 
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);
+    emscripten::function("get_road_ids", &get_road_ids);
+    emscripten::function("create_new_road", &create_new_road);
 }
 
 } // namespace odr

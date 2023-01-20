@@ -3,6 +3,7 @@ var ModuleOpenDrive = null;
 var OpenDriveMap = null;
 var refline_lines = null;
 var road_network_mesh = null;
+var road_network_mesh_new = null;
 var roadmarks_mesh = null;
 var lane_outline_lines = null;
 var roadmark_outline_lines = null;
@@ -13,7 +14,9 @@ var spotlight_info = document.getElementById('spotlight_info');
 var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
- 
+var map_filename = 'Town10HD.xodr'
+var map_filepath = './'+map_filename;
+
 const COLORS = {
     road : 1.0,
     roadmark : 1.0,
@@ -29,6 +32,7 @@ const COLORS = {
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('mousemove', onDocumentMouseMove, false);
 window.addEventListener('dblclick', onDocumentMouseDbClick, false);
+window.addEventListener('keydown', onKeyDown, false);
 
 /* notifactions */
 const notyf = new Notyf({
@@ -50,7 +54,7 @@ camera.up.set(0, 0, 1); /* Coordinate system with Z pointing up */
 const controls = new THREE.MapControls(camera, renderer.domElement);
 controls.addEventListener('start', () => { spotlight_paused = true; controls.autoRotate = false; });
 controls.addEventListener('end', () => { spotlight_paused = false; });
-controls.autoRotate = true;
+// controls.autoRotate = true;
 
 /* THREEJS lights */
 const light = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -114,7 +118,7 @@ const roadmarks_material = new THREE.MeshBasicMaterial({
 /* load WASM + odr map */
 libOpenDrive().then(Module => {
     ModuleOpenDrive = Module;
-    fetch("./data.xodr").then((file_data) => {
+    fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
             loadFile(file_text, false);
         });
@@ -131,8 +135,8 @@ function onFileSelect(file)
 function loadFile(file_text, clear_map)
 {
     if (clear_map)
-        ModuleOpenDrive['FS_unlink']('./data.xodr');
-    ModuleOpenDrive['FS_createDataFile'](".", "data.xodr", file_text, true, true);
+        ModuleOpenDrive['FS_unlink'](map_filepath);
+    ModuleOpenDrive['FS_createDataFile'](".", map_filename, file_text, true, true);
     if (OpenDriveMap)
         OpenDriveMap.delete();
     odr_map_config = {
@@ -142,7 +146,7 @@ function loadFile(file_text, clear_map)
         center_map : true,
         abs_z_for_for_local_road_obj_outline : true
     };
-    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap("./data.xodr", odr_map_config);
+    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
     loadOdrMap(clear_map);
 }
 
@@ -157,7 +161,7 @@ function reloadOdrMap()
         center_map : true,
         abs_z_for_for_local_road_obj_outline : true
     };
-    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap("./data.xodr", odr_map_config);
+    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
     loadOdrMap(true, false);
 }
 
@@ -222,35 +226,35 @@ function loadOdrMap(clear_map = true, fit_view = true)
     xyz_scene.add(xyz_mesh);
 
     /* st coords road network mesh */
-    const st_mesh = new THREE.Mesh(road_network_geom, st_material);
-    st_mesh.matrixAutoUpdate = false;
-    st_scene.add(st_mesh);
+    // const st_mesh = new THREE.Mesh(road_network_geom, st_material);
+    // st_mesh.matrixAutoUpdate = false;
+    // st_scene.add(st_mesh);
 
     /* roadmarks geometry */
-    const odr_roadmarks_mesh = odr_road_network_mesh.roadmarks_mesh;
-    const roadmarks_geom = get_geometry(odr_roadmarks_mesh);
-    roadmarks_geom.attributes.color.array.fill(COLORS.roadmark);
-    for (const [vert_start_idx, _] of getStdMapEntries(odr_roadmarks_mesh.roadmark_type_start_indices)) {
-        const vert_idx_interval = odr_roadmarks_mesh.get_idx_interval_roadmark(vert_start_idx);
-        const vert_count = vert_idx_interval[1] - vert_idx_interval[0];
-        const vert_start_idx_encoded = encodeUInt32(vert_start_idx);
-        const attr_arr = new Float32Array(vert_count * 4);
-        for (let i = 0; i < vert_count; i++)
-            attr_arr.set(vert_start_idx_encoded, i * 4);
-        roadmarks_geom.attributes.id.array.set(attr_arr, vert_idx_interval[0] * 4);
-    }
-    disposable_objs.push(roadmarks_geom);
+    // const odr_roadmarks_mesh = odr_road_network_mesh.roadmarks_mesh;
+    // const roadmarks_geom = get_geometry(odr_roadmarks_mesh);
+    // roadmarks_geom.attributes.color.array.fill(COLORS.roadmark);
+    // for (const [vert_start_idx, _] of getStdMapEntries(odr_roadmarks_mesh.roadmark_type_start_indices)) {
+    //     const vert_idx_interval = odr_roadmarks_mesh.get_idx_interval_roadmark(vert_start_idx);
+    //     const vert_count = vert_idx_interval[1] - vert_idx_interval[0];
+    //     const vert_start_idx_encoded = encodeUInt32(vert_start_idx);
+    //     const attr_arr = new Float32Array(vert_count * 4);
+    //     for (let i = 0; i < vert_count; i++)
+    //         attr_arr.set(vert_start_idx_encoded, i * 4);
+    //     roadmarks_geom.attributes.id.array.set(attr_arr, vert_idx_interval[0] * 4);
+    // }
+    // disposable_objs.push(roadmarks_geom);
 
     /* roadmarks mesh */
-    roadmarks_mesh = new THREE.Mesh(roadmarks_geom, roadmarks_material);
-    roadmarks_mesh.matrixAutoUpdate = false;
-    roadmarks_mesh.visible = !(PARAMS.view_mode == 'Outlines') && PARAMS.roadmarks;
-    scene.add(roadmarks_mesh);
+    // roadmarks_mesh = new THREE.Mesh(roadmarks_geom, roadmarks_material);
+    // roadmarks_mesh.matrixAutoUpdate = false;
+    // roadmarks_mesh.visible = !(PARAMS.view_mode == 'Outlines') && PARAMS.roadmarks;
+    // scene.add(roadmarks_mesh);
 
     /* picking roadmarks mesh */
-    const roadmark_picking_mesh = new THREE.Mesh(roadmarks_geom, id_material);
-    roadmark_picking_mesh.matrixAutoUpdate = false;
-    roadmark_picking_scene.add(roadmark_picking_mesh);
+    // const roadmark_picking_mesh = new THREE.Mesh(roadmarks_geom, id_material);
+    // roadmark_picking_mesh.matrixAutoUpdate = false;
+    // roadmark_picking_scene.add(roadmark_picking_mesh);
 
     /* lane outline */
     const lane_outlines_geom = new THREE.BufferGeometry();
@@ -262,21 +266,21 @@ function loadOdrMap(clear_map = true, fit_view = true)
     scene.add(lane_outline_lines);
 
     /* roadmark outline */
-    const roadmark_outlines_geom = new THREE.BufferGeometry();
-    roadmark_outlines_geom.setAttribute('position', roadmarks_geom.attributes.position);
-    roadmark_outlines_geom.setIndex(getStdVecEntries(odr_roadmarks_mesh.get_roadmark_outline_indices(), true));
-    roadmark_outline_lines = new THREE.LineSegments(roadmark_outlines_geom, roadmark_outlines_material);
-    roadmark_outline_lines.renderOrder = 8;
-    roadmark_outline_lines.matrixAutoUpdate = false;
-    disposable_objs.push(roadmark_outlines_geom);
-    roadmark_outline_lines.visible = PARAMS.roadmarks;
-    scene.add(roadmark_outline_lines);
+    // const roadmark_outlines_geom = new THREE.BufferGeometry();
+    // roadmark_outlines_geom.setAttribute('position', roadmarks_geom.attributes.position);
+    // roadmark_outlines_geom.setIndex(getStdVecEntries(odr_roadmarks_mesh.get_roadmark_outline_indices(), true));
+    // roadmark_outline_lines = new THREE.LineSegments(roadmark_outlines_geom, roadmark_outlines_material);
+    // roadmark_outline_lines.renderOrder = 8;
+    // roadmark_outline_lines.matrixAutoUpdate = false;
+    // disposable_objs.push(roadmark_outlines_geom);
+    // roadmark_outline_lines.visible = PARAMS.roadmarks;
+    // scene.add(roadmark_outline_lines);
 
     /* fit view and camera */
     const bbox_reflines = new THREE.Box3().setFromObject(refline_lines);
     const max_diag_dist = bbox_reflines.min.distanceTo(bbox_reflines.max);
     camera.far = max_diag_dist * 1.5;
-    controls.autoRotate = fit_view;
+    // controls.autoRotate = fit_view;
     if (fit_view)
         fitViewToBbox(bbox_reflines);
 
@@ -308,7 +312,7 @@ function loadOdrMap(clear_map = true, fit_view = true)
         </div>`;
     notyf.open({ type : 'info', message : info_msg });
 
-    odr_roadmarks_mesh.delete();
+    // odr_roadmarks_mesh.delete();
     odr_lanes_mesh.delete();
     spotlight_info.style.display = "none";
     animate();
@@ -442,7 +446,7 @@ function fitViewToBbox(bbox, restrict_zoom = true)
     const fov2r = (camera.fov * 0.5) * (Math.PI / 180.0);
     const dz = l2xy / Math.tan(fov2r);
 
-    camera.position.set(bbox.min.x, center_pt.y, bbox.max.z + dz);
+    camera.position.set(center_pt.x, center_pt.y, bbox.max.z + dz);
     controls.target.set(center_pt.x, center_pt.y, center_pt.z);
     if (restrict_zoom)
         controls.maxDistance = center_pt.distanceTo(bbox.max) * 1.2;
