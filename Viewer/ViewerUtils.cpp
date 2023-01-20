@@ -104,7 +104,6 @@ RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps)
 
 std::vector<std::string> get_road_ids(const OpenDriveMap& odr_map)
 {
-    std::cout<<odr_map.id_to_road.size()<<std::endl;
     std::vector<std::string>road_ids;
     for (const auto& id_road : odr_map.id_to_road)
     {
@@ -176,38 +175,21 @@ RoadNetworkMesh create_new_road(OpenDriveMap& odr_map, double eps)
         }
     }
 
-
-
-
-
-
-
-
-
-    std::cout<<road.id<<std::endl;
-    int count = 0;
     lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
 
     for (const auto& s_lanesec : road.s_to_lanesection)
     {
-        std::cout<< "s_lanesec" <<std::endl;
         const LaneSection& lanesec = s_lanesec.second;
         lanes_mesh.lanesec_start_indices[lanes_mesh.vertices.size()] = lanesec.s0;
         for (const auto& id_lane : lanesec.id_to_lane)
         {
             const Lane&       lane = id_lane.second;
-            std::cout<< "id_lane "<<lane.id<<std::endl;
             const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
             if (lane.type != "driving"){continue;}
 
             lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
             Mesh3D asdf = road.get_lane_mesh(lane, eps);
 
-            for (auto vertex : asdf.vertices){
-                std::cout<<vertex[0]<<" "<<vertex[1]<<" "<<vertex[2]<<" "<<std::endl;
-            }
-
-            std::cout<< "asdf.vertices.size() "<<asdf.vertices.size()<<std::endl;
             lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
         }
     }

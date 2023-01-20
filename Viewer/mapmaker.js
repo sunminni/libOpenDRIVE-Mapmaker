@@ -15,7 +15,6 @@ function onKeyDown(e){
 
 function addRoad(){
     const odr_road_network_mesh = ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution));
-    console.log(odr_road_network_mesh);
     const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
     const road_network_geom_new = get_geometry(odr_lanes_mesh_new);
     road_network_geom_new.attributes.color.array.fill(COLORS.road);
@@ -39,4 +38,9 @@ function addRoad(){
     scene.add(road_network_mesh_new);
 
     odr_lanes_mesh_new.delete();
+}
+
+function updateNewRoad(){
+    scene.remove(road_network_mesh_new);
+    addRoad();
 }
