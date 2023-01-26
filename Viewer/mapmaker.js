@@ -11,7 +11,7 @@ function onKeyDown(e){
         //     console.log(std_vec.get(idx));
         // }
     }
-}
+} 
 
 function addRoad(){
     const road = ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution));
