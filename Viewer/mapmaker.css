@@ -1,0 +1,7 @@
+.new_road_controls{
+    position: absolute;
+    top: 500px;
+    left: 200px;
+    border: 2px solid gray;
+    padding: 5px;
+}

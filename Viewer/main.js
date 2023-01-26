@@ -16,6 +16,7 @@ var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
 var map_filename = 'Town10HD.xodr'
 var map_filepath = './'+map_filename;
+var newRoadMode = false;
 
 const COLORS = {
     road : 1.0,

@@ -1,7 +1,16 @@
 function onKeyDown(e){
     console.log(e.key);
     if (e.key=='a'){
-        addRoad();
+        newRoadMode=!newRoadMode;
+        if (newRoadMode){
+            new_road_gui.domElement.style.display = 'block';
+            createNewRoad(NEW_ROAD_PARAMS.road_length);
+        }
+        else{
+            new_road_gui.domElement.style.display = 'none';
+            scene.remove(road_network_mesh_new);
+            removeNewRoad();
+        }
     }
     if (e.key=='g'){
         let std_vec = ModuleOpenDrive.get_road_ids(OpenDriveMap);
@@ -13,8 +22,17 @@ function onKeyDown(e){
     }
 } 
 
-function addRoad(){
-    const road = ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution));
+function removeNewRoad(){
+    ModuleOpenDrive.remove_new_road(OpenDriveMap);
+}
+
+function createNewRoad(road_length){
+    const road = ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution), road_length);
+    drawRoad(road);
+}
+
+function drawRoad(road){
+    scene.remove(road_network_mesh_new);
     const odr_road_network_mesh = ModuleOpenDrive.create_road_mesh(parseFloat(PARAMS.resolution),road);
     const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
     const road_network_geom_new = get_geometry(odr_lanes_mesh_new);
@@ -41,7 +59,21 @@ function addRoad(){
     odr_lanes_mesh_new.delete();
 }
 
-function updateNewRoad(){
-    scene.remove(road_network_mesh_new);
-    addRoad();
+function updateNewRoad(road_length){
+    const road = ModuleOpenDrive.update_new_road(OpenDriveMap, road_length);
+    drawRoad(road);
 }
+
+var NEW_ROAD_PARAMS = {
+    road_length : 10
+};
+
+const new_road_gui = new dat.GUI();
+new_road_gui.add(NEW_ROAD_PARAMS, 'road_length', 1, 100).onChange((road_length) => {
+    updateNewRoad(road_length);
+});
+
+new_road_gui.domElement.classList.add('new_road_controls');
+new_road_gui.domElement.getElementsByClassName('close-button')[0].remove();
+new_road_gui.domElement.style.display = 'none';
+// console.log();

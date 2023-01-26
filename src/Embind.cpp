@@ -101,6 +101,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("get_refline_segments", &get_refline_segments);
     emscripten::function("get_road_ids", &get_road_ids);
     emscripten::function("create_road_mesh", &create_road_mesh);
+    emscripten::function("update_new_road", &update_new_road);
+    emscripten::function("remove_new_road", &remove_new_road);
     emscripten::function("create_new_road", &create_new_road);
 }
 
