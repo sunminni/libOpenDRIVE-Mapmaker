@@ -138,9 +138,11 @@ RoadNetworkMesh create_road_mesh(double eps, Road road){
     return out_mesh;
 }
 
-Road update_new_road(OpenDriveMap& odr_map, double road_length){
+Road update_new_road(OpenDriveMap& odr_map, double road_length, double x, double y, double hdg)
+{
     Road new_road = odr_map.id_to_road.at("new_road");
     new_road.length = road_length;
+    new_road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, x, y, hdg, road_length);
     return new_road;
 }
 
@@ -148,14 +150,14 @@ void remove_new_road(OpenDriveMap& odr_map){
     odr_map.id_to_road.erase("new_road");
 }
 
-Road create_new_road(OpenDriveMap& odr_map, double eps, double road_length)
+void create_new_road(OpenDriveMap& odr_map, double eps)
 {
     std::string new_road_id = "new_road";
     std::string junc = "-1";
     // Road& road = Road(road_id,20,"-1","new_road");
-    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,road_length,junc,new_road_id)}).first->second;
+    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,1.0,junc,new_road_id)}).first->second;
 
-    road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, 0, 0, 0, road_length);
+    road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, 0, 0, 0, 1.0);
     LaneSection& lanesection = road.s_to_lanesection.insert({0, LaneSection(new_road_id, 0)}).first->second;
 
     for (int lane_id = 0;lane_id>-2;lane_id--){
@@ -205,7 +207,6 @@ Road create_new_road(OpenDriveMap& odr_map, double eps, double road_length)
             id_lane.second.outer_border = id_lane.second.outer_border.add(road.lane_offset);
         }
     }
-    return road;
 }
 
 } // namespace odr

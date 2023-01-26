@@ -4,7 +4,7 @@ function onKeyDown(e){
         newRoadMode=!newRoadMode;
         if (newRoadMode){
             new_road_gui.domElement.style.display = 'block';
-            createNewRoad(NEW_ROAD_PARAMS.road_length);
+            createNewRoad();
         }
         else{
             new_road_gui.domElement.style.display = 'none';
@@ -26,8 +26,13 @@ function removeNewRoad(){
     ModuleOpenDrive.remove_new_road(OpenDriveMap);
 }
 
-function createNewRoad(road_length){
-    const road = ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution), road_length);
+function createNewRoad(){
+    ModuleOpenDrive.create_new_road(OpenDriveMap, parseFloat(PARAMS.resolution));
+    updateNewRoad();
+}
+
+function updateNewRoad(){
+    const road = ModuleOpenDrive.update_new_road(OpenDriveMap, NEW_ROAD_PARAMS.road_length, NEW_ROAD_PARAMS.x, NEW_ROAD_PARAMS.y, NEW_ROAD_PARAMS.hdg);
     drawRoad(road);
 }
 
@@ -59,19 +64,18 @@ function drawRoad(road){
     odr_lanes_mesh_new.delete();
 }
 
-function updateNewRoad(road_length){
-    const road = ModuleOpenDrive.update_new_road(OpenDriveMap, road_length);
-    drawRoad(road);
-}
-
 var NEW_ROAD_PARAMS = {
-    road_length : 10
+    road_length : 10,
+    x : 0,
+    y : 0,
+    hdg : 0,
 };
 
 const new_road_gui = new dat.GUI();
-new_road_gui.add(NEW_ROAD_PARAMS, 'road_length', 1, 100).onChange((road_length) => {
-    updateNewRoad(road_length);
-});
+const road_lengthC = new_road_gui.add(NEW_ROAD_PARAMS, 'road_length', 1, 100).onChange(() => {updateNewRoad();});
+const xC = new_road_gui.add(NEW_ROAD_PARAMS, 'x', -100, 100).onChange(() => {updateNewRoad();});
+const yC = new_road_gui.add(NEW_ROAD_PARAMS, 'y', -100, 100).onChange(() => {updateNewRoad();});
+const hdgC = new_road_gui.add(NEW_ROAD_PARAMS, 'hdg', -Math.PI, Math.PI, 0.001).onChange(() => {updateNewRoad();});
 
 new_road_gui.domElement.classList.add('new_road_controls');
 new_road_gui.domElement.getElementsByClassName('close-button')[0].remove();

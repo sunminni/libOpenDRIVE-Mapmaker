@@ -12,8 +12,8 @@ Mesh3D          get_refline_segments(const OpenDriveMap& odr_map, double eps);
 RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps);
 std::vector<std::string> get_road_ids(const OpenDriveMap& odr_map);
 RoadNetworkMesh create_road_mesh(double eps, Road road);
-Road update_new_road(OpenDriveMap& odr_map, double road_length);
+Road update_new_road(OpenDriveMap& odr_map, double road_length, double x, double y, double hdg);
 void remove_new_road(OpenDriveMap& odr_map);
-Road create_new_road(OpenDriveMap& odr_map, double eps, double road_length);
+void create_new_road(OpenDriveMap& odr_map, double eps);
 
 } // namespace odr
