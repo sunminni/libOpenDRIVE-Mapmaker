@@ -66,21 +66,21 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
         .property("lanesec_start_indices", &LanesMesh::lanesec_start_indices)
         .property("lane_start_indices", &LanesMesh::lane_start_indices);
 
-    emscripten::class_<RoadmarksMesh, emscripten::base<LanesMesh>>("RoadmarksMesh")
-        .function("get_roadmark_type", &RoadmarksMesh::get_roadmark_type)
-        .function("get_idx_interval_roadmark", &RoadmarksMesh::get_idx_interval_roadmark)
-        .function("get_roadmark_outline_indices", &RoadmarksMesh::get_roadmark_outline_indices)
-        .property("roadmark_type_start_indices", &RoadmarksMesh::roadmark_type_start_indices);
+    // emscripten::class_<RoadmarksMesh, emscripten::base<LanesMesh>>("RoadmarksMesh")
+    //     .function("get_roadmark_type", &RoadmarksMesh::get_roadmark_type)
+    //     .function("get_idx_interval_roadmark", &RoadmarksMesh::get_idx_interval_roadmark)
+    //     .function("get_roadmark_outline_indices", &RoadmarksMesh::get_roadmark_outline_indices)
+    //     .property("roadmark_type_start_indices", &RoadmarksMesh::roadmark_type_start_indices);
 
-    emscripten::class_<RoadObjectsMesh, emscripten::base<RoadsMesh>>("RoadObjectsMesh")
-        .function("get_road_object_id", &RoadObjectsMesh::get_road_object_id)
-        .function("get_idx_interval_road_object", &RoadObjectsMesh::get_idx_interval_road_object)
-        .property("road_object_start_indices", &RoadObjectsMesh::road_object_start_indices);
+    // emscripten::class_<RoadObjectsMesh, emscripten::base<RoadsMesh>>("RoadObjectsMesh")
+    //     .function("get_road_object_id", &RoadObjectsMesh::get_road_object_id)
+    //     .function("get_idx_interval_road_object", &RoadObjectsMesh::get_idx_interval_road_object)
+    //     .property("road_object_start_indices", &RoadObjectsMesh::road_object_start_indices);
 
     emscripten::class_<RoadNetworkMesh>("RoadNetworkMesh")
-        .property("lanes_mesh", &RoadNetworkMesh::lanes_mesh)
-        .property("roadmarks_mesh", &RoadNetworkMesh::roadmarks_mesh)
-        .property("road_objects_mesh", &RoadNetworkMesh::road_objects_mesh);
+        .property("lanes_mesh", &RoadNetworkMesh::lanes_mesh);
+        // .property("roadmarks_mesh", &RoadNetworkMesh::roadmarks_mesh)
+        // .property("road_objects_mesh", &RoadNetworkMesh::road_objects_mesh);
 
     emscripten::value_object<OpenDriveMapConfig>("OpenDriveMapConfig")
         .field("with_lateralProfile", &OpenDriveMapConfig::with_lateralProfile)
@@ -97,13 +97,28 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
 
     emscripten::class_<Road>("Road");
 
+    emscripten::class_<NEW_ROAD_PARAMS>("NEW_ROAD_PARAMS")
+        .property("road_length", &NEW_ROAD_PARAMS::road_length)
+        .property("x", &NEW_ROAD_PARAMS::x)
+        .property("y", &NEW_ROAD_PARAMS::y)
+        .property("hdg", &NEW_ROAD_PARAMS::hdg)
+        .property("predecessorIJ", &NEW_ROAD_PARAMS::predecessorIJ)
+        .property("predecessorID", &NEW_ROAD_PARAMS::predecessorID)
+        .property("predecessorCP", &NEW_ROAD_PARAMS::predecessorCP)
+        .property("successor", &NEW_ROAD_PARAMS::successor);
+
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);
     emscripten::function("get_road_ids", &get_road_ids);
+    emscripten::function("save_map", &save_map);
+    emscripten::function("get_road", &get_road);
     emscripten::function("create_road_mesh", &create_road_mesh);
+    emscripten::function("update_handle_road", &update_handle_road);
+    emscripten::function("write_handle_road_xml", &write_handle_road_xml);
     emscripten::function("update_new_road", &update_new_road);
     emscripten::function("remove_new_road", &remove_new_road);
     emscripten::function("create_new_road", &create_new_road);
+    emscripten::function("init_NRP", &init_NRP);
 }
 
 } // namespace odr

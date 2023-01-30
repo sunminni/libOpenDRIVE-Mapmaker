@@ -4,7 +4,7 @@ var PARAMS = {
     ref_line : true,
     roadmarks : true,
     wireframe : false,
-    spotlight : true,
+    // spotlight : true,
     fitView : () => { fitViewToObj(refline_lines); },
     lateralProfile : true,
     laneHeight : true,
@@ -17,7 +17,7 @@ gui.add(PARAMS, 'load_file').name('📁 Load .xodr');
 gui.add(PARAMS, 'resolution', { Low : 1.0, Medium : 0.3, High : 0.02 }).name('📏  Detail').onChange((val) => {
     loadOdrMap(true, false);
 });
-gui.add(PARAMS, 'spotlight').name("🔦 Spotlight");
+// gui.add(PARAMS, 'spotlight').name("🔦 Spotlight");
 gui.add(PARAMS, 'fitView').name("⟲ Reset Camera");
 
 var gui_view_folder = gui.addFolder('View');

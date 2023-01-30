@@ -59,37 +59,37 @@ std::array<size_t, 2> LanesMesh::get_idx_interval_lane(const std::size_t vert_id
 
 std::vector<size_t> LanesMesh::get_lane_outline_indices() const { return get_outline_indices<int>(this->lane_start_indices, this->vertices.size()); }
 
-std::string RoadmarksMesh::get_roadmark_type(const std::size_t vert_idx) const
-{
-    return get_nearest_lower_val<size_t, std::string>(this->roadmark_type_start_indices, vert_idx);
-}
+// std::string RoadmarksMesh::get_roadmark_type(const std::size_t vert_idx) const
+// {
+//     return get_nearest_lower_val<size_t, std::string>(this->roadmark_type_start_indices, vert_idx);
+// }
 
-std::array<size_t, 2> RoadmarksMesh::get_idx_interval_roadmark(const std::size_t vert_idx) const
-{
-    return get_key_interval<size_t, std::string>(this->roadmark_type_start_indices, vert_idx, this->vertices.size());
-}
+// std::array<size_t, 2> RoadmarksMesh::get_idx_interval_roadmark(const std::size_t vert_idx) const
+// {
+//     return get_key_interval<size_t, std::string>(this->roadmark_type_start_indices, vert_idx, this->vertices.size());
+// }
 
-std::vector<size_t> RoadmarksMesh::get_roadmark_outline_indices() const
-{
-    return get_outline_indices<std::string>(this->roadmark_type_start_indices, this->vertices.size());
-}
+// std::vector<size_t> RoadmarksMesh::get_roadmark_outline_indices() const
+// {
+//     return get_outline_indices<std::string>(this->roadmark_type_start_indices, this->vertices.size());
+// }
 
-std::string RoadObjectsMesh::get_road_object_id(const std::size_t vert_idx) const
-{
-    return get_nearest_lower_val<size_t, std::string>(this->road_object_start_indices, vert_idx);
-}
+// std::string RoadObjectsMesh::get_road_object_id(const std::size_t vert_idx) const
+// {
+//     return get_nearest_lower_val<size_t, std::string>(this->road_object_start_indices, vert_idx);
+// }
 
-std::array<size_t, 2> RoadObjectsMesh::get_idx_interval_road_object(const std::size_t vert_idx) const
-{
-    return get_key_interval<size_t, std::string>(this->road_object_start_indices, vert_idx, this->vertices.size());
-}
+// std::array<size_t, 2> RoadObjectsMesh::get_idx_interval_road_object(const std::size_t vert_idx) const
+// {
+//     return get_key_interval<size_t, std::string>(this->road_object_start_indices, vert_idx, this->vertices.size());
+// }
 
 Mesh3D RoadNetworkMesh::get_mesh() const
 {
     Mesh3D out_mesh;
     out_mesh.add_mesh(this->lanes_mesh);
-    out_mesh.add_mesh(this->roadmarks_mesh);
-    out_mesh.add_mesh(this->road_objects_mesh);
+    // out_mesh.add_mesh(this->roadmarks_mesh);
+    // out_mesh.add_mesh(this->road_objects_mesh);
     return out_mesh;
 }
 

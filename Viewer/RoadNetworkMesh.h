@@ -36,33 +36,33 @@ struct LanesMesh : public RoadsMesh
     std::map<size_t, int>    lane_start_indices;
 };
 
-struct RoadmarksMesh : public LanesMesh
-{
-    RoadmarksMesh() = default;
-    virtual ~RoadmarksMesh() = default;
+// struct RoadmarksMesh : public LanesMesh
+// {
+//     RoadmarksMesh() = default;
+//     virtual ~RoadmarksMesh() = default;
 
-    std::string           get_roadmark_type(const std::size_t vert_idx) const;
-    std::array<size_t, 2> get_idx_interval_roadmark(const std::size_t vert_idx) const;
-    std::vector<size_t>   get_roadmark_outline_indices() const;
+//     std::string           get_roadmark_type(const std::size_t vert_idx) const;
+//     std::array<size_t, 2> get_idx_interval_roadmark(const std::size_t vert_idx) const;
+//     std::vector<size_t>   get_roadmark_outline_indices() const;
 
-    std::map<size_t, std::string> roadmark_type_start_indices;
-};
+//     std::map<size_t, std::string> roadmark_type_start_indices;
+// };
 
-struct RoadObjectsMesh : public RoadsMesh
-{
-    std::string           get_road_object_id(const std::size_t vert_idx) const;
-    std::array<size_t, 2> get_idx_interval_road_object(const std::size_t vert_idx) const;
+// struct RoadObjectsMesh : public RoadsMesh
+// {
+//     std::string           get_road_object_id(const std::size_t vert_idx) const;
+//     std::array<size_t, 2> get_idx_interval_road_object(const std::size_t vert_idx) const;
 
-    std::map<size_t, std::string> road_object_start_indices;
-};
+//     std::map<size_t, std::string> road_object_start_indices;
+// };
 
 struct RoadNetworkMesh
 {
     Mesh3D get_mesh() const;
 
     LanesMesh       lanes_mesh;
-    RoadmarksMesh   roadmarks_mesh;
-    RoadObjectsMesh road_objects_mesh;
+    // RoadmarksMesh   roadmarks_mesh;
+    // RoadObjectsMesh road_objects_mesh;
 };
 
 } // namespace odr
