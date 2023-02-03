@@ -24,8 +24,10 @@ http.createServer((request, response) => {
         request.on("data", (chunk) => {
             body.push(chunk);
         }).on("end", () => {
-            body = Buffer.concat(body).toString();
-            fs.writeFileSync("test.xodr", body);
+            body_dict = JSON.parse(Buffer.concat(body).toString());
+            filename = body_dict['filename'];
+            data = body_dict['data'];
+            fs.writeFileSync(filename, data);
             response.writeHead(200);
             response.end();
         });

@@ -21,7 +21,7 @@ var predeiC;
 var predcpC;
 var succC;
 
-var map_filename = 'test.xodr'
+var map_filename = 'RandomRoad.xodr'
 var map_filepath = './'+map_filename;
 var handleRoad;
 
@@ -55,10 +55,16 @@ function onKeyDown(e){
         new_road_gui.domElement.style.display = 'none';
         scene.remove(road_network_mesh_new);
         writeHandleRoadXML();
-        let save_data = ModuleOpenDrive.save_map(OpenDriveMap);
+        let body_dict = {};
+        body_dict['filename'] = map_filename;
+        body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
         fetch('http://localhost:8000/save', {
             method: 'POST',
-            body: save_data,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+            body: JSON.stringify(body_dict),
         }).then(()=>{fetch(map_filepath).then((file_data) => {
             file_data.text().then((file_text) => {
                 loadFile(file_text, true);
