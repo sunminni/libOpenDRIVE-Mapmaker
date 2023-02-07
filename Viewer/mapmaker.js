@@ -1,5 +1,4 @@
 // Globals
-var selectRoadMode = true;
 var selectPredFlag = false;
 
 var sel_road_id = null;
@@ -55,28 +54,28 @@ function writeXMLFile(){
     }).then(()=>{fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
             loadFile(file_text, true);
+            if (NEW_ROAD_PARAMS.road_id!==""){
+                createHandleRoad();
+            }
         });
     });});
 }
 
 function onKeyDown(e){
     console.log(e.key);
-    if (e.key=='a'){
-        toggleRoadControls();
-        // scene.remove(road_network_mesh_new);
-        // removeNewRoad();
-    }
-    if (e.key=='Escape'){
-        if (NEW_ROAD_PARAMS.road_id!==""){
+    if (NEW_ROAD_PARAMS.road_id!==""){
+        if (e.key=='a'){
+            ModuleOpenDrive.create_new_road(OpenDriveMap, NEW_ROAD_PARAMS);
+            writeXMLFile();
+        }
+        if (e.key=='Escape'){
             toggleRoadControls();
             ModuleOpenDrive.write_handle_road_xml(OpenDriveMap,NEW_ROAD_PARAMS);
             scene.remove(road_network_mesh_new);
             writeXMLFile();
             NEW_ROAD_PARAMS.road_id="";
         }
-    }
-    if (e.key=='Delete'){
-        if (NEW_ROAD_PARAMS.road_id!==""){
+        if (e.key=='Delete'){
             toggleRoadControls();
             ModuleOpenDrive.delete_road(OpenDriveMap,NEW_ROAD_PARAMS);
             scene.remove(road_network_mesh_new);
@@ -87,12 +86,13 @@ function onKeyDown(e){
 }
 
 function onMouseClick(e){
-    if (selectRoadMode){
+    if (NEW_ROAD_PARAMS.road_id===""){
         if (sel_road_id!==null){
             console.log(sel_road_id);
             console.log(sel_lanesec_s0);
             console.log(sel_lane_id);
-            createHandleRoad(sel_road_id);
+            NEW_ROAD_PARAMS.road_id = sel_road_id;
+            createHandleRoad();
             toggleRoadControls();
             if(selectPredFlag){
                 console.log(sel_road_id);
@@ -132,8 +132,8 @@ function updateControllerDisplay(){
     succC.updateDisplay();
 }
 
-function createHandleRoad(road_id){
-    handleRoad = ModuleOpenDrive.get_road(OpenDriveMap,road_id,NEW_ROAD_PARAMS);
+function createHandleRoad(){
+    handleRoad = ModuleOpenDrive.get_road(OpenDriveMap,NEW_ROAD_PARAMS);
     updateControllerDisplay();
     drawRoad(handleRoad);
 }
@@ -201,7 +201,6 @@ function drawRoad(road){
 
 function selectPred(){
     selectPredFlag = true;
-    selectRoadMode = true;
 }
 
 

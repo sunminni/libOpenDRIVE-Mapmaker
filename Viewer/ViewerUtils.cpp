@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 namespace odr
 {
@@ -144,9 +145,8 @@ std::string save_map(const OpenDriveMap& odr_map)
     return output;
 }
 
-Road get_road(const OpenDriveMap& odr_map, std::string road_id, NEW_ROAD_PARAMS& p)
+Road get_road(const OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
 {
-    p.road_id = road_id;
     Road target_road = odr_map.id_to_road.at(p.road_id);
     p.road_length = target_road.length;
     p.x = std::stod(target_road.xml_node.child("planView").child("geometry").attribute("x").value());
@@ -230,69 +230,84 @@ void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p)
     handleRoad.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
 }
 
-std::vector<std::string> update_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS p)
-{   
-    std::vector<std::string> road_ids = {};
-    Road& new_road = odr_map.id_to_road.at("new_road");
-    new_road.length = p.road_length;
-    new_road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
-    new_road.predecessor.id = p.predecessorID;
-    // new_road.predecessor.type = p.predecessorIJ ? RoadLink::Type::Type_Junction : RoadLink::Type::Type_Road;
-    new_road.predecessor.type = RoadLink::Type::Type_Road;
-    new_road.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
+// std::vector<std::string> update_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS p)
+// {   
+//     std::vector<std::string> road_ids = {};
+//     Road& new_road = odr_map.id_to_road.at("new_road");
+//     new_road.length = p.road_length;
+//     new_road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
+//     new_road.predecessor.id = p.predecessorID;
+//     // new_road.predecessor.type = p.predecessorIJ ? RoadLink::Type::Type_Junction : RoadLink::Type::Type_Road;
+//     new_road.predecessor.type = RoadLink::Type::Type_Road;
+//     new_road.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
     
-    new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(new_road.predecessor.id.c_str());
-    new_road.xml_node.child("link").child("predecessor").attribute("elementType").set_value("road");
-    new_road.xml_node.child("link").child("predecessor").attribute("contactPoint").set_value("start");
-    new_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("predecessor").attribute("id").set_value(new_road.predecessor.id.c_str());
+//     new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(new_road.predecessor.id.c_str());
+//     new_road.xml_node.child("link").child("predecessor").attribute("elementType").set_value("road");
+//     new_road.xml_node.child("link").child("predecessor").attribute("contactPoint").set_value("start");
+//     new_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("predecessor").attribute("id").set_value(new_road.predecessor.id.c_str());
 
-    road_ids.push_back("new_road");
+//     road_ids.push_back("new_road");
 
-    if (p.predecessorID.size()>0){
-        for (auto& s_lanesec : new_road.s_to_lanesection)
-        {
-            LaneSection& lanesec = s_lanesec.second;
-            for (auto& id_lane : lanesec.id_to_lane)
-            {
-                Lane& lane = id_lane.second;
-                lane.predecessor = -1;
-            }
-        }
-        Road& other_road = odr_map.id_to_road.at(p.predecessorID);
+//     if (p.predecessorID.size()>0){
+//         for (auto& s_lanesec : new_road.s_to_lanesection)
+//         {
+//             LaneSection& lanesec = s_lanesec.second;
+//             for (auto& id_lane : lanesec.id_to_lane)
+//             {
+//                 Lane& lane = id_lane.second;
+//                 lane.predecessor = -1;
+//             }
+//         }
+//         Road& other_road = odr_map.id_to_road.at(p.predecessorID);
 
-        other_road.successor.id = "new_road";
-        other_road.successor.type = RoadLink::Type::Type_Road;
-        other_road.successor.contact_point = RoadLink::ContactPoint::ContactPoint_End;
-        road_ids.push_back(p.predecessorID);
+//         other_road.successor.id = "new_road";
+//         other_road.successor.type = RoadLink::Type::Type_Road;
+//         other_road.successor.contact_point = RoadLink::ContactPoint::ContactPoint_End;
+//         road_ids.push_back(p.predecessorID);
 
-        other_road.xml_node.child("link").child("successor").attribute("elementId").set_value(other_road.successor.id.c_str());
-        other_road.xml_node.child("link").child("successor").attribute("elementType").set_value("road");
-        other_road.xml_node.child("link").child("successor").attribute("contactPoint").set_value("end");
-        other_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("successor").attribute("id").set_value(other_road.successor.id.c_str());
+//         other_road.xml_node.child("link").child("successor").attribute("elementId").set_value(other_road.successor.id.c_str());
+//         other_road.xml_node.child("link").child("successor").attribute("elementType").set_value("road");
+//         other_road.xml_node.child("link").child("successor").attribute("contactPoint").set_value("end");
+//         other_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("successor").attribute("id").set_value(other_road.successor.id.c_str());
 
-        for (auto& s_lanesec : other_road.s_to_lanesection)
-        {
-            LaneSection& lanesec = s_lanesec.second;
-            for (auto& id_lane : lanesec.id_to_lane)
-            {
-                Lane& lane = id_lane.second;
-                lane.successor = -1;
-            }
-        }
-    }
+//         for (auto& s_lanesec : other_road.s_to_lanesection)
+//         {
+//             LaneSection& lanesec = s_lanesec.second;
+//             for (auto& id_lane : lanesec.id_to_lane)
+//             {
+//                 Lane& lane = id_lane.second;
+//                 lane.successor = -1;
+//             }
+//         }
+//     }
 
-    return road_ids;
+//     return road_ids;
+// }
+
+// void remove_new_road(OpenDriveMap& odr_map){
+//     odr_map.id_to_road.erase("new_road");
+// }
+
+void add_lane(pugi::xml_node& laneSectionChild, int lane_id){
+    pugi::xml_node lane_r = laneSectionChild.append_child("lane");
+    lane_r.append_attribute("id").set_value(lane_id);
+    lane_r.append_attribute("type").set_value("driving");
+    lane_r.append_attribute("level").set_value("false");
+    pugi::xml_node link_r = lane_r.append_child("link");
+    link_r.append_child("predecessor").append_attribute("id").set_value(lane_id);
+    link_r.append_child("successor").append_attribute("id").set_value(lane_id);
+    pugi::xml_node width_r = lane_r.append_child("width");
+    width_r.append_attribute("sOffset").set_value("0");
+    width_r.append_attribute("a").set_value("3.5");
+    width_r.append_attribute("b").set_value("0");
+    width_r.append_attribute("c").set_value("0");
+    width_r.append_attribute("d").set_value("0");
 }
 
-void remove_new_road(OpenDriveMap& odr_map){
-    odr_map.id_to_road.erase("new_road");
-}
-
-
-pugi::xml_node create_road_xml(OpenDriveMap& odr_map){
+pugi::xml_node create_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p){
     pugi::xml_node new_road = odr_map.xml_doc.append_child("road");
-    new_road.append_attribute("length").set_value("10.0");
-    new_road.append_attribute("id").set_value("new_road");
+    new_road.append_attribute("length").set_value(p.road_length);
+    new_road.append_attribute("id").set_value(p.road_id.c_str());
     new_road.append_attribute("junction").set_value("-1");
     pugi::xml_node link = new_road.append_child("link");
     pugi::xml_node predecessor = link.append_child("predecessor");
@@ -306,10 +321,10 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map){
     pugi::xml_node planView = new_road.append_child("planView");
     pugi::xml_node geometry = planView.append_child("geometry");
     geometry.append_attribute("s").set_value("0");
-    geometry.append_attribute("x").set_value("0");
-    geometry.append_attribute("y").set_value("0");
-    geometry.append_attribute("hdg").set_value("0");
-    geometry.append_attribute("length").set_value("10.0");
+    geometry.append_attribute("x").set_value(p.x);
+    geometry.append_attribute("y").set_value(p.y);
+    geometry.append_attribute("hdg").set_value(p.hdg);
+    geometry.append_attribute("length").set_value(p.road_length);
     geometry.append_child("line");
 
     pugi::xml_node lanes = new_road.append_child("lanes");
@@ -328,86 +343,52 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map){
     lane_c.append_attribute("type").set_value("none");
     lane_c.append_attribute("level").set_value("false");
     pugi::xml_node right = laneSection.append_child("right");
-    pugi::xml_node lane_r = right.append_child("lane");
-    lane_r.append_attribute("id").set_value("-1");
-    lane_r.append_attribute("type").set_value("driving");
-    lane_r.append_attribute("level").set_value("false");
-    pugi::xml_node link_r = lane_r.append_child("link");
-    link_r.append_child("predecessor").append_attribute("id").set_value("-1");
-    link_r.append_child("successor").append_attribute("id").set_value("-1");
-    pugi::xml_node width_r = lane_r.append_child("width");
-    width_r.append_attribute("sOffset").set_value("0");
-    width_r.append_attribute("a").set_value("3.5");
-    width_r.append_attribute("b").set_value("0");
-    width_r.append_attribute("c").set_value("0");
-    width_r.append_attribute("d").set_value("0");
+    add_lane(right,-1);
+    add_lane(right,-2);
 
     return new_road;
 }
 
-void create_new_road(OpenDriveMap& odr_map, double eps)
+int get_new_road_id(const OpenDriveMap& odr_map)
 {
-    std::string new_road_id = "new_road";
+    int max_road_id = 0;
+    for (const auto& id_road_pair : odr_map.id_to_road)
+    {
+        int id = std::stoi(id_road_pair.first);
+        if (id>max_road_id) max_road_id = id;
+    }
+    return max_road_id+1;
+}
+
+void get_end(NEW_ROAD_PARAMS& p){
+    if (p.line_type=="arc"){
+        double radius = 1/p.curvature;
+        double theta = p.road_length/radius;
+        double dx = sin(theta)*radius;
+        double dy = (1-cos(theta))*radius;
+        double ddx = dx*cos(p.hdg)-dy*sin(p.hdg);
+        double ddy = dy*cos(p.hdg)+dx*sin(p.hdg);
+        p.x += ddx;
+        p.y += ddy;
+        p.hdg += theta;
+    }
+    else{
+        p.x += cos(p.hdg)*p.road_length;
+        p.y += sin(p.hdg)*p.road_length;
+    }
+}
+
+void create_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+{
+    std::string new_road_id = std::to_string(get_new_road_id(odr_map));
+    p.road_id = new_road_id;
+    get_end(p);
+    p.road_length = 20;
+    p.line_type = "line";
+
     std::string junc = "-1";
-    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,1.0,junc,new_road_id)}).first->second;
-    road.xml_node = create_road_xml(odr_map);
-
-    road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, 0, 0, 0, 1.0);
-    LaneSection& lanesection = road.s_to_lanesection.insert({0, LaneSection(new_road_id, 0)}).first->second;
-
-    int min_lane = -1;
-    int max_lane = 0;
-    double lane_width = 3.5;
-
-    for (int lane_id = min_lane;lane_id<=max_lane;lane_id++){
-        Lane& new_lane = lanesection.id_to_lane.insert({lane_id, odr::Lane(new_road_id, 0, lane_id, false, "driving")}).first->second;
-        if (lane_id==0) continue;
-        double s0 = 0.0;
-        double s_offset = 0.0;
-        new_lane.lane_width.s0_to_poly[s0 + s_offset] = Poly3(s0 + s_offset, lane_width, 0, 0, 0);
-        new_lane.s_to_height_offset.insert({s0 + s_offset, HeightOffset(0, 0)});
-    }
-
-    /* derive lane borders from lane widths */
-    auto id_lane_iter0 = lanesection.id_to_lane.find(0);
-    if (id_lane_iter0 == lanesection.id_to_lane.end())
-        throw std::runtime_error("lane section does not have lane #0");
-
-    /* iterate from id #0 towards +inf */
-    auto id_lane_iter1 = std::next(id_lane_iter0);
-    for (auto iter = id_lane_iter1; iter != lanesection.id_to_lane.end(); iter++)
-    {
-        if (iter == id_lane_iter0)
-        {
-            iter->second.outer_border = iter->second.lane_width;
-        }
-        else
-        {
-            iter->second.inner_border = std::prev(iter)->second.outer_border;
-            iter->second.outer_border = std::prev(iter)->second.outer_border.add(iter->second.lane_width);
-        }
-    }
-
-    /* iterate from id #0 towards -inf */
-    std::map<int, Lane>::reverse_iterator r_id_lane_iter_1(id_lane_iter0);
-    for (auto r_iter = r_id_lane_iter_1; r_iter != lanesection.id_to_lane.rend(); r_iter++)
-    {
-        if (r_iter == r_id_lane_iter_1)
-        {
-            r_iter->second.outer_border = r_iter->second.lane_width.negate();
-        }
-        else
-        {
-            r_iter->second.inner_border = std::prev(r_iter)->second.outer_border;
-            r_iter->second.outer_border = std::prev(r_iter)->second.outer_border.add(r_iter->second.lane_width.negate());
-        }
-    }
-
-    for (auto& id_lane : lanesection.id_to_lane)
-    {
-        id_lane.second.inner_border = id_lane.second.inner_border.add(road.lane_offset);
-        id_lane.second.outer_border = id_lane.second.outer_border.add(road.lane_offset);
-    }
+    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,junc,new_road_id)}).first->second;
+    road.xml_node = create_road_xml(odr_map,p);
 }
 
 NEW_ROAD_PARAMS init_NRP(){
