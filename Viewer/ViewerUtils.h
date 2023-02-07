@@ -9,11 +9,13 @@ namespace odr
 struct NEW_ROAD_PARAMS
 {
     NEW_ROAD_PARAMS() = default;
+    std::string line_type = "";
     std::string road_id = "";
     double road_length = 10.0;
     double x = 0;
     double y = 0;
     double hdg = 0;
+    double curvature = 0;
     bool predecessorIJ = false;
     std::string predecessorID = "";
     int predecessorCP = 0;

@@ -11,10 +11,13 @@ var sel_cp = null;
 var NEW_ROAD_PARAMS = null;
 
 var new_road_gui;
+var line_typeC;
 var road_lengthC;
 var xC;
 var yC;
 var hdgC;
+var curvatureC;
+var geometry_folder;
 var pred_folder;
 var predetC;
 var predeiC;
@@ -105,10 +108,19 @@ function removeNewRoad(){
 }
 
 function updateControllerDisplay(){
+    line_typeC.updateDisplay();
     road_lengthC.updateDisplay();
     xC.updateDisplay();
     yC.updateDisplay();
     hdgC.updateDisplay();
+    if(line_typeC.getValue() == "line" && curvatureC!==null){
+        curvatureC.remove();
+        curvatureC = null;
+    }
+    if (line_typeC.getValue() == "arc" && curvatureC===null){
+        curvatureC = geometry_folder.add(NEW_ROAD_PARAMS, 'curvature').step(0.00001).onChange(() => {updateHandleRoad();});
+    }
+    if (curvatureC!==null) curvatureC.updateDisplay();
     predetC.updateDisplay();
     predeiC.updateDisplay();
     predcpC.updateDisplay();
@@ -122,6 +134,18 @@ function createHandleRoad(road_id){
 }
 
 function updateHandleRoad(){
+    if(line_typeC.getValue() == "line" && curvatureC!==null){
+        console.log("line");
+        curvatureC.remove();
+        curvatureC = null;
+    }
+    if (line_typeC.getValue() == "arc" && curvatureC===null){
+        console.log("arc");
+        curvatureC = geometry_folder.add(NEW_ROAD_PARAMS, 'curvature').step(0.00001).onChange(() => {updateHandleRoad();});
+    }
+    if (curvatureC!==null && curvatureC.getValue()==0){
+        curvatureC.setValue(0.00001);
+    }
     ModuleOpenDrive.update_handle_road(handleRoad, NEW_ROAD_PARAMS);
     drawRoad(handleRoad);
 }
@@ -184,10 +208,15 @@ function init_new_road_control(){
     new_road_gui.domElement.getElementsByClassName('close-button')[0].remove();
     new_road_gui.domElement.style.display = 'none';
 
-    road_lengthC = new_road_gui.add(NEW_ROAD_PARAMS, 'road_length', 1).step(0.001).onChange(() => {updateHandleRoad();});
-    xC = new_road_gui.add(NEW_ROAD_PARAMS, 'x').step(0.001).onChange(() => {updateHandleRoad();});
-    yC = new_road_gui.add(NEW_ROAD_PARAMS, 'y').step(0.001).onChange(() => {updateHandleRoad();});
-    hdgC = new_road_gui.add(NEW_ROAD_PARAMS, 'hdg', -Math.PI*2, Math.PI*2, 0.001).onChange(() => {updateHandleRoad();});
+    geometry_folder = new_road_gui.addFolder('Geometry');
+    geometry_folder.open();
+
+    line_typeC = geometry_folder.add(NEW_ROAD_PARAMS, 'line_type', { 'line' : 'line', 'arc' : 'arc' }).onChange(() => {updateHandleRoad();});
+    road_lengthC = geometry_folder.add(NEW_ROAD_PARAMS, 'road_length', 1).step(0.001).onChange(() => {updateHandleRoad();});
+    xC = geometry_folder.add(NEW_ROAD_PARAMS, 'x').step(0.001).onChange(() => {updateHandleRoad();});
+    yC = geometry_folder.add(NEW_ROAD_PARAMS, 'y').step(0.001).onChange(() => {updateHandleRoad();});
+    hdgC = geometry_folder.add(NEW_ROAD_PARAMS, 'hdg', -Math.PI*2, Math.PI*2, 0.001).onChange(() => {updateHandleRoad();});
+    curvatureC = geometry_folder.add(NEW_ROAD_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
 
     pred_folder = new_road_gui.addFolder('Predecessor');
     pred_folder.open();

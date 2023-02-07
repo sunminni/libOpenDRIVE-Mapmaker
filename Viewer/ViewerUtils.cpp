@@ -4,6 +4,7 @@
 #include "RefLine.h"
 #include "Road.h"
 #include "Geometries/Line.h"
+#include "Geometries/Arc.h"
 
 #include <iostream>
 #include <vector>
@@ -151,7 +152,13 @@ Road get_road(const OpenDriveMap& odr_map, std::string road_id, NEW_ROAD_PARAMS&
     p.x = std::stod(target_road.xml_node.child("planView").child("geometry").attribute("x").value());
     p.y = std::stod(target_road.xml_node.child("planView").child("geometry").attribute("y").value());
     p.hdg = std::stod(target_road.xml_node.child("planView").child("geometry").attribute("hdg").value());
-
+    if (!target_road.xml_node.child("planView").child("geometry").child("arc").empty()){
+        p.line_type = "arc";
+        p.curvature = std::stod(target_road.xml_node.child("planView").child("geometry").child("arc").attribute("curvature").value());
+    }
+    else{
+        p.line_type = "line";
+    }
     return target_road;
 }
 
@@ -184,16 +191,35 @@ void write_handle_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
     std::cout<<"p.road_id: "<<p.road_id<<std::endl;
     Road& target_road = odr_map.id_to_road.at(p.road_id);
     target_road.xml_node.attribute("length").set_value(p.road_length);
-    target_road.xml_node.child("planView").child("geometry").attribute("x").set_value(p.x);
-    target_road.xml_node.child("planView").child("geometry").attribute("y").set_value(p.y);
-    target_road.xml_node.child("planView").child("geometry").attribute("hdg").set_value(p.hdg);
-    target_road.xml_node.child("planView").child("geometry").attribute("length").set_value(p.road_length);
+    pugi::xml_node geometry = target_road.xml_node.child("planView").child("geometry");
+    geometry.attribute("x").set_value(p.x);
+    geometry.attribute("y").set_value(p.y);
+    geometry.attribute("hdg").set_value(p.hdg);
+    geometry.attribute("length").set_value(p.road_length);
+    if (!geometry.child("arc").empty()){
+        geometry.remove_child("arc");
+    }
+    else if (!geometry.child("line").empty()){
+        geometry.remove_child("line");
+    }
+    if (p.line_type=="arc"){
+        pugi::xml_node arc = geometry.append_child("arc");
+        arc.append_attribute("curvature").set_value(p.curvature);
+    }
+    else if (p.line_type=="line"){
+        geometry.append_child("line");
+    }
 }
 
 void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p)
 {
     handleRoad.length = p.road_length;
-    handleRoad.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
+    if (p.line_type=="arc"){
+        handleRoad.ref_line.s0_to_geometry[0] = std::make_unique<Arc>(0, p.x, p.y, p.hdg, p.road_length, p.curvature);
+    }
+    else if (p.line_type=="line"){
+        handleRoad.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
+    }
     handleRoad.predecessor.id = p.predecessorID;
     handleRoad.predecessor.type = RoadLink::Type::Type_Road;
     handleRoad.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;

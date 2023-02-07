@@ -14,7 +14,7 @@ var spotlight_info = document.getElementById('spotlight_info');
 var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
-
+var fit_view = true
 
 const COLORS = {
     road : 1.0,
@@ -165,7 +165,7 @@ function reloadOdrMap()
     loadOdrMap(true, false);
 }
 
-function loadOdrMap(clear_map = true, fit_view = true)
+function loadOdrMap(clear_map = true)
 {
     const t0 = performance.now();
     if (clear_map) {
@@ -279,8 +279,10 @@ function loadOdrMap(clear_map = true, fit_view = true)
     const max_diag_dist = bbox_reflines.min.distanceTo(bbox_reflines.max);
     camera.far = max_diag_dist * 1.5;
     // controls.autoRotate = fit_view;
-    if (fit_view)
+    if (fit_view){
         fitViewToBbox(bbox_reflines);
+        fit_view = false;
+    }
 
     /* ground grid */
     let bbox_center_pt = new THREE.Vector3();

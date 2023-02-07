@@ -98,10 +98,12 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::class_<Road>("Road");
 
     emscripten::class_<NEW_ROAD_PARAMS>("NEW_ROAD_PARAMS")
+        .property("line_type", &NEW_ROAD_PARAMS::line_type)
         .property("road_length", &NEW_ROAD_PARAMS::road_length)
         .property("x", &NEW_ROAD_PARAMS::x)
         .property("y", &NEW_ROAD_PARAMS::y)
         .property("hdg", &NEW_ROAD_PARAMS::hdg)
+        .property("curvature", &NEW_ROAD_PARAMS::curvature)
         .property("predecessorIJ", &NEW_ROAD_PARAMS::predecessorIJ)
         .property("predecessorID", &NEW_ROAD_PARAMS::predecessorID)
         .property("predecessorCP", &NEW_ROAD_PARAMS::predecessorCP)
