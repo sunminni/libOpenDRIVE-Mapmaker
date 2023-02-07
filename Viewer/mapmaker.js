@@ -1,5 +1,4 @@
 // Globals
-var newRoadMode = false;
 var selectRoadMode = true;
 var selectPredFlag = false;
 
@@ -32,47 +31,58 @@ var handleRoad;
 window.addEventListener('keydown', onKeyDown, false);
 window.addEventListener('click', onMouseClick, false);
 
+
+function toggleRoadControls(){
+    if (new_road_gui.domElement.style.display==="none"){
+        new_road_gui.domElement.style.display = 'block';
+    }
+    else{
+        new_road_gui.domElement.style.display = 'none';
+    }
+}
+
+function writeXMLFile(){
+    let body_dict = {};
+    body_dict['filename'] = map_filename;
+    body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
+    fetch('http://localhost:8000/save', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body_dict),
+    }).then(()=>{fetch(map_filepath).then((file_data) => {
+        file_data.text().then((file_text) => {
+            loadFile(file_text, true);
+        });
+    });});
+}
+
 function onKeyDown(e){
     console.log(e.key);
     if (e.key=='a'){
-        newRoadMode=!newRoadMode;
-        selectRoadMode = false;
-        if (newRoadMode){
-            new_road_gui.domElement.style.display = 'block';
-            // createNewRoad();
-        }
-        else{
-            new_road_gui.domElement.style.display = 'none';
-            scene.remove(road_network_mesh_new);
-            removeNewRoad();
-        }
-    }
-    if (e.key=='g'){
-        let save_data = ModuleOpenDrive.save_map(OpenDriveMap);
-        fetch('http://localhost:8000/save', {
-            method: 'POST',
-            body: save_data,
-        });
+        toggleRoadControls();
+        // scene.remove(road_network_mesh_new);
+        // removeNewRoad();
     }
     if (e.key=='Escape'){
-        new_road_gui.domElement.style.display = 'none';
-        scene.remove(road_network_mesh_new);
-        writeHandleRoadXML();
-        let body_dict = {};
-        body_dict['filename'] = map_filename;
-        body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
-        fetch('http://localhost:8000/save', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-            body: JSON.stringify(body_dict),
-        }).then(()=>{fetch(map_filepath).then((file_data) => {
-            file_data.text().then((file_text) => {
-                loadFile(file_text, true);
-            });
-        });});
+        if (NEW_ROAD_PARAMS.road_id!==""){
+            toggleRoadControls();
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap,NEW_ROAD_PARAMS);
+            scene.remove(road_network_mesh_new);
+            writeXMLFile();
+            NEW_ROAD_PARAMS.road_id="";
+        }
+    }
+    if (e.key=='Delete'){
+        if (NEW_ROAD_PARAMS.road_id!==""){
+            toggleRoadControls();
+            ModuleOpenDrive.delete_road(OpenDriveMap,NEW_ROAD_PARAMS);
+            scene.remove(road_network_mesh_new);
+            writeXMLFile();
+            NEW_ROAD_PARAMS.road_id="";
+        }
     }
 }
 
@@ -83,8 +93,7 @@ function onMouseClick(e){
             console.log(sel_lanesec_s0);
             console.log(sel_lane_id);
             createHandleRoad(sel_road_id);
-            new_road_gui.domElement.style.display = 'block';
-
+            toggleRoadControls();
             if(selectPredFlag){
                 console.log(sel_road_id);
                 console.log(sel_lanesec_s0);
@@ -97,10 +106,6 @@ function onMouseClick(e){
             // updateNewRoad();
         }
     }
-}
-
-function writeHandleRoadXML(){
-    ModuleOpenDrive.write_handle_road_xml(OpenDriveMap,NEW_ROAD_PARAMS);
 }
 
 function removeNewRoad(){

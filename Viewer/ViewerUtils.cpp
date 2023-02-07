@@ -211,6 +211,11 @@ void write_handle_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
     }
 }
 
+void delete_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+{
+    odr_map.id_to_road.erase(p.road_id);
+}
+
 void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p)
 {
     handleRoad.length = p.road_length;

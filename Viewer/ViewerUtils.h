@@ -32,6 +32,7 @@ Road get_road(const OpenDriveMap& odr_map, std::string road_id, NEW_ROAD_PARAMS&
 RoadNetworkMesh create_road_mesh(double eps, Road road);
 void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p);
 void write_handle_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p);
+void delete_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p);
 std::vector<std::string> update_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS p);
 // Road update_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS p);
 void remove_new_road(OpenDriveMap& odr_map);
