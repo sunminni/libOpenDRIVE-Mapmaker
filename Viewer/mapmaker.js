@@ -1,5 +1,5 @@
 // Globals
-var selectMode = "road";
+var selectMode = "init";
 
 var sel_road_id = null;
 var sel_lanesec_s0 = null;
@@ -32,13 +32,15 @@ var preview_road = [null,null];
 var preview_mesh = [null,null];
 var validPreview = [false,false];
 
+var mode_info = document.getElementById('mode_info');
+
 // Event Listeners
 window.addEventListener('keydown', onKeyDown, false);
 window.addEventListener('click', onMouseClick, false);
 
 
-function toggleRoadControls(){
-    if (new_road_gui.domElement.style.display==="none"){
+function showRoadControls(bool){
+    if (bool){
         new_road_gui.domElement.style.display = 'block';
     }
     else{
@@ -281,6 +283,32 @@ function previewLink(){
     }
 }
 
+function predMode(){
+    setMode("predecessor");
+}
+
+function setMode(mode){
+    if (mode == "road"){
+        showRoadControls(false);
+        scene.remove(handle_mesh);
+        scene.remove(preview_mesh[0]);
+        scene.remove(preview_mesh[1]);
+    }
+    else if (mode == "selected"){
+        showRoadControls(true);
+        scene.remove(preview_mesh[0]);
+        scene.remove(preview_mesh[1]);
+    }
+    else if (mode == "link"){
+        showRoadControls(true);
+    }
+    else if (mode == "predecessor"){
+    }
+    console.log("mode "+mode);
+    selectMode = mode;
+    mode_info.innerHTML = "current_mode: "+mode;
+}
+
 function onKeyDown(e){
     console.log(e.key);
     if (selectMode === "selected"){
@@ -289,31 +317,27 @@ function onKeyDown(e){
             writeXMLFile();
         }
         if (e.key=='l'){
-            selectMode = "link";
+            setMode("link");
         }
         if (e.key=='Escape'){
-            toggleRoadControls();
             ModuleOpenDrive.write_road_xml(OpenDriveMap, HANDLE_PARAMS);
-            scene.remove(handle_mesh);
+            setMode("road");
             writeXMLFile();
-            selectMode = "road";
         }
         if (e.key=='Delete'){
-            toggleRoadControls();
             ModuleOpenDrive.delete_road(OpenDriveMap, HANDLE_PARAMS);
-            scene.remove(handle_mesh);
+            setMode("road");
             writeXMLFile();
-            selectMode = "road";
         }
     }
     else if (selectMode === "link"){
         if (e.key=='Escape'){
-            selectMode = "selected";
+            setMode("selected");
         }
     }
     else if (selectMode === "predecessor"){
         if (e.key=='Escape'){
-            selectMode = "selected";
+            setMode("selected");
         }
     }
     else if (selectMode === "road"){
@@ -329,8 +353,7 @@ function onMouseClick(e){
             console.log(sel_lane_id);
             HANDLE_PARAMS.road_id = sel_road_id;
             createHandleRoad();
-            toggleRoadControls();
-            selectMode = "selected";
+            setMode("selected");
         }
         else if (selectMode === "predecessor"){
             console.log(sel_road_id);
@@ -340,7 +363,7 @@ function onMouseClick(e){
             HANDLE_PARAMS.predecessorIJ=false;
             HANDLE_PARAMS.predecessorID=sel_road_id;
             HANDLE_PARAMS.predecessorCP=sel_cp;
-            selectMode = "selected";
+            setMode("selected");
         }
         else if (selectMode === "link"){
             if (validPreview[0]){
@@ -349,12 +372,8 @@ function onMouseClick(e){
                 if (validPreview[1]){
                     ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
                 }
+                setMode("road");
                 writeXMLFile();
-                scene.remove(handle_mesh);
-                scene.remove(preview_mesh[0]);
-                scene.remove(preview_mesh[1]);
-                toggleRoadControls();
-                selectMode = "road";
             }
         }
     }
@@ -433,11 +452,6 @@ function drawRoadMesh(road,mesh){
     return mesh;
 }
 
-function selectPred(){
-    selectMode = "predecessor";
-}
-
-
 function init_new_road_control(){
     HANDLE_PARAMS = ModuleOpenDrive.create_RP();
     PREVIEW_PARAMS = [ModuleOpenDrive.create_RP(),ModuleOpenDrive.create_RP()];
@@ -465,6 +479,8 @@ function init_new_road_control(){
     predcpC.domElement.getElementsByTagName("input")[0].disabled = true;
     succC = new_road_gui.add(HANDLE_PARAMS, 'successor').onChange(() => {updateHandleRoad();});
 
-    predeiC.domElement.innerHTML = '<button onclick="event.stopPropagation();selectPred();">-1</button>';
+    predeiC.domElement.innerHTML = '<button onclick="event.stopPropagation();predMode();">-1</button>';
     succC.domElement.innerHTML = '<button>-1</button>';
+
+    setMode("road");
 }
