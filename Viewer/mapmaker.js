@@ -6,7 +6,6 @@ var sel_lanesec_s0 = null;
 var sel_lane_id = null;
 var sel_cp = null;
 
-
 var new_road_gui;
 var line_typeC;
 var road_lengthC;
@@ -31,7 +30,7 @@ var handle_mesh = null;
 var PREVIEW_PARAMS = [null,null];
 var preview_road = [null,null];
 var preview_mesh = [null,null];
-var validPreview = false;
+var validPreview = [false,false];
 
 // Event Listeners
 window.addEventListener('keydown', onKeyDown, false);
@@ -179,7 +178,7 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
 function previewLink(){
     scene.remove(preview_mesh[0]);
     scene.remove(preview_mesh[1]);
-    validPreview = false;
+    validPreview = [false,false];
 
     // console.log(HANDLE_PARAMS.road_id+"+"+sel_road_id);
     let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
@@ -274,11 +273,12 @@ function previewLink(){
 
     if (!arc_only){
         preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),drawRoadMesh(preview_road[1],preview_mesh[1])];
+        validPreview = [true,true];
     }
     else{
         preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+        validPreview = [true,false];
     }
-    validPreview = true;
 }
 
 function onKeyDown(e){
@@ -343,10 +343,12 @@ function onMouseClick(e){
             selectMode = "selected";
         }
         else if (selectMode === "link"){
-            if (validPreview){
+            if (validPreview[0]){
                 //make roads
                 ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-                ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
+                if (validPreview[1]){
+                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
+                }
                 writeXMLFile();
                 scene.remove(handle_mesh);
                 scene.remove(preview_mesh[0]);
