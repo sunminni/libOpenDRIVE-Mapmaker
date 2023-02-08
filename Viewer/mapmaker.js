@@ -285,7 +285,7 @@ function onKeyDown(e){
     console.log(e.key);
     if (selectMode === "selected"){
         if (e.key=='a'){
-            ModuleOpenDrive.create_new_road(OpenDriveMap, HANDLE_PARAMS);
+            ModuleOpenDrive.extend_road(OpenDriveMap, HANDLE_PARAMS);
             writeXMLFile();
         }
         if (e.key=='l'){
@@ -345,6 +345,13 @@ function onMouseClick(e){
         else if (selectMode === "link"){
             if (validPreview){
                 //make roads
+                ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+                ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
+                writeXMLFile();
+                scene.remove(handle_mesh);
+                scene.remove(preview_mesh[0]);
+                scene.remove(preview_mesh[1]);
+                toggleRoadControls();
                 selectMode = "road";
             }
         }

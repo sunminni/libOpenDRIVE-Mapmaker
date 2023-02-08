@@ -36,7 +36,8 @@ void delete_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 // std::vector<std::string> update_new_road(OpenDriveMap& odr_map, ROAD_PARAMS p);
 // Road update_new_road(OpenDriveMap& odr_map, ROAD_PARAMS p);
 std::vector<double> get_end(ROAD_PARAMS& p);
-void create_new_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
+void extend_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
+void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 ROAD_PARAMS create_RP();
 
 } // namespace odr

@@ -321,7 +321,13 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
     geometry.append_attribute("y").set_value(p.y);
     geometry.append_attribute("hdg").set_value(p.hdg);
     geometry.append_attribute("length").set_value(p.road_length);
-    geometry.append_child("line");
+    if (p.line_type=="line"){
+        geometry.append_child("line");
+    }
+    else{
+        pugi::xml_node arc = geometry.append_child("arc");
+        arc.append_attribute("curvature").set_value(p.curvature);
+    }
 
     pugi::xml_node lanes = new_road.append_child("lanes");
     pugi::xml_node laneOffset = lanes.append_child("laneOffset");
@@ -379,19 +385,27 @@ std::vector<double> get_end(ROAD_PARAMS& p){
     return x_y_hdg;
 }
 
-void create_new_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
+void extend_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     std::string new_road_id = std::to_string(get_new_road_id(odr_map));
-    p.road_id = new_road_id;
+    double road_length = 20;
+    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,road_length,"-1",new_road_id)}).first->second;
+
     std::vector<double> end = get_end(p);
     p.x = end[0];
     p.y = end[1];
     p.hdg = end[2];
-    p.road_length = 20;
+    p.road_length = road_length;
     p.line_type = "line";
+    p.road_id = new_road_id;
+    road.xml_node = create_road_xml(odr_map,p);
+}
 
-    std::string junc = "-1";
-    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,junc,new_road_id)}).first->second;
+void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
+{
+    std::string new_road_id = std::to_string(get_new_road_id(odr_map));
+    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,"-1",new_road_id)}).first->second;
+    p.road_id = new_road_id;
     road.xml_node = create_road_xml(odr_map,p);
 }
 
