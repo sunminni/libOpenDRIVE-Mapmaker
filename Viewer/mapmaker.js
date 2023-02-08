@@ -7,6 +7,7 @@ var sel_lane_id = null;
 var sel_cp = null;
 
 var new_road_gui;
+var road_idC;
 var line_typeC;
 var road_lengthC;
 var xC;
@@ -19,6 +20,8 @@ var predetC;
 var predeiC;
 var predcpC;
 var succC;
+
+var updateTimestamp = Date.now();
 
 var map_filename = 'RandomRoad.xodr'
 var map_filepath = './'+map_filename;
@@ -319,10 +322,13 @@ function onKeyDown(e){
         if (e.key=='l'){
             setMode("link");
         }
-        if (e.key=='Escape'){
+        if (e.key=='s'){
             ModuleOpenDrive.write_road_xml(OpenDriveMap, HANDLE_PARAMS);
             setMode("road");
             writeXMLFile();
+        }
+        if (e.key=='Escape'){
+            setMode("road");
         }
         if (e.key=='Delete'){
             ModuleOpenDrive.delete_road(OpenDriveMap, HANDLE_PARAMS);
@@ -379,7 +385,12 @@ function onMouseClick(e){
     }
 }
 
+function makeCurvatureC(){
+    return geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
+}
+
 function updateControllerDisplay(){
+    road_idC.updateDisplay();
     line_typeC.updateDisplay();
     road_lengthC.updateDisplay();
     xC.updateDisplay();
@@ -390,7 +401,7 @@ function updateControllerDisplay(){
         curvatureC = null;
     }
     if (line_typeC.getValue() == "arc" && curvatureC===null){
-        curvatureC = geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
+        curvatureC = makeCurvatureC();
     }
     if (curvatureC!==null) curvatureC.updateDisplay();
     predetC.updateDisplay();
@@ -407,6 +418,14 @@ function createHandleRoad(){
 }
 
 function updateHandleRoad(){
+    let curTimestamp = Date.now();
+    if (curTimestamp - updateTimestamp < 10){
+        return;
+    }
+    else{
+        updateTimestamp = curTimestamp;
+    }
+
     if(line_typeC.getValue() == "line" && curvatureC!==null){
         console.log("line");
         curvatureC.remove();
@@ -414,7 +433,7 @@ function updateHandleRoad(){
     }
     if (line_typeC.getValue() == "arc" && curvatureC===null){
         console.log("arc");
-        curvatureC = geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
+        curvatureC = makeCurvatureC();
     }
     if (curvatureC!==null && curvatureC.getValue()==0){
         curvatureC.setValue(0.00001);
@@ -461,15 +480,16 @@ function init_new_road_control(){
     new_road_gui.domElement.getElementsByClassName('close-button')[0].remove();
     new_road_gui.domElement.style.display = 'none';
 
+    road_idC = new_road_gui.add(HANDLE_PARAMS, 'road_id').onChange(() => {updateHandleRoad();});
+
     geometry_folder = new_road_gui.addFolder('Geometry');
     geometry_folder.open();
-
     line_typeC = geometry_folder.add(HANDLE_PARAMS, 'line_type', { 'line' : 'line', 'arc' : 'arc' }).onChange(() => {updateHandleRoad();});
     road_lengthC = geometry_folder.add(HANDLE_PARAMS, 'road_length', 1).step(0.001).onChange(() => {updateHandleRoad();});
     xC = geometry_folder.add(HANDLE_PARAMS, 'x').step(0.001).onChange(() => {updateHandleRoad();});
     yC = geometry_folder.add(HANDLE_PARAMS, 'y').step(0.001).onChange(() => {updateHandleRoad();});
     hdgC = geometry_folder.add(HANDLE_PARAMS, 'hdg', -Math.PI*2, Math.PI*2, 0.001).onChange(() => {updateHandleRoad();});
-    curvatureC = geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
+    curvatureC = makeCurvatureC();
 
     pred_folder = new_road_gui.addFolder('Predecessor');
     pred_folder.open();
