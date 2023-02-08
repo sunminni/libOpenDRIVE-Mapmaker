@@ -145,7 +145,7 @@ std::string save_map(const OpenDriveMap& odr_map)
     return output;
 }
 
-Road get_road(const OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+Road get_road(const OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     Road target_road = odr_map.id_to_road.at(p.road_id);
     p.road_length = target_road.length;
@@ -186,7 +186,7 @@ RoadNetworkMesh create_road_mesh(double eps, Road road){
     return out_mesh;
 }
 
-void write_handle_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+void write_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     std::cout<<"p.road_id: "<<p.road_id<<std::endl;
     Road& target_road = odr_map.id_to_road.at(p.road_id);
@@ -211,26 +211,26 @@ void write_handle_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
     }
 }
 
-void delete_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+void delete_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     odr_map.id_to_road.erase(p.road_id);
 }
 
-void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p)
+void update_road(Road& road, ROAD_PARAMS& p)
 {
-    handleRoad.length = p.road_length;
+    road.length = p.road_length;
     if (p.line_type=="arc"){
-        handleRoad.ref_line.s0_to_geometry[0] = std::make_unique<Arc>(0, p.x, p.y, p.hdg, p.road_length, p.curvature);
+        road.ref_line.s0_to_geometry[0] = std::make_unique<Arc>(0, p.x, p.y, p.hdg, p.road_length, p.curvature);
     }
     else if (p.line_type=="line"){
-        handleRoad.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
+        road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
     }
-    handleRoad.predecessor.id = p.predecessorID;
-    handleRoad.predecessor.type = RoadLink::Type::Type_Road;
-    handleRoad.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
+    road.predecessor.id = p.predecessorID;
+    road.predecessor.type = RoadLink::Type::Type_Road;
+    road.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
 }
 
-// std::vector<std::string> update_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS p)
+// std::vector<std::string> update_new_road(OpenDriveMap& odr_map, ROAD_PARAMS p)
 // {   
 //     std::vector<std::string> road_ids = {};
 //     Road& new_road = odr_map.id_to_road.at("new_road");
@@ -284,10 +284,6 @@ void update_handle_road(Road& handleRoad, NEW_ROAD_PARAMS& p)
 //     return road_ids;
 // }
 
-// void remove_new_road(OpenDriveMap& odr_map){
-//     odr_map.id_to_road.erase("new_road");
-// }
-
 void add_lane(pugi::xml_node& laneSectionChild, int lane_id){
     pugi::xml_node lane_r = laneSectionChild.append_child("lane");
     lane_r.append_attribute("id").set_value(lane_id);
@@ -304,7 +300,7 @@ void add_lane(pugi::xml_node& laneSectionChild, int lane_id){
     width_r.append_attribute("d").set_value("0");
 }
 
-pugi::xml_node create_road_xml(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p){
+pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
     pugi::xml_node new_road = odr_map.xml_doc.append_child("road");
     new_road.append_attribute("length").set_value(p.road_length);
     new_road.append_attribute("id").set_value(p.road_id.c_str());
@@ -360,7 +356,8 @@ int get_new_road_id(const OpenDriveMap& odr_map)
     return max_road_id+1;
 }
 
-void get_end(NEW_ROAD_PARAMS& p){
+std::vector<double> get_end(ROAD_PARAMS& p){
+    std::vector<double> x_y_hdg;
     if (p.line_type=="arc"){
         double radius = 1/p.curvature;
         double theta = p.road_length/radius;
@@ -368,21 +365,28 @@ void get_end(NEW_ROAD_PARAMS& p){
         double dy = (1-cos(theta))*radius;
         double ddx = dx*cos(p.hdg)-dy*sin(p.hdg);
         double ddy = dy*cos(p.hdg)+dx*sin(p.hdg);
-        p.x += ddx;
-        p.y += ddy;
-        p.hdg += theta;
+        x_y_hdg.push_back(p.x+ddx);
+        x_y_hdg.push_back(p.y+ddy);
+        x_y_hdg.push_back(p.hdg+theta);
     }
     else{
-        p.x += cos(p.hdg)*p.road_length;
-        p.y += sin(p.hdg)*p.road_length;
+        double ddx = cos(p.hdg)*p.road_length;
+        double ddy = sin(p.hdg)*p.road_length;
+        x_y_hdg.push_back(p.x+ddx);
+        x_y_hdg.push_back(p.y+ddy);
+        x_y_hdg.push_back(p.hdg);
     }
+    return x_y_hdg;
 }
 
-void create_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
+void create_new_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     std::string new_road_id = std::to_string(get_new_road_id(odr_map));
     p.road_id = new_road_id;
-    get_end(p);
+    std::vector<double> end = get_end(p);
+    p.x = end[0];
+    p.y = end[1];
+    p.hdg = end[2];
     p.road_length = 20;
     p.line_type = "line";
 
@@ -391,8 +395,8 @@ void create_new_road(OpenDriveMap& odr_map, NEW_ROAD_PARAMS& p)
     road.xml_node = create_road_xml(odr_map,p);
 }
 
-NEW_ROAD_PARAMS init_NRP(){
-    return NEW_ROAD_PARAMS();
+ROAD_PARAMS create_RP(){
+    return ROAD_PARAMS();
 }
 
 } // namespace odr

@@ -97,18 +97,18 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
 
     emscripten::class_<Road>("Road");
 
-    emscripten::class_<NEW_ROAD_PARAMS>("NEW_ROAD_PARAMS")
-        .property("road_id", &NEW_ROAD_PARAMS::road_id)
-        .property("line_type", &NEW_ROAD_PARAMS::line_type)
-        .property("road_length", &NEW_ROAD_PARAMS::road_length)
-        .property("x", &NEW_ROAD_PARAMS::x)
-        .property("y", &NEW_ROAD_PARAMS::y)
-        .property("hdg", &NEW_ROAD_PARAMS::hdg)
-        .property("curvature", &NEW_ROAD_PARAMS::curvature)
-        .property("predecessorIJ", &NEW_ROAD_PARAMS::predecessorIJ)
-        .property("predecessorID", &NEW_ROAD_PARAMS::predecessorID)
-        .property("predecessorCP", &NEW_ROAD_PARAMS::predecessorCP)
-        .property("successor", &NEW_ROAD_PARAMS::successor);
+    emscripten::class_<ROAD_PARAMS>("ROAD_PARAMS")
+        .property("road_id", &ROAD_PARAMS::road_id)
+        .property("line_type", &ROAD_PARAMS::line_type)
+        .property("road_length", &ROAD_PARAMS::road_length)
+        .property("x", &ROAD_PARAMS::x)
+        .property("y", &ROAD_PARAMS::y)
+        .property("hdg", &ROAD_PARAMS::hdg)
+        .property("curvature", &ROAD_PARAMS::curvature)
+        .property("predecessorIJ", &ROAD_PARAMS::predecessorIJ)
+        .property("predecessorID", &ROAD_PARAMS::predecessorID)
+        .property("predecessorCP", &ROAD_PARAMS::predecessorCP)
+        .property("successor", &ROAD_PARAMS::successor);
 
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);
@@ -116,13 +116,13 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("save_map", &save_map);
     emscripten::function("get_road", &get_road);
     emscripten::function("create_road_mesh", &create_road_mesh);
-    emscripten::function("update_handle_road", &update_handle_road);
-    emscripten::function("write_handle_road_xml", &write_handle_road_xml);
+    emscripten::function("update_road", &update_road);
+    emscripten::function("write_road_xml", &write_road_xml);
     emscripten::function("delete_road", &delete_road);
     // emscripten::function("update_new_road", &update_new_road);
-    // emscripten::function("remove_new_road", &remove_new_road);
+    emscripten::function("get_end", &get_end);
     emscripten::function("create_new_road", &create_new_road);
-    emscripten::function("init_NRP", &init_NRP);
+    emscripten::function("create_RP", &create_RP);
 }
 
 } // namespace odr

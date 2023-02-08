@@ -3,7 +3,6 @@ var ModuleOpenDrive = null;
 var OpenDriveMap = null;
 var refline_lines = null;
 var road_network_mesh = null;
-var road_network_mesh_new = null;
 var roadmarks_mesh = null;
 var lane_outline_lines = null;
 var roadmark_outline_lines = null;
@@ -381,6 +380,9 @@ function animate()
         sel_road_id = road_id;
         sel_lanesec_s0 = lanesec_s0;
         sel_lane_id = lane_id;
+        if (selectMode === "link"){
+            previewLink();
+        }
         // let road = ModuleOpenDrive.get_road(OpenDriveMap,road_id);
         // let road_length = road.length;
         // if (selectRoadMode){
