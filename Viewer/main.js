@@ -386,7 +386,7 @@ function animate()
         sel_lanesec_s0 = lanesec_s0;
         sel_lane_id = lane_id;
         
-        if (MapmakerMode === "link"){
+        if (MapmakerMode === CONNECT){
             previewLink();
         }
         // let road = ModuleOpenDrive.get_road(OpenDriveMap,road_id);

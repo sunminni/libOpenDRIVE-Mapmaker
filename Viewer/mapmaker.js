@@ -3,6 +3,8 @@ const CREATE_LINE_1 = "create line: set start point";
 const CREATE_LINE_2 = "create line: set end point";
 const DEFAULT = "default";
 const EXTEND_ROAD_LINE = "extend road: line";
+const CONNECT = "connect roads: select next road";
+const SELECTED = "road selected";
 
 var MapmakerMode = "init";
 
@@ -73,7 +75,7 @@ function writeXMLFile(){
     }).then(()=>{fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
             loadFile(file_text, true);
-            if (MapmakerMode === "selected"){
+            if (MapmakerMode === SELECTED){
                 createHandleRoad();
             }
         });
@@ -315,10 +317,6 @@ function previewLink(){
     }
 }
 
-function predMode(){
-    setMode("predecessor");
-}
-
 function setMode(mode){
     if (mode == DEFAULT){
         showRoadControls(false);
@@ -326,15 +324,13 @@ function setMode(mode){
         scene.remove(preview_mesh[0]);
         scene.remove(preview_mesh[1]);
     }
-    else if (mode == "selected"){
+    else if (mode == SELECTED){
         showRoadControls(true);
         scene.remove(preview_mesh[0]);
         scene.remove(preview_mesh[1]);
     }
-    else if (mode == "link"){
+    else if (mode == CONNECT){
         showRoadControls(true);
-    }
-    else if (mode == "predecessor"){
     }
     console.log("mode "+mode);
     MapmakerMode = mode;
@@ -343,7 +339,7 @@ function setMode(mode){
 
 function onKeyDown(e){
     console.log(e.key);
-    if (MapmakerMode === "selected"){
+    if (MapmakerMode === SELECTED){
         if (e.key=='a'){
             ModuleOpenDrive.extend_road(OpenDriveMap, HANDLE_PARAMS);
             writeXMLFile();
@@ -361,6 +357,9 @@ function onKeyDown(e){
             setMode(DEFAULT);
             writeXMLFile();
         }
+        if (e.key=='c'){
+            setMode(CONNECT);
+        }
         if (e.key=='Escape'){
             setMode(DEFAULT);
         }
@@ -370,14 +369,9 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
-    else if (MapmakerMode === "link"){
+    else if (MapmakerMode === CONNECT){
         if (e.key=='Escape'){
-            setMode("selected");
-        }
-    }
-    else if (MapmakerMode === "predecessor"){
-        if (e.key=='Escape'){
-            setMode("selected");
+            setMode(SELECTED);
         }
     }
     else if (MapmakerMode === DEFAULT){
@@ -426,19 +420,9 @@ function onMouseClick(event){
             console.log(sel_lane_id);
             HANDLE_PARAMS.road_id = sel_road_id;
             createHandleRoad();
-            setMode("selected");
+            setMode(SELECTED);
         }
-        else if (MapmakerMode === "predecessor"){
-            console.log(sel_road_id);
-            console.log(sel_lanesec_s0);
-            console.log(sel_lane_id);
-            console.log(sel_cp);
-            HANDLE_PARAMS.predecessorIJ=false;
-            HANDLE_PARAMS.predecessorID=sel_road_id;
-            HANDLE_PARAMS.predecessorCP=sel_cp;
-            setMode("selected");
-        }
-        else if (MapmakerMode === "link"){
+        else if (MapmakerMode === CONNECT){
             if (validLink[0]){
                 //make roads
                 ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
@@ -566,7 +550,7 @@ function initMapmaker(){
     predcpC.domElement.getElementsByTagName("input")[0].disabled = true;
     succC = new_road_gui.add(HANDLE_PARAMS, 'successor').onChange(() => {updateHandleRoad();});
 
-    predeiC.domElement.innerHTML = '<button onclick="event.stopPropagation();predMode();">-1</button>';
+    predeiC.domElement.innerHTML = '<button onclick="event.stopPropagation();">-1</button>';
     succC.domElement.innerHTML = '<button>-1</button>';
 
     setMode(DEFAULT);
