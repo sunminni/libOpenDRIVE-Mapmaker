@@ -9,7 +9,7 @@ namespace odr
 struct ROAD_PARAMS
 {
     ROAD_PARAMS() = default;
-    std::string line_type = "";
+    std::string line_type = "line";
     std::string road_id = "";
     double road_length = 10.0;
     double x = 0;
@@ -39,5 +39,7 @@ std::vector<double> get_end(ROAD_PARAMS& p);
 void extend_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 ROAD_PARAMS create_RP();
+int get_new_road_id(const OpenDriveMap& odr_map);
+Road create_preview_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 
 } // namespace odr

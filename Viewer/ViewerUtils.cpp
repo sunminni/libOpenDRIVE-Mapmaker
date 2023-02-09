@@ -139,7 +139,9 @@ std::string save_map(const OpenDriveMap& odr_map)
     for (const auto& id_road : odr_map.id_to_road)
     {
         const Road& road = id_road.second;
-        output += node_to_string(road.xml_node);
+        if (std::stoi(road.id)>0){
+            output += node_to_string(road.xml_node);
+        }
     }
     output += "</OpenDRIVE>";
     return output;
@@ -174,12 +176,15 @@ RoadNetworkMesh create_road_mesh(double eps, Road road){
         for (const auto& id_lane : lanesec.id_to_lane)
         {
             const Lane&       lane = id_lane.second;
+            std::cout<<"lane.id "<<lane.id<<std::endl;
             const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
             if (lane.type != "driving"){continue;}
 
             lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
             Mesh3D asdf = road.get_lane_mesh(lane, eps);
-
+            for (int i=0;i<asdf.vertices.size();i++){
+                std::cout << "asdf.vertices[i] " << asdf.vertices[i][0] << " " << asdf.vertices[i][0] << " " << asdf.vertices[i][0] << std::endl;
+            }
             lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
         }
     }
@@ -407,6 +412,67 @@ void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
     Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,"-1",new_road_id)}).first->second;
     p.road_id = new_road_id;
     road.xml_node = create_road_xml(odr_map,p);
+}
+
+Road create_preview_road(OpenDriveMap& odr_map, std::string road_id)
+{
+    Road& road = odr_map.id_to_road.insert({road_id,Road(road_id,10,"-1",road_id)}).first->second;
+
+    road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, 0, 0, 0, 10);
+
+    LaneSection& lanesection = road.s_to_lanesection.insert({0, LaneSection(road.id, 0)}).first->second;
+
+    for (int lane_id=0;lane_id>-3;lane_id--)
+    {
+        Lane& lane = lanesection.id_to_lane.insert({lane_id,
+                                 Lane(road.id, 0, lane_id, false, lane_id==0?"none":"driving")})
+                        .first->second;
+
+        lane.lane_width.s0_to_poly[0] = Poly3(0, 3.5, 0, 0, 0);
+    }
+
+    /* derive lane borders from lane widths */
+    auto id_lane_iter0 = lanesection.id_to_lane.find(0);
+    if (id_lane_iter0 == lanesection.id_to_lane.end())
+        throw std::runtime_error("lane section does not have lane #0");
+
+    /* iterate from id #0 towards +inf */
+    auto id_lane_iter1 = std::next(id_lane_iter0);
+    for (auto iter = id_lane_iter1; iter != lanesection.id_to_lane.end(); iter++)
+    {
+        if (iter == id_lane_iter0)
+        {
+            iter->second.outer_border = iter->second.lane_width;
+        }
+        else
+        {
+            iter->second.inner_border = std::prev(iter)->second.outer_border;
+            iter->second.outer_border = std::prev(iter)->second.outer_border.add(iter->second.lane_width);
+        }
+    }
+
+    /* iterate from id #0 towards -inf */
+    std::map<int, Lane>::reverse_iterator r_id_lane_iter_1(id_lane_iter0);
+    for (auto r_iter = r_id_lane_iter_1; r_iter != lanesection.id_to_lane.rend(); r_iter++)
+    {
+        if (r_iter == r_id_lane_iter_1)
+        {
+            r_iter->second.outer_border = r_iter->second.lane_width.negate();
+        }
+        else
+        {
+            r_iter->second.inner_border = std::prev(r_iter)->second.outer_border;
+            r_iter->second.outer_border = std::prev(r_iter)->second.outer_border.add(r_iter->second.lane_width.negate());
+        }
+    }
+
+    for (auto& id_lane : lanesection.id_to_lane)
+    {
+        id_lane.second.inner_border = id_lane.second.inner_border.add(road.lane_offset);
+        id_lane.second.outer_border = id_lane.second.outer_border.add(road.lane_offset);
+    }
+
+    return road;
 }
 
 ROAD_PARAMS create_RP(){

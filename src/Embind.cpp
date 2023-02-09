@@ -95,7 +95,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
         .property("x_offs", &OpenDriveMap::x_offs)
         .property("y_offs", &OpenDriveMap::y_offs);
 
-    emscripten::class_<Road>("Road");
+    emscripten::class_<Road>("Road")
+        .property("id", &Road::id);
 
     emscripten::class_<ROAD_PARAMS>("ROAD_PARAMS")
         .property("road_id", &ROAD_PARAMS::road_id)
@@ -124,6 +125,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("extend_road", &extend_road);
     emscripten::function("add_road", &add_road);
     emscripten::function("create_RP", &create_RP);
+    emscripten::function("get_new_road_id", &get_new_road_id);
+    emscripten::function("create_preview_road", &create_preview_road);
 }
 
 } // namespace odr

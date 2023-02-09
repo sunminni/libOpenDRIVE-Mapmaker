@@ -115,7 +115,7 @@ const roadmarks_material = new THREE.MeshBasicMaterial({
 /* load WASM + odr map */
 libOpenDrive().then(Module => {
     ModuleOpenDrive = Module;
-    init_new_road_control();
+    initMapmaker();
 
     fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
@@ -146,6 +146,11 @@ function loadFile(file_text, clear_map)
         abs_z_for_for_local_road_obj_outline : true
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
+    
+    PREVIEW_PARAMS[0].road_id = "-1";
+    PREVIEW_PARAMS[1].road_id = "-2";
+    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,PREVIEW_PARAMS[0]),
+                    ModuleOpenDrive.create_preview_road(OpenDriveMap,PREVIEW_PARAMS[1])];
     loadOdrMap(clear_map);
 }
 
@@ -161,6 +166,7 @@ function reloadOdrMap()
         abs_z_for_for_local_road_obj_outline : true
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
+    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
     loadOdrMap(true, false);
 }
 
@@ -380,7 +386,8 @@ function animate()
         sel_road_id = road_id;
         sel_lanesec_s0 = lanesec_s0;
         sel_lane_id = lane_id;
-        if (selectMode === "link"){
+        
+        if (MapmakerMode === "link"){
             previewLink();
         }
         // let road = ModuleOpenDrive.get_road(OpenDriveMap,road_id);
@@ -406,6 +413,10 @@ function animate()
         sel_road_id = null;
         sel_lanesec_s0 = null;
         sel_lane_id = null;
+    }
+
+    if (MapmakerMode === CREATE_LINE_2){
+        previewLine();
     }
 
     renderer.render(scene, camera);
@@ -518,6 +529,7 @@ function onDocumentMouseMove(event)
     event.preventDefault();
     mouse.x = event.clientX;
     mouse.y = event.clientY;
+    calcMouseWorldPos(event);
 }
 
 function onDocumentMouseDbClick(e)
