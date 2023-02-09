@@ -147,10 +147,8 @@ function loadFile(file_text, clear_map)
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
     
-    PREVIEW_PARAMS[0].road_id = "-1";
-    PREVIEW_PARAMS[1].road_id = "-2";
-    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,PREVIEW_PARAMS[0]),
-                    ModuleOpenDrive.create_preview_road(OpenDriveMap,PREVIEW_PARAMS[1])];
+    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
+                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
     loadOdrMap(clear_map);
 }
 
@@ -166,7 +164,8 @@ function reloadOdrMap()
         abs_z_for_for_local_road_obj_outline : true
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
-    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
+    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
+                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
     loadOdrMap(true, false);
 }
 
@@ -416,7 +415,10 @@ function animate()
     }
 
     if (MapmakerMode === CREATE_LINE_2){
-        previewLine();
+        previewCreateLine();
+    }
+    else if (MapmakerMode === EXTEND_ROAD_LINE){
+        previewExtendLine();
     }
 
     renderer.render(scene, camera);

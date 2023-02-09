@@ -188,12 +188,22 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
     return [xi,yi];
 }
 
-function previewLine(){
+function previewCreateLine(){
     scene.remove(preview_mesh[0]);
     scene.remove(preview_mesh[1]);
 
     PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
     PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
+
+    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
+    preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+}
+
+function previewExtendLine(){
+    scene.remove(preview_mesh[0]);
+    scene.remove(preview_mesh[1]);
+
+    PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
 
     ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
     preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
@@ -339,7 +349,12 @@ function onKeyDown(e){
             writeXMLFile();
         }
         if (e.key=='l'){
-            setMode("link");
+            let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
+            PREVIEW_PARAMS[0].x = std_vec.get(0);
+            PREVIEW_PARAMS[0].y = std_vec.get(1);
+            PREVIEW_PARAMS[0].hdg = std_vec.get(2);
+            PREVIEW_PARAMS[0].line_type = "line";
+            setMode(EXTEND_ROAD_LINE);
         }
         if (e.key=='s'){
             ModuleOpenDrive.write_road_xml(OpenDriveMap, HANDLE_PARAMS);
@@ -385,7 +400,6 @@ function onMouseClick(event){
     calcMouseWorldPos(event);
 
     if (MapmakerMode === CREATE_LINE_1){
-        PREVIEW_PARAMS[0].road_id = "-1";
         PREVIEW_PARAMS[0].x = mouse_pos.x;
         PREVIEW_PARAMS[0].y = mouse_pos.y;
         PREVIEW_PARAMS[0].line_type = "line";
@@ -394,6 +408,12 @@ function onMouseClick(event){
     else if (MapmakerMode === CREATE_LINE_2){
         PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
         PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
+        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+        setMode(DEFAULT);
+        writeXMLFile();
+    }
+    else if (MapmakerMode === EXTEND_ROAD_LINE){
+        PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
         ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
         setMode(DEFAULT);
         writeXMLFile();
