@@ -5,6 +5,11 @@ const DEFAULT = "default";
 const EXTEND_ROAD_LINE = "extend road: line";
 const CONNECT = "connect roads: select next road";
 const SELECTED = "road selected";
+const CREATE_ARC_1 = "create arc: set start point";
+const CREATE_ARC_2 = "create arc: set start direction";
+const CREATE_ARC_3 = "create arc: set end point";
+
+var arrow1 = null;
 
 var MapmakerMode = "init";
 
@@ -43,7 +48,7 @@ var handle_mesh = null;
 var PREVIEW_PARAMS = [null,null];
 var preview_road = [null,null];
 var preview_mesh = [null,null];
-var validLink = [false,false];
+var validPreview = [false,false];
 
 var mode_info = document.getElementById('mode_info');
 
@@ -190,6 +195,124 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
     return [xi,yi];
 }
 
+function showPreview(){
+    if (MapmakerMode === CONNECT){
+        if (sel_road_id!==null){
+            previewLink();
+        }
+    }
+    else if (MapmakerMode === CREATE_LINE_2){
+        previewCreateLine();
+    }
+    else if (MapmakerMode === EXTEND_ROAD_LINE){
+        previewExtendLine();
+    }
+    else if (MapmakerMode === CREATE_ARC_2){
+        previewCreateArc1();
+    }
+    else if (MapmakerMode === CREATE_ARC_3){
+        previewCreateArc2();
+    }
+}
+
+function previewCreateArc1(){
+    scene.remove(arrow1);
+    let from = new THREE.Vector3(PREVIEW_PARAMS[0].x, PREVIEW_PARAMS[0].y, 0);
+    let to = new THREE.Vector3(mouse_pos.x,mouse_pos.y,0);
+    let direction = to.clone().sub(from);
+    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 50, 0xff0000, 10, 10);
+    scene.add(arrow1);
+}
+
+function previewCreateArc2(){
+    scene.remove(preview_mesh[0]);
+    scene.remove(preview_mesh[1]);
+    validPreview = [false,false];
+
+    let xs = PREVIEW_PARAMS[0].x;
+    let ys = PREVIEW_PARAMS[0].y;
+    let xe = mouse_pos.x;
+    let ye = mouse_pos.y;
+    let start_hdg = PREVIEW_PARAMS[0].hdg;
+
+    let start_m,start_b,m,b,xc,yc;
+    let vert = "false";
+    if (start_hdg==Math.PI/2 || start_hdg==-Math.PI/2){
+        //vert up
+        yc = ys;
+        xc = (ys**2)+(xe**2)-(2*ys*ye)+(ye**2)-(xs**2);
+        xc = xc / (-(2*xs)+(2*xe));
+        vert = start_hdg==Math.PI/2 ? "up" : "down";
+    }
+    else if (start_hdg==0 || start_hdg==Math.PI || start_hdg==-Math.PI){
+        //hori right
+        xc = xs;
+        yc = (xs**2)-(ys**2)-(2*xs*xe)+(xe**2)+(ye**2);
+        yc = yc / (-(2*ys)+(2*ye));
+        start_m = 0;
+        start_b = ys;
+    }
+    else{
+        start_m = Math.sin(start_hdg)/Math.cos(start_hdg);
+        start_b = ys-start_m*xs;
+        m = -1/start_m;
+        b = ys-m*xs;
+        xc = -(xs**2)+(2*ys*b)-(ys**2)+(xe**2)-(2*ye*b)+(ye**2);
+        xc = xc / (-(2*xs)-(2*ys*m)+(2*xe)+(2*ye*m));
+        yc = m*xc+b;
+    }
+
+    let radius = Math.hypot(xc-xs,yc-ys);
+
+    if (radius == Number.POSITIVE_INFINITY || radius == Number.NEGATIVE_INFINITY) return;
+
+    let dot = (xs-xc)*(xe-xc) + (ys-yc)*(ye-yc);
+    let det = (xs-xc)*(ye-yc) - (ys-yc)*(xe-xc);
+    let theta = null;
+
+    if (vert=="up"){
+        theta = Math.atan2(-det, -dot)+Math.PI;
+        if (xe>xs){
+            theta -= Math.PI*2;
+        }
+    }
+    else if (vert=="down"){
+        theta = Math.atan2(-det, -dot)+Math.PI;
+        if (xe<xs){
+            theta -= Math.PI*2;
+        }
+    }
+    else{
+        if (ye>start_m*xe+start_b){
+            console.log("above");
+            theta = Math.atan2(-det, -dot)+Math.PI;
+            if (Math.abs(start_hdg)>Math.PI/2){
+                theta -= Math.PI*2;
+            }
+        }
+        else{
+            console.log("below");
+            theta = Math.atan2(-det, -dot)-Math.PI;
+            if (Math.abs(start_hdg)>Math.PI/2){
+                theta += Math.PI*2;
+            }
+        }
+    }
+
+    let road_length = Math.abs(theta*radius);
+    let curvature = theta>0 ? 1/radius : -1/radius;
+    
+    PREVIEW_PARAMS[0].road_length =road_length;
+    PREVIEW_PARAMS[0].curvature = curvature;
+    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
+    preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+    validPreview = [true,false];
+
+    // let end_hdg = Math.atan2(mouse_pos.y-end_y,mouse_pos.x-end_x);
+    // let theta = end_hdg-PREVIEW_PARAMS[0].hdg;
+    // let radius = (c/2)/Math.sin(theta/2);
+}
+
 function previewCreateLine(){
     scene.remove(preview_mesh[0]);
     scene.remove(preview_mesh[1]);
@@ -214,7 +337,7 @@ function previewExtendLine(){
 function previewLink(){
     scene.remove(preview_mesh[0]);
     scene.remove(preview_mesh[1]);
-    validLink = [false,false];
+    validPreview = [false,false];
 
     // console.log(HANDLE_PARAMS.road_id+"+"+sel_road_id);
     let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
@@ -309,11 +432,11 @@ function previewLink(){
 
     if (!arc_only){
         preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),drawRoadMesh(preview_road[1],preview_mesh[1])];
-        validLink = [true,true];
+        validPreview = [true,true];
     }
     else{
         preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-        validLink = [true,false];
+        validPreview = [true,false];
     }
 }
 
@@ -323,6 +446,7 @@ function setMode(mode){
         scene.remove(handle_mesh);
         scene.remove(preview_mesh[0]);
         scene.remove(preview_mesh[1]);
+        scene.remove(arrow1);
     }
     else if (mode == SELECTED){
         showRoadControls(true);
@@ -375,6 +499,9 @@ function onKeyDown(e){
         }
     }
     else if (MapmakerMode === DEFAULT){
+        if (e.key=='a'){
+            setMode(CREATE_ARC_1);
+        }
         if (e.key=='l'){
             setMode(CREATE_LINE_1);
         }
@@ -412,6 +539,24 @@ function onMouseClick(event){
         setMode(DEFAULT);
         writeXMLFile();
     }
+    else if (MapmakerMode === CREATE_ARC_1){
+        PREVIEW_PARAMS[0].x = mouse_pos.x;
+        PREVIEW_PARAMS[0].y = mouse_pos.y;
+        PREVIEW_PARAMS[0].line_type = "arc";
+        setMode(CREATE_ARC_2);
+    }
+    else if (MapmakerMode === CREATE_ARC_2){
+        PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
+        PREVIEW_PARAMS[0].hdg = -Math.PI;
+        setMode(CREATE_ARC_3);
+    }
+    else if (MapmakerMode === CREATE_ARC_3){
+        if (validPreview[0]){
+            ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+            setMode(DEFAULT);
+            writeXMLFile();
+        }
+    }
 
     if (sel_road_id!==null){
         if (MapmakerMode === DEFAULT){
@@ -423,10 +568,10 @@ function onMouseClick(event){
             setMode(SELECTED);
         }
         else if (MapmakerMode === CONNECT){
-            if (validLink[0]){
+            if (validPreview[0]){
                 //make roads
                 ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-                if (validLink[1]){
+                if (validPreview[1]){
                     ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
                 }
                 setMode(DEFAULT);

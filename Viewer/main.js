@@ -386,9 +386,6 @@ function animate()
         sel_lanesec_s0 = lanesec_s0;
         sel_lane_id = lane_id;
         
-        if (MapmakerMode === CONNECT){
-            previewLink();
-        }
         // let road = ModuleOpenDrive.get_road(OpenDriveMap,road_id);
         // let road_length = road.length;
         // if (selectRoadMode){
@@ -414,12 +411,7 @@ function animate()
         sel_lane_id = null;
     }
 
-    if (MapmakerMode === CREATE_LINE_2){
-        previewCreateLine();
-    }
-    else if (MapmakerMode === EXTEND_ROAD_LINE){
-        previewExtendLine();
-    }
+    showPreview();
 
     renderer.render(scene, camera);
 }

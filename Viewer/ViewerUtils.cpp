@@ -177,15 +177,9 @@ RoadNetworkMesh create_road_mesh(double eps, Road road){
         for (const auto& id_lane : lanesec.id_to_lane)
         {
             const Lane&       lane = id_lane.second;
-            std::cout<<"lane.id "<<lane.id<<std::endl;
             const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
             if (lane.type != "driving"){continue;}
-
             lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
-            Mesh3D asdf = road.get_lane_mesh(lane, eps);
-            for (int i=0;i<asdf.vertices.size();i++){
-                std::cout << "asdf.vertices[i] " << asdf.vertices[i][0] << " " << asdf.vertices[i][0] << " " << asdf.vertices[i][0] << std::endl;
-            }
             lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
         }
     }
