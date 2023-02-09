@@ -20,7 +20,7 @@ Mesh3D get_refline_segments(const OpenDriveMap& odr_map, double eps)
     for (const auto& id_road : odr_map.id_to_road)
     {
         const Road&       road = id_road.second;
-
+        if (std::stod(road.id)<0) continue;
         int driving_lane_count = 0;
         for (const auto& s_lanesec : road.s_to_lanesection)
         {
@@ -62,6 +62,7 @@ RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps)
     for (const auto& id_road : odr_map.id_to_road)
     {
         const Road& road = id_road.second;
+        if (std::stod(road.id)<0) continue;
         lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
         // roadmarks_mesh.road_start_indices[roadmarks_mesh.vertices.size()] = road.id;
         // road_objects_mesh.road_start_indices[road_objects_mesh.vertices.size()] = road.id;
