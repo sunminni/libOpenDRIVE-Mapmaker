@@ -465,8 +465,12 @@ function onKeyDown(e){
     console.log(e.key);
     if (MapmakerMode === SELECTED){
         if (e.key=='a'){
-            ModuleOpenDrive.extend_road(OpenDriveMap, HANDLE_PARAMS);
-            writeXMLFile();
+            let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
+            PREVIEW_PARAMS[0].x = std_vec.get(0);
+            PREVIEW_PARAMS[0].y = std_vec.get(1);
+            PREVIEW_PARAMS[0].hdg = std_vec.get(2);
+            PREVIEW_PARAMS[0].line_type = "arc";
+            setMode(CREATE_ARC_3);
         }
         if (e.key=='l'){
             let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
@@ -547,7 +551,6 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === CREATE_ARC_2){
         PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
-        PREVIEW_PARAMS[0].hdg = -Math.PI;
         setMode(CREATE_ARC_3);
     }
     else if (MapmakerMode === CREATE_ARC_3){
