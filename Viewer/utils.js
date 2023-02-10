@@ -234,9 +234,6 @@ function previewLink(){
     m2 = Math.round(m2 * 1000) / 1000
     b2 = Math.round(b2 * 1000) / 1000
 
-    preview_road = [ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]),
-                    ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0])];
-
     if (m1==m2 && b1==b2){
         //road only
         console.log("road only");
