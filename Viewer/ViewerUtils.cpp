@@ -293,11 +293,11 @@ void add_lane(pugi::xml_node& laneSectionChild, int lane_id){
 }
 
 pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
-    pugi::xml_node new_road = odr_map.xml_doc.append_child("road");
-    new_road.append_attribute("length").set_value(p.road_length);
-    new_road.append_attribute("id").set_value(p.road_id.c_str());
-    new_road.append_attribute("junction").set_value("-1");
-    pugi::xml_node link = new_road.append_child("link");
+    pugi::xml_node new_road_node = odr_map.xml_doc.append_child("road");
+    new_road_node.append_attribute("length").set_value(p.road_length);
+    new_road_node.append_attribute("id").set_value(p.road_id.c_str());
+    new_road_node.append_attribute("junction").set_value("-1");
+    pugi::xml_node link = new_road_node.append_child("link");
     pugi::xml_node predecessor = link.append_child("predecessor");
     predecessor.append_attribute("elementType").set_value("road");
     predecessor.append_attribute("elementId").set_value("-1");
@@ -306,7 +306,7 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
     successor.append_attribute("elementType").set_value("road");
     successor.append_attribute("elementId").set_value("-1");
     successor.append_attribute("contactPoint").set_value("start");
-    pugi::xml_node planView = new_road.append_child("planView");
+    pugi::xml_node planView = new_road_node.append_child("planView");
     pugi::xml_node geometry = planView.append_child("geometry");
     geometry.append_attribute("s").set_value("0");
     geometry.append_attribute("x").set_value(p.x);
@@ -321,7 +321,7 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
         arc.append_attribute("curvature").set_value(p.curvature);
     }
 
-    pugi::xml_node lanes = new_road.append_child("lanes");
+    pugi::xml_node lanes = new_road_node.append_child("lanes");
     pugi::xml_node laneOffset = lanes.append_child("laneOffset");
     laneOffset.append_attribute("s").set_value("0");
     laneOffset.append_attribute("a").set_value("0");
@@ -340,7 +340,7 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p){
     add_lane(right,-1);
     add_lane(right,-2);
 
-    return new_road;
+    return new_road_node;
 }
 
 int get_new_road_id(const OpenDriveMap& odr_map)
@@ -387,6 +387,7 @@ std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map)
     for (const auto& id_road : odr_map.id_to_road)
     {
         const Road& road = id_road.second;
+        
         if (std::stod(road.id)<0) continue;
         
         std::vector<double> tmp_vec;
@@ -408,6 +409,12 @@ std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map)
             tmp_vec.push_back(x_y_hdg[1]);
             tmp_vec.push_back(x_y_hdg[2]);
         }
+
+        tmp_vec.push_back(std::stod(road.junction));
+        tmp_vec.push_back(std::stod(road.id));
+        tmp_vec.push_back(std::stod(road.predecessor.id));
+        tmp_vec.push_back(std::stod(road.successor.id));
+        
         road_arrows.push_back(tmp_vec);
     }
     return road_arrows;
@@ -419,9 +426,17 @@ void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
         return;
     }
     std::string new_road_id = std::to_string(get_new_road_id(odr_map));
-    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,"-1",new_road_id)}).first->second;
+    Road& new_road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,"-1",new_road_id)}).first->second;
     p.road_id = new_road_id;
-    road.xml_node = create_road_xml(odr_map,p);
+    new_road.xml_node = create_road_xml(odr_map,p);
+
+    std::string pred_road_id = std::to_string(link_params[0]);
+    Road& pred_road = odr_map.id_to_road.at(pred_road_id);
+    pugi::xml_node sucessor = pred_road.xml_node.child("link").child("successor");
+    sucessor.attribute("elementId").set_value(new_road_id.c_str());
+
+    pugi::xml_node predecessor = new_road.xml_node.child("link").child("predecessor");
+    predecessor.attribute("elementId").set_value(pred_road_id.c_str());
 }
 
 Road create_preview_road(OpenDriveMap& odr_map, std::string road_id)
@@ -485,8 +500,19 @@ Road create_preview_road(OpenDriveMap& odr_map, std::string road_id)
     return road;
 }
 
-ROAD_PARAMS create_RP(){
+ROAD_PARAMS create_RP()
+{
     return ROAD_PARAMS();
+}
+
+void link_params_push(int a)
+{
+    link_params.push_back(a);
+}
+
+void link_params_clear()
+{
+    link_params.clear();
 }
 
 } // namespace odr

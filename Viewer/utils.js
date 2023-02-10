@@ -395,6 +395,7 @@ function afterModuleLoad(){
 }
 
 function afterMapLoad(){
+
     for (let arrow of link_arrows){
         scene.remove(arrow);
     }
@@ -403,24 +404,99 @@ function afterMapLoad(){
                     ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
     let std_vec = ModuleOpenDrive.get_road_arrows(OpenDriveMap);
     link_arrows = [];
+    let road_points = {};
     for(let i=0;i<std_vec.size();i++){
+        let road_id = std_vec.get(i).get(7);
+        let junction = std_vec.get(i).get(6);
+        let color = junction==-1 ? 0xff0000 : 0x00ffff;
+        road_points[road_id] = [];
         for (let j=0;j<2;j++){
             let x = std_vec.get(i).get(j*3+0);
             let y = std_vec.get(i).get(j*3+1);
             let hdg = std_vec.get(i).get(j*3+2);
+            road_points[road_id].push(x);
+            road_points[road_id].push(y);
             let from = new THREE.Vector3(x, y, 0);
             let direction = new THREE.Vector3(Math.cos(hdg),Math.sin(hdg),0);
-            direction.multiplyScalar(2);
-            if (j==1){
-                from = from.sub(direction);
+            road_points[road_id].push(direction);
+            if (j==0){
+                from.add(direction);
             }
-            direction.multiplyScalar(0.5);
-            let arrow = new THREE.ArrowHelper(direction, from, 2, 0xff0000, 2, 2);
+            else{
+                direction.multiplyScalar(2);
+                j==0?from.add(direction):from.sub(direction);
+                direction.multiplyScalar(0.5);
+            }
+            let arrow = new THREE.ArrowHelper(direction, from, 1, color, 1, 1);
+            arrow.line.material.linewidth = 5;
+            scene.add(arrow);
+            link_arrows.push(arrow);
+        }
+        road_points[road_id].push(std_vec.get(i).get(8));
+        road_points[road_id].push(std_vec.get(i).get(9));
+    }
+
+    for (const [key, value] of Object.entries(road_points)) {
+        console.log(key, value);
+        if (value[6]!=-1){
+            //pred
+            let my_start_x = road_points[key][0];
+            let my_start_y = road_points[key][1];
+            let my_start_dir = road_points[key][2];
+            let pred_end_x = road_points[value[6]][3];
+            let pred_end_y = road_points[value[6]][4];
+            let pred_end_dir = road_points[value[6]][5];
+            let from = new THREE.Vector3(my_start_x, my_start_y, 0);
+            let to = new THREE.Vector3(pred_end_x, pred_end_y, 0);
+            to.sub(pred_end_dir);
+            let direction = to.clone().sub(from);
+            let length = direction.length();
+            let arrow = new THREE.ArrowHelper(direction.normalize(), from, length, 0xffff00, 1, 1);
+            arrow.line.material.linewidth = 5;
+            scene.add(arrow);
+            link_arrows.push(arrow);
+        }
+        if (value[7]!=-1){
+            //succ
+            let my_end_x = road_points[key][3];
+            let my_end_y = road_points[key][4];
+            let my_end_dir = road_points[key][5];
+            let succ_start_x = road_points[value[7]][0];
+            let succ_start_y = road_points[value[7]][1];
+            let succ_start_dir = road_points[value[7]][2];
+            let from = new THREE.Vector3(my_end_x, my_end_y, 0);
+            let to = new THREE.Vector3(succ_start_x, succ_start_y, 0);
+            to.add(succ_start_dir);
+            let direction = to.clone().sub(from);
+            let length = direction.length();
+            let arrow = new THREE.ArrowHelper(direction.normalize(), from, length, 0xffff00, 1, 1);
             arrow.line.material.linewidth = 5;
             scene.add(arrow);
             link_arrows.push(arrow);
         }
     }
+
+
+        // if (std_vec.get(i).get(7) == 1){
+        //     let pred_x = std_vec.get(i).get(8);
+        //     let pred_y = std_vec.get(i).get(9);
+        //     let x = std_vec.get(i).get(0);
+        //     let y = std_vec.get(i).get(1);
+        //     let hdg = std_vec.get(i).get(2);
+        //     let from = new THREE.Vector3(x, y, 0);
+        //     let to = new THREE.Vector3(pred_x, pred_y, 0);
+        //     let direction = new THREE.Vector3(Math.cos(hdg),Math.sin(hdg),0);
+        //     let arrow = new THREE.ArrowHelper(direction, from, 1, 0xffff00, 1, 1);
+        //     arrow.line.material.linewidth = 5;
+        //     scene.add(arrow);
+        //     link_arrows.push(arrow);
+
+        // }
+        // if (std_vec.get(i).get(10) == 1){
+        //     let succ_x = std_vec.get(i).get(11);
+        //     let succ_y = std_vec.get(i).get(12);
+        // }
+        // console.log(predecessor,successor);
 }
 
 function writeXMLFile(){

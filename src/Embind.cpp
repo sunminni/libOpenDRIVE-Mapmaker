@@ -126,6 +126,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("create_RP", &create_RP);
     emscripten::function("get_new_road_id", &get_new_road_id);
     emscripten::function("create_preview_road", &create_preview_road);
+    emscripten::function("link_params_push", &link_params_push);
+    emscripten::function("link_params_clear", &link_params_clear);
 }
 
 } // namespace odr

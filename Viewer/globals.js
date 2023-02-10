@@ -12,7 +12,7 @@ const EXTEND_ARC = "extend road: arc";
 
 var arrow1 = null;
 var link_arrows = [];
-
+var link_params = null;
 var MapmakerMode = "init";
 
 var mouse_vec = new THREE.Vector3();

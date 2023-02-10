@@ -24,6 +24,8 @@ struct ROAD_PARAMS
 
 class OpenDriveMap;
 
+static std::vector<int> link_params;
+
 Mesh3D get_refline_segments(const OpenDriveMap& odr_map, double eps);
 RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps);
 std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map);
@@ -38,5 +40,7 @@ void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 ROAD_PARAMS create_RP();
 int get_new_road_id(const OpenDriveMap& odr_map);
 Road create_preview_road(OpenDriveMap& odr_map, std::string road_id);
+void link_params_push(int a);
+void link_params_clear();
 
 } // namespace odr

@@ -121,12 +121,15 @@ function onMouseClick(event){
     else if (MapmakerMode === CREATE_LINE_2){
         PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
         PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
+        ModuleOpenDrive.link_params_clear();
         ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
         setMode(DEFAULT);
         writeXMLFile();
     }
     else if (MapmakerMode === EXTEND_ROAD_LINE){
         PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
+        ModuleOpenDrive.link_params_clear();
+        ModuleOpenDrive.link_params_push(HANDLE_PARAMS.road_id);
         ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
         setMode(DEFAULT);
         writeXMLFile();
