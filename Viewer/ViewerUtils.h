@@ -16,10 +16,6 @@ struct ROAD_PARAMS
     double y = 0;
     double hdg = 0;
     double curvature = 0;
-    bool predecessorIJ = false;
-    std::string predecessorID = "";
-    int predecessorCP = 0;
-    std::string successor = "";
 };
 
 class OpenDriveMap;
@@ -36,7 +32,7 @@ void update_road(Road& handleRoad, ROAD_PARAMS& p);
 void write_road_xml(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 void delete_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
 std::vector<double> get_end(ROAD_PARAMS& p);
-void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p);
+void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p, std::string pred_road_id, std::string succ_road_id);
 ROAD_PARAMS create_RP();
 int get_new_road_id(const OpenDriveMap& odr_map);
 Road create_preview_road(OpenDriveMap& odr_map, std::string road_id);

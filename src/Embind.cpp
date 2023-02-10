@@ -106,11 +106,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
         .property("x", &ROAD_PARAMS::x)
         .property("y", &ROAD_PARAMS::y)
         .property("hdg", &ROAD_PARAMS::hdg)
-        .property("curvature", &ROAD_PARAMS::curvature)
-        .property("predecessorIJ", &ROAD_PARAMS::predecessorIJ)
-        .property("predecessorID", &ROAD_PARAMS::predecessorID)
-        .property("predecessorCP", &ROAD_PARAMS::predecessorCP)
-        .property("successor", &ROAD_PARAMS::successor);
+        .property("curvature", &ROAD_PARAMS::curvature);
 
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);

@@ -271,26 +271,26 @@ function previewLink(){
     else if (d1<d2){
         //arc + line
         console.log("arc + line");
-        PREVIEW_PARAMS[0].x = x2;
-        PREVIEW_PARAMS[0].y = y2;
-        PREVIEW_PARAMS[0].hdg = hdg2;
-        PREVIEW_PARAMS[0].line_type = "line";
-        PREVIEW_PARAMS[0].road_length = d2-d1;
-        let tmp_vec = ModuleOpenDrive.get_end(PREVIEW_PARAMS[0]);
+        PREVIEW_PARAMS[1].x = x2;
+        PREVIEW_PARAMS[1].y = y2;
+        PREVIEW_PARAMS[1].hdg = hdg2;
+        PREVIEW_PARAMS[1].line_type = "line";
+        PREVIEW_PARAMS[1].road_length = d2-d1;
+        let tmp_vec = ModuleOpenDrive.get_end(PREVIEW_PARAMS[1]);
         let tmp_x = tmp_vec.get(0);
         let tmp_y = tmp_vec.get(1);
-        PREVIEW_PARAMS[0].x = x2-(tmp_x-x2)
-        PREVIEW_PARAMS[0].y = y2-(tmp_y-y2)
+        PREVIEW_PARAMS[1].x = x2-(tmp_x-x2)
+        PREVIEW_PARAMS[1].y = y2-(tmp_y-y2)
 
-        PREVIEW_PARAMS[1].x = x1;
-        PREVIEW_PARAMS[1].y = y1;
-        PREVIEW_PARAMS[1].hdg = hdg1;
-        PREVIEW_PARAMS[1].line_type = "arc";
-        let c = Math.hypot(PREVIEW_PARAMS[0].x-x1, PREVIEW_PARAMS[0].y-y1);
+        PREVIEW_PARAMS[0].x = x1;
+        PREVIEW_PARAMS[0].y = y1;
+        PREVIEW_PARAMS[0].hdg = hdg1;
+        PREVIEW_PARAMS[0].line_type = "arc";
+        let c = Math.hypot(PREVIEW_PARAMS[1].x-x1, PREVIEW_PARAMS[1].y-y1);
         let theta = hdg2-hdg1;
         let radius = (c/2)/Math.sin(theta/2);
-        PREVIEW_PARAMS[1].road_length = theta*radius;
-        PREVIEW_PARAMS[1].curvature = 1/radius;
+        PREVIEW_PARAMS[0].road_length = theta*radius;
+        PREVIEW_PARAMS[0].curvature = 1/radius;
     }
     else{
         //arc only
@@ -379,17 +379,6 @@ function afterModuleLoad(){
     yC = geometry_folder.add(HANDLE_PARAMS, 'y').step(0.001).onChange(() => {updateHandleRoad();});
     hdgC = geometry_folder.add(HANDLE_PARAMS, 'hdg', -Math.PI*2, Math.PI*2, 0.001).onChange(() => {updateHandleRoad();});
     curvatureC = makeCurvatureC();
-
-    pred_folder = new_road_gui.addFolder('Predecessor');
-    pred_folder.open();
-    predetC = pred_folder.add(HANDLE_PARAMS, 'predecessorIJ').onChange(() => {updateHandleRoad();}).name("Junction");
-    predeiC = pred_folder.add(HANDLE_PARAMS, 'predecessorID').onChange(() => {updateHandleRoad();}).name("ID");
-    predcpC = pred_folder.add(HANDLE_PARAMS, 'predecessorCP').onChange(() => {updateHandleRoad();}).name("Contact Point");
-    predcpC.domElement.getElementsByTagName("input")[0].disabled = true;
-    succC = new_road_gui.add(HANDLE_PARAMS, 'successor').onChange(() => {updateHandleRoad();});
-
-    predeiC.domElement.innerHTML = '<button onclick="event.stopPropagation();">-1</button>';
-    succC.domElement.innerHTML = '<button>-1</button>';
 
     setMode(DEFAULT);
 }

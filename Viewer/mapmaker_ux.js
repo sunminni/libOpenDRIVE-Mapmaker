@@ -121,16 +121,13 @@ function onMouseClick(event){
     else if (MapmakerMode === CREATE_LINE_2){
         PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
         PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
-        ModuleOpenDrive.link_params_clear();
-        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0], "-1", "-1");
         setMode(DEFAULT);
         writeXMLFile();
     }
     else if (MapmakerMode === EXTEND_ROAD_LINE){
         PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
-        ModuleOpenDrive.link_params_clear();
-        ModuleOpenDrive.link_params_push(HANDLE_PARAMS.road_id);
-        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0], HANDLE_PARAMS.road_id, "-1");
         setMode(DEFAULT);
         writeXMLFile();
     }
@@ -146,7 +143,7 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         if (validPreview[0]){
-            ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
+            ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0], MapmakerMode === EXTEND_ARC ? HANDLE_PARAMS.road_id : "-1", "-1");
             setMode(DEFAULT);
             writeXMLFile();
         }
@@ -164,9 +161,12 @@ function onMouseClick(event){
         else if (MapmakerMode === CONNECT){
             if (validPreview[0]){
                 //make roads
-                ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
                 if (validPreview[1]){
-                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
+                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0], HANDLE_PARAMS.road_id, "-1");
+                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1], PREVIEW_PARAMS[0].road_id, sel_road_id);
+                }
+                else{
+                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0], HANDLE_PARAMS.road_id, sel_road_id);
                 }
                 setMode(DEFAULT);
                 writeXMLFile();
@@ -190,8 +190,4 @@ function updateControllerDisplay(){
         curvatureC = makeCurvatureC();
     }
     if (curvatureC!==null) curvatureC.updateDisplay();
-    predetC.updateDisplay();
-    predeiC.updateDisplay();
-    predcpC.updateDisplay();
-    succC.updateDisplay();
 }

@@ -32,11 +32,6 @@ var yC;
 var hdgC;
 var curvatureC;
 var geometry_folder;
-var pred_folder;
-var predetC;
-var predeiC;
-var predcpC;
-var succC;
 
 var updateTimestamp = Date.now();
 
