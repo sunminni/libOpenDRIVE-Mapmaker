@@ -526,14 +526,4 @@ ROAD_PARAMS create_RP()
     return ROAD_PARAMS();
 }
 
-void link_params_push(int a)
-{
-    link_params.push_back(a);
-}
-
-void link_params_clear()
-{
-    link_params.clear();
-}
-
 } // namespace odr

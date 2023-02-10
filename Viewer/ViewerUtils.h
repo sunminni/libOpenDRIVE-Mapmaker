@@ -36,7 +36,5 @@ void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p, std::string pred_road_id, s
 ROAD_PARAMS create_RP();
 int get_new_road_id(const OpenDriveMap& odr_map);
 Road create_preview_road(OpenDriveMap& odr_map, std::string road_id);
-void link_params_push(int a);
-void link_params_clear();
 
 } // namespace odr

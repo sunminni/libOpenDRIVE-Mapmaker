@@ -381,6 +381,16 @@ function afterModuleLoad(){
     curvatureC = makeCurvatureC();
 
     setMode(DEFAULT);
+
+    // let image_loader = new THREE.TextureLoader();
+    // let image_material = new THREE.MeshLambertMaterial({
+    //     map: image_loader.load('songdo.png')
+    // });
+
+    // let image_geometry = new THREE.PlaneGeometry(200, 200*.75);
+    // let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    // image_mesh.position.set(0,0,0)
+    // scene.add(image_mesh);
 }
 
 function afterMapLoad(){
