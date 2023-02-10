@@ -1,103 +1,6 @@
-// Globals
-const CREATE_LINE_1 = "create line: set start point";
-const CREATE_LINE_2 = "create line: set end point";
-const DEFAULT = "default";
-const EXTEND_ROAD_LINE = "extend road: line";
-const CONNECT = "connect roads: select next road";
-const SELECTED = "road selected";
-const CREATE_ARC_1 = "create arc: set start point";
-const CREATE_ARC_2 = "create arc: set start direction";
-const CREATE_ARC_3 = "create arc: set end point";
-const EXTEND_ARC = "extend road: arc";
-
-var arrow1 = null;
-
-var MapmakerMode = "init";
-
-var mouse_vec = new THREE.Vector3();
-var mouse_pos = new THREE.Vector3();
-
-var sel_road_id = null;
-var sel_lanesec_s0 = null;
-var sel_lane_id = null;
-var sel_cp = null;
-
-var new_road_gui;
-var road_idC;
-var line_typeC;
-var road_lengthC;
-var xC;
-var yC;
-var hdgC;
-var curvatureC;
-var geometry_folder;
-var pred_folder;
-var predetC;
-var predeiC;
-var predcpC;
-var succC;
-
-var updateTimestamp = Date.now();
-
-var map_filename = 'RandomRoad.xodr'
-var map_filepath = './'+map_filename;
-
-var HANDLE_PARAMS = null;
-var handle_road = null;
-var handle_mesh = null;
-
-var PREVIEW_PARAMS = [null,null];
-var preview_road = [null,null];
-var preview_mesh = [null,null];
-var validPreview = [false,false];
-
-var mode_info = document.getElementById('mode_info');
-
-// Event Listeners
-window.addEventListener('keydown', onKeyDown, false);
-window.addEventListener('click', onMouseClick, false);
-
-
-function showRoadControls(bool){
-    if (bool){
-        new_road_gui.domElement.style.display = 'block';
-    }
-    else{
-        new_road_gui.domElement.style.display = 'none';
-    }
-}
-
-function writeXMLFile(){
-    let body_dict = {};
-    body_dict['filename'] = map_filename;
-    body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
-    fetch('http://localhost:8000/save', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body_dict),
-    }).then(()=>{fetch(map_filepath).then((file_data) => {
-        file_data.text().then((file_text) => {
-            loadFile(file_text, true);
-            if (MapmakerMode === SELECTED){
-                createHandleRoad();
-            }
-        });
-    });});
-}
-
 function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
 
     if (hdg1==hdg2) return null;
-
-    // if (hdg1%Math.PI==0 && hdg2%Math.PI==0)
-    //     //two hori
-    //     return null;
-    // if ((hdg1%Math.PI!=0 && hdg1%(Math.PI/2)==0)&&(hdg2%Math.PI!=0 && hdg2%(Math.PI/2)==0))
-    //     //two vert
-    //     return null;
 
     let xi = null;
     let yi = null;
@@ -141,8 +44,6 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
         let b2 = y2-m2*x2;
         xi = (b2-b1)/(m1-m2);
         yi = m1*xi+b1;
-        console.log("m1 "+m1);
-        console.log("m2 "+m2);
     }
 
     if (hdg1%(2*Math.PI)==0){
@@ -194,26 +95,6 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
     
 
     return [xi,yi];
-}
-
-function showPreview(){
-    if (MapmakerMode === CONNECT){
-        if (sel_road_id!==null){
-            previewLink();
-        }
-    }
-    else if (MapmakerMode === CREATE_LINE_2){
-        previewCreateLine();
-    }
-    else if (MapmakerMode === EXTEND_ROAD_LINE){
-        previewExtendLine();
-    }
-    else if (MapmakerMode === CREATE_ARC_2){
-        previewCreateArc1();
-    }
-    else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
-        previewCreateArc2();
-    }
 }
 
 function previewCreateArc1(){
@@ -306,10 +187,6 @@ function previewCreateArc2(){
     ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
     preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
     validPreview = [true,false];
-
-    // let end_hdg = Math.atan2(mouse_pos.y-end_y,mouse_pos.x-end_x);
-    // let theta = end_hdg-PREVIEW_PARAMS[0].hdg;
-    // let radius = (c/2)/Math.sin(theta/2);
 }
 
 function previewCreateLine(){
@@ -338,7 +215,6 @@ function previewLink(){
     scene.remove(preview_mesh[1]);
     validPreview = [false,false];
 
-    // console.log(HANDLE_PARAMS.road_id+"+"+sel_road_id);
     let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
     let x1 = std_vec.get(0);
     let y1 = std_vec.get(1);
@@ -439,210 +315,12 @@ function previewLink(){
     }
 }
 
-function setMode(mode){
-    if (mode == DEFAULT){
-        showRoadControls(false);
-        scene.remove(handle_mesh);
-        scene.remove(preview_mesh[0]);
-        scene.remove(preview_mesh[1]);
-        scene.remove(arrow1);
-    }
-    else if (mode == SELECTED){
-        showRoadControls(true);
-        scene.remove(preview_mesh[0]);
-        scene.remove(preview_mesh[1]);
-    }
-    else if (mode == CONNECT){
-        showRoadControls(true);
-    }
-    console.log("mode "+mode);
-    MapmakerMode = mode;
-    mode_info.innerHTML = mode;
-}
-
-function onKeyDown(e){
-    console.log(e.key);
-    if (MapmakerMode === SELECTED){
-        if (e.key=='a'){
-            let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
-            PREVIEW_PARAMS[0].x = std_vec.get(0);
-            PREVIEW_PARAMS[0].y = std_vec.get(1);
-            PREVIEW_PARAMS[0].hdg = std_vec.get(2);
-            PREVIEW_PARAMS[0].line_type = "arc";
-            setMode(EXTEND_ARC);
-        }
-        if (e.key=='l'){
-            let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
-            PREVIEW_PARAMS[0].x = std_vec.get(0);
-            PREVIEW_PARAMS[0].y = std_vec.get(1);
-            PREVIEW_PARAMS[0].hdg = std_vec.get(2);
-            PREVIEW_PARAMS[0].line_type = "line";
-            setMode(EXTEND_ROAD_LINE);
-        }
-        if (e.key=='s'){
-            ModuleOpenDrive.write_road_xml(OpenDriveMap, HANDLE_PARAMS);
-            setMode(DEFAULT);
-            writeXMLFile();
-        }
-        if (e.key=='c'){
-            setMode(CONNECT);
-        }
-        if (e.key=='Escape'){
-            setMode(DEFAULT);
-        }
-        if (e.key=='Delete'){
-            ModuleOpenDrive.delete_road(OpenDriveMap, HANDLE_PARAMS);
-            setMode(DEFAULT);
-            writeXMLFile();
-        }
-    }
-    else if ([CONNECT,EXTEND_ROAD_LINE,EXTEND_ARC].includes(MapmakerMode)){
-        if (e.key=='Escape'){
-            setMode(SELECTED);
-        }
-    }
-    else if ([CREATE_LINE_1,CREATE_LINE_2,CREATE_ARC_1,CREATE_ARC_2,CREATE_ARC_3].includes(MapmakerMode)){
-        if (e.key=='Escape'){
-            setMode(DEFAULT);
-        }
-    }
-    else if (MapmakerMode === DEFAULT){
-        if (e.key=='a'){
-            setMode(CREATE_ARC_1);
-        }
-        if (e.key=='l'){
-            setMode(CREATE_LINE_1);
-        }
-    }
-}
-
 function calcMouseWorldPos(event){
     mouse_vec.set(
         ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
     mouse_vec.unproject( camera );
     mouse_vec.sub( camera.position ).normalize();
     mouse_pos.copy( camera.position ).add( mouse_vec.multiplyScalar( -camera.position.z / mouse_vec.z ) );
-}
-
-function onMouseClick(event){
-
-    calcMouseWorldPos(event);
-
-    if (MapmakerMode === CREATE_LINE_1){
-        PREVIEW_PARAMS[0].x = mouse_pos.x;
-        PREVIEW_PARAMS[0].y = mouse_pos.y;
-        PREVIEW_PARAMS[0].line_type = "line";
-        setMode(CREATE_LINE_2);
-    }
-    else if (MapmakerMode === CREATE_LINE_2){
-        PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
-        PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
-        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-        setMode(DEFAULT);
-        writeXMLFile();
-    }
-    else if (MapmakerMode === EXTEND_ROAD_LINE){
-        PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
-        ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-        setMode(DEFAULT);
-        writeXMLFile();
-    }
-    else if (MapmakerMode === CREATE_ARC_1){
-        PREVIEW_PARAMS[0].x = mouse_pos.x;
-        PREVIEW_PARAMS[0].y = mouse_pos.y;
-        PREVIEW_PARAMS[0].line_type = "arc";
-        setMode(CREATE_ARC_2);
-    }
-    else if (MapmakerMode === CREATE_ARC_2){
-        PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
-        setMode(CREATE_ARC_3);
-    }
-    else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
-        if (validPreview[0]){
-            ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-            setMode(DEFAULT);
-            writeXMLFile();
-        }
-    }
-
-    if (sel_road_id!==null){
-        if (MapmakerMode === DEFAULT){
-            console.log(sel_road_id);
-            console.log(sel_lanesec_s0);
-            console.log(sel_lane_id);
-            HANDLE_PARAMS.road_id = sel_road_id;
-            createHandleRoad();
-            setMode(SELECTED);
-        }
-        else if (MapmakerMode === CONNECT){
-            if (validPreview[0]){
-                //make roads
-                ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
-                if (validPreview[1]){
-                    ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[1]);
-                }
-                setMode(DEFAULT);
-                writeXMLFile();
-            }
-        }
-    }
-}
-
-function makeCurvatureC(){
-    return geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
-}
-
-function updateControllerDisplay(){
-    road_idC.updateDisplay();
-    line_typeC.updateDisplay();
-    road_lengthC.updateDisplay();
-    xC.updateDisplay();
-    yC.updateDisplay();
-    hdgC.updateDisplay();
-    if(line_typeC.getValue() == "line" && curvatureC!==null){
-        curvatureC.remove();
-        curvatureC = null;
-    }
-    if (line_typeC.getValue() == "arc" && curvatureC===null){
-        curvatureC = makeCurvatureC();
-    }
-    if (curvatureC!==null) curvatureC.updateDisplay();
-    predetC.updateDisplay();
-    predeiC.updateDisplay();
-    predcpC.updateDisplay();
-    succC.updateDisplay();
-}
-
-
-function createHandleRoad(){
-    handle_road = ModuleOpenDrive.get_road_and_params(OpenDriveMap,HANDLE_PARAMS);
-    updateControllerDisplay();
-    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
-}
-
-function updateHandleRoad(){
-    let curTimestamp = Date.now();
-    if (curTimestamp - updateTimestamp < 10){
-        return;
-    }
-    else{
-        updateTimestamp = curTimestamp;
-    }
-
-    if(line_typeC.getValue() == "line" && curvatureC!==null){
-        console.log("line");
-        curvatureC.remove();
-        curvatureC = null;
-    }
-    if (line_typeC.getValue() == "arc" && curvatureC===null){
-        console.log("arc");
-        curvatureC = makeCurvatureC();
-    }
-    if (curvatureC!==null && curvatureC.getValue()==0){
-        curvatureC.setValue(0.001);
-    }
-    ModuleOpenDrive.update_road(handle_road, HANDLE_PARAMS);
-    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
 }
 
 function drawRoadMesh(road,mesh){
@@ -706,4 +384,61 @@ function initMapmaker(){
     succC.domElement.innerHTML = '<button>-1</button>';
 
     setMode(DEFAULT);
+}
+
+function writeXMLFile(){
+    let body_dict = {};
+    body_dict['filename'] = map_filename;
+    body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
+    fetch('http://localhost:8000/save', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body_dict),
+    }).then(()=>{fetch(map_filepath).then((file_data) => {
+        file_data.text().then((file_text) => {
+            loadFile(file_text, true);
+            if (MapmakerMode === SELECTED){
+                createHandleRoad();
+            }
+        });
+    });});
+}
+
+function makeCurvatureC(){
+    return geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
+}
+
+
+function createHandleRoad(){
+    handle_road = ModuleOpenDrive.get_road_and_params(OpenDriveMap,HANDLE_PARAMS);
+    updateControllerDisplay();
+    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
+}
+
+function updateHandleRoad(){
+    let curTimestamp = Date.now();
+    if (curTimestamp - updateTimestamp < 10){
+        return;
+    }
+    else{
+        updateTimestamp = curTimestamp;
+    }
+
+    if(line_typeC.getValue() == "line" && curvatureC!==null){
+        console.log("line");
+        curvatureC.remove();
+        curvatureC = null;
+    }
+    if (line_typeC.getValue() == "arc" && curvatureC===null){
+        console.log("arc");
+        curvatureC = makeCurvatureC();
+    }
+    if (curvatureC!==null && curvatureC.getValue()==0){
+        curvatureC.setValue(0.001);
+    }
+    ModuleOpenDrive.update_road(handle_road, HANDLE_PARAMS);
+    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
 }

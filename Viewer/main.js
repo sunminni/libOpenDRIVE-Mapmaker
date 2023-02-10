@@ -29,6 +29,8 @@ const COLORS = {
 /* event listeners */
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('mousemove', onDocumentMouseMove, false);
+window.addEventListener('keydown', onKeyDown, false);
+window.addEventListener('click', onMouseClick, false);
 // window.addEventListener('dblclick', onDocumentMouseDbClick, false);
 
 /* notifactions */
