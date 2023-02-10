@@ -232,60 +232,6 @@ void update_road(Road& road, ROAD_PARAMS& p)
     }
 }
 
-// std::vector<std::string> update_new_road(OpenDriveMap& odr_map, ROAD_PARAMS p)
-// {   
-//     std::vector<std::string> road_ids = {};
-//     Road& new_road = odr_map.id_to_road.at("new_road");
-//     new_road.length = p.road_length;
-//     new_road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, p.x, p.y, p.hdg, p.road_length);
-//     new_road.predecessor.id = p.predecessorID;
-//     // new_road.predecessor.type = p.predecessorIJ ? RoadLink::Type::Type_Junction : RoadLink::Type::Type_Road;
-//     new_road.predecessor.type = RoadLink::Type::Type_Road;
-//     new_road.predecessor.contact_point = RoadLink::ContactPoint::ContactPoint_Start;
-    
-//     new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(new_road.predecessor.id.c_str());
-//     new_road.xml_node.child("link").child("predecessor").attribute("elementType").set_value("road");
-//     new_road.xml_node.child("link").child("predecessor").attribute("contactPoint").set_value("start");
-//     new_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("predecessor").attribute("id").set_value(new_road.predecessor.id.c_str());
-
-//     road_ids.push_back("new_road");
-
-//     if (p.predecessorID.size()>0){
-//         for (auto& s_lanesec : new_road.s_to_lanesection)
-//         {
-//             LaneSection& lanesec = s_lanesec.second;
-//             for (auto& id_lane : lanesec.id_to_lane)
-//             {
-//                 Lane& lane = id_lane.second;
-//                 lane.predecessor = -1;
-//             }
-//         }
-//         Road& other_road = odr_map.id_to_road.at(p.predecessorID);
-
-//         other_road.successor.id = "new_road";
-//         other_road.successor.type = RoadLink::Type::Type_Road;
-//         other_road.successor.contact_point = RoadLink::ContactPoint::ContactPoint_End;
-//         road_ids.push_back(p.predecessorID);
-
-//         other_road.xml_node.child("link").child("successor").attribute("elementId").set_value(other_road.successor.id.c_str());
-//         other_road.xml_node.child("link").child("successor").attribute("elementType").set_value("road");
-//         other_road.xml_node.child("link").child("successor").attribute("contactPoint").set_value("end");
-//         other_road.xml_node.find_child_by_attribute("lane", "id", "-1").child("link").child("successor").attribute("id").set_value(other_road.successor.id.c_str());
-
-//         for (auto& s_lanesec : other_road.s_to_lanesection)
-//         {
-//             LaneSection& lanesec = s_lanesec.second;
-//             for (auto& id_lane : lanesec.id_to_lane)
-//             {
-//                 Lane& lane = id_lane.second;
-//                 lane.successor = -1;
-//             }
-//         }
-//     }
-
-//     return road_ids;
-// }
-
 void add_lane(pugi::xml_node& laneSectionChild, int lane_id){
     pugi::xml_node lane_r = laneSectionChild.append_child("lane");
     lane_r.append_attribute("id").set_value(lane_id);
