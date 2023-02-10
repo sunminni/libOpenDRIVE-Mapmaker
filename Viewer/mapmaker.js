@@ -8,6 +8,7 @@ const SELECTED = "road selected";
 const CREATE_ARC_1 = "create arc: set start point";
 const CREATE_ARC_2 = "create arc: set start direction";
 const CREATE_ARC_3 = "create arc: set end point";
+const EXTEND_ARC = "extend road: arc";
 
 var arrow1 = null;
 
@@ -210,7 +211,7 @@ function showPreview(){
     else if (MapmakerMode === CREATE_ARC_2){
         previewCreateArc1();
     }
-    else if (MapmakerMode === CREATE_ARC_3){
+    else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         previewCreateArc2();
     }
 }
@@ -284,14 +285,12 @@ function previewCreateArc2(){
     }
     else{
         if (ye>start_m*xe+start_b){
-            console.log("above");
             theta = Math.atan2(-det, -dot)+Math.PI;
             if (Math.abs(start_hdg)>Math.PI/2){
                 theta -= Math.PI*2;
             }
         }
         else{
-            console.log("below");
             theta = Math.atan2(-det, -dot)-Math.PI;
             if (Math.abs(start_hdg)>Math.PI/2){
                 theta += Math.PI*2;
@@ -345,13 +344,13 @@ function previewLink(){
     let y1 = std_vec.get(1);
     let hdg1 = std_vec.get(2);
     PREVIEW_PARAMS[0].road_id = sel_road_id;
-    let linkRoad = ModuleOpenDrive.get_road(OpenDriveMap,PREVIEW_PARAMS[0]);
+    let linkRoad = ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]);
     let x2 = PREVIEW_PARAMS[0].x;
     let y2 = PREVIEW_PARAMS[0].y;
     let hdg2 = PREVIEW_PARAMS[0].hdg;
 
-    preview_road = [ModuleOpenDrive.get_road(OpenDriveMap,PREVIEW_PARAMS[0]),
-                    ModuleOpenDrive.get_road(OpenDriveMap,PREVIEW_PARAMS[0])];
+    preview_road = [ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]),
+                    ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0])];
 
     let intersection = getIntersection(x1,y1,hdg1,x2,y2,hdg2);
     console.log(intersection);
@@ -470,7 +469,7 @@ function onKeyDown(e){
             PREVIEW_PARAMS[0].y = std_vec.get(1);
             PREVIEW_PARAMS[0].hdg = std_vec.get(2);
             PREVIEW_PARAMS[0].line_type = "arc";
-            setMode(CREATE_ARC_3);
+            setMode(EXTEND_ARC);
         }
         if (e.key=='l'){
             let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
@@ -497,9 +496,14 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
-    else if (MapmakerMode === CONNECT){
+    else if ([CONNECT,EXTEND_ROAD_LINE,EXTEND_ARC].includes(MapmakerMode)){
         if (e.key=='Escape'){
             setMode(SELECTED);
+        }
+    }
+    else if ([CREATE_LINE_1,CREATE_LINE_2,CREATE_ARC_1,CREATE_ARC_2,CREATE_ARC_3].includes(MapmakerMode)){
+        if (e.key=='Escape'){
+            setMode(DEFAULT);
         }
     }
     else if (MapmakerMode === DEFAULT){
@@ -553,7 +557,7 @@ function onMouseClick(event){
         PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
         setMode(CREATE_ARC_3);
     }
-    else if (MapmakerMode === CREATE_ARC_3){
+    else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         if (validPreview[0]){
             ModuleOpenDrive.add_road(OpenDriveMap, PREVIEW_PARAMS[0]);
             setMode(DEFAULT);
@@ -611,7 +615,7 @@ function updateControllerDisplay(){
 
 
 function createHandleRoad(){
-    handle_road = ModuleOpenDrive.get_road(OpenDriveMap,HANDLE_PARAMS);
+    handle_road = ModuleOpenDrive.get_road_and_params(OpenDriveMap,HANDLE_PARAMS);
     updateControllerDisplay();
     handle_mesh = drawRoadMesh(handle_road,handle_mesh);
 }

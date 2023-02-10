@@ -148,7 +148,7 @@ std::string save_map(const OpenDriveMap& odr_map)
     return output;
 }
 
-Road get_road(const OpenDriveMap& odr_map, ROAD_PARAMS& p)
+Road get_road_and_params(const OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
     Road target_road = odr_map.id_to_road.at(p.road_id);
     p.road_length = target_road.length;
@@ -383,22 +383,6 @@ std::vector<double> get_end(ROAD_PARAMS& p){
         x_y_hdg.push_back(p.hdg);
     }
     return x_y_hdg;
-}
-
-void extend_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
-{
-    std::string new_road_id = std::to_string(get_new_road_id(odr_map));
-    double road_length = 20;
-    Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,road_length,"-1",new_road_id)}).first->second;
-
-    std::vector<double> end = get_end(p);
-    p.x = end[0];
-    p.y = end[1];
-    p.hdg = end[2];
-    p.road_length = road_length;
-    p.line_type = "line";
-    p.road_id = new_road_id;
-    road.xml_node = create_road_xml(odr_map,p);
 }
 
 void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)

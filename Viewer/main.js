@@ -386,16 +386,6 @@ function animate()
         sel_lanesec_s0 = lanesec_s0;
         sel_lane_id = lane_id;
         
-        // let road = ModuleOpenDrive.get_road(OpenDriveMap,road_id);
-        // let road_length = road.length;
-        // if (selectRoadMode){
-        //     if((lane_id<0 && st_pixel_buffer[0]<road_length/2) || (lane_id>0 && st_pixel_buffer[0]>road_length/2)){
-        //         sel_cp = 1;
-        //     }
-        //     else{
-        //         sel_cp = 2;
-        //     }
-        // }
     } else {
         if (INTERSECTED_LANE_ID != 0xffffffff) {
             const odr_lanes_mesh = road_network_mesh.userData.odr_road_network_mesh.lanes_mesh;
