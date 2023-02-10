@@ -211,22 +211,45 @@ function previewExtendLine(){
 }
 
 function previewLink(){
-    scene.remove(preview_mesh[0]);
-    scene.remove(preview_mesh[1]);
+    
     validPreview = [false,false];
 
     let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
     let x1 = std_vec.get(0);
     let y1 = std_vec.get(1);
     let hdg1 = std_vec.get(2);
+    let m1 = Math.tan(hdg1);
+    let b1 = y1-m1*x1;
+
     PREVIEW_PARAMS[0].road_id = sel_road_id;
     let linkRoad = ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]);
     let x2 = PREVIEW_PARAMS[0].x;
     let y2 = PREVIEW_PARAMS[0].y;
     let hdg2 = PREVIEW_PARAMS[0].hdg;
+    let m2 = Math.tan(hdg2);
+    let b2 = y1-m2*x1;
+
+    m1 = Math.round(m1 * 1000) / 1000
+    b1 = Math.round(b1 * 1000) / 1000
+    m2 = Math.round(m2 * 1000) / 1000
+    b2 = Math.round(b2 * 1000) / 1000
 
     preview_road = [ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]),
                     ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0])];
+
+    if (m1==m2 && b1==b2){
+        //road only
+        console.log("road only");
+        PREVIEW_PARAMS[0].x = x1;
+        PREVIEW_PARAMS[0].y = y1;
+        PREVIEW_PARAMS[0].hdg = hdg1;
+        PREVIEW_PARAMS[0].line_type = "line";
+        PREVIEW_PARAMS[0].road_length = Math.hypot(x2-x1, y2-y1);
+        ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
+        preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+        validPreview = [true,false];
+        return;
+    }
 
     let intersection = getIntersection(x1,y1,hdg1,x2,y2,hdg2);
     console.log(intersection);
@@ -241,8 +264,8 @@ function previewLink(){
 
     arc_only = false;
     if (d2<d1){
-        //extend 1 then arc
-        console.log("extend 1 then arc");
+        //line + arc
+        console.log("line + arc");
         PREVIEW_PARAMS[0].x = x1;
         PREVIEW_PARAMS[0].y = y1;
         PREVIEW_PARAMS[0].hdg = hdg1;
@@ -261,8 +284,8 @@ function previewLink(){
         PREVIEW_PARAMS[1].curvature = 1/radius;
     }
     else if (d1<d2){
-        //arc then extend
-        console.log("arc then extend");
+        //arc + line
+        console.log("arc + line");
         PREVIEW_PARAMS[0].x = x2;
         PREVIEW_PARAMS[0].y = y2;
         PREVIEW_PARAMS[0].hdg = hdg2;
