@@ -117,7 +117,7 @@ const roadmarks_material = new THREE.MeshBasicMaterial({
 /* load WASM + odr map */
 libOpenDrive().then(Module => {
     ModuleOpenDrive = Module;
-    initMapmaker();
+    afterModuleLoad();
 
     fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
@@ -148,9 +148,7 @@ function loadFile(file_text, clear_map)
         abs_z_for_for_local_road_obj_outline : true
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
-    
-    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
-                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
+    afterMapLoad();
     loadOdrMap(clear_map);
 }
 
@@ -166,8 +164,7 @@ function reloadOdrMap()
         abs_z_for_for_local_road_obj_outline : true
     };
     OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
-    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
-                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
+    afterMapLoad();
     loadOdrMap(true, false);
 }
 

@@ -11,6 +11,7 @@ const CREATE_ARC_3 = "create arc: set end point";
 const EXTEND_ARC = "extend road: arc";
 
 var arrow1 = null;
+var link_arrows = [];
 
 var MapmakerMode = "init";
 

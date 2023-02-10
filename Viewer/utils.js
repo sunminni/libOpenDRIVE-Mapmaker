@@ -360,7 +360,7 @@ function drawRoadMesh(road,mesh){
     return mesh;
 }
 
-function initMapmaker(){
+function afterModuleLoad(){
     HANDLE_PARAMS = ModuleOpenDrive.create_RP();
     PREVIEW_PARAMS = [ModuleOpenDrive.create_RP(),ModuleOpenDrive.create_RP()];
 
@@ -392,6 +392,35 @@ function initMapmaker(){
     succC.domElement.innerHTML = '<button>-1</button>';
 
     setMode(DEFAULT);
+}
+
+function afterMapLoad(){
+    for (let arrow of link_arrows){
+        scene.remove(arrow);
+    }
+
+    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
+                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
+    let std_vec = ModuleOpenDrive.get_road_arrows(OpenDriveMap);
+    link_arrows = [];
+    for(let i=0;i<std_vec.size();i++){
+        for (let j=0;j<2;j++){
+            let x = std_vec.get(i).get(j*3+0);
+            let y = std_vec.get(i).get(j*3+1);
+            let hdg = std_vec.get(i).get(j*3+2);
+            let from = new THREE.Vector3(x, y, 0);
+            let direction = new THREE.Vector3(Math.cos(hdg),Math.sin(hdg),0);
+            direction.multiplyScalar(2);
+            if (j==1){
+                from = from.sub(direction);
+            }
+            direction.multiplyScalar(0.5);
+            let arrow = new THREE.ArrowHelper(direction, from, 2, 0xff0000, 2, 2);
+            arrow.line.material.linewidth = 5;
+            scene.add(arrow);
+            link_arrows.push(arrow);
+        }
+    }
 }
 
 function writeXMLFile(){

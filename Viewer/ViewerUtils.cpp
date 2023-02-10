@@ -5,6 +5,7 @@
 #include "Road.h"
 #include "Geometries/Line.h"
 #include "Geometries/Arc.h"
+#include "Geometries/RoadGeometry.h"
 
 #include <iostream>
 #include <vector>
@@ -105,16 +106,7 @@ RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps)
     return out_mesh;
 }
 
-std::vector<std::string> get_road_ids(const OpenDriveMap& odr_map)
-{
-    std::vector<std::string>road_ids;
-    for (const auto& id_road : odr_map.id_to_road)
-    {
-        const Road& road = id_road.second;
-        road_ids.push_back(road.id);
-    }
-    return road_ids;
-}
+
 
 struct xml_string_writer: pugi::xml_writer
 {
@@ -140,9 +132,9 @@ std::string save_map(const OpenDriveMap& odr_map)
     for (const auto& id_road : odr_map.id_to_road)
     {
         const Road& road = id_road.second;
-        if (std::stoi(road.id)>0){
-            output += node_to_string(road.xml_node);
-        }
+        if (std::stod(road.id)<0) continue;
+
+        output += node_to_string(road.xml_node);
     }
     output += "</OpenDRIVE>";
     return output;
@@ -362,27 +354,63 @@ int get_new_road_id(const OpenDriveMap& odr_map)
     return max_road_id+1;
 }
 
-std::vector<double> get_end(ROAD_PARAMS& p){
+std::vector<double> calc_end(std::string line_type, double x, double y, double hdg, double road_length, double curvature){
     std::vector<double> x_y_hdg;
-    if (p.line_type=="arc"){
-        double radius = 1/p.curvature;
-        double theta = p.road_length/radius;
+    if (line_type=="arc"){
+        double radius = 1/curvature;
+        double theta = road_length/radius;
         double dx = sin(theta)*radius;
         double dy = (1-cos(theta))*radius;
-        double ddx = dx*cos(p.hdg)-dy*sin(p.hdg);
-        double ddy = dy*cos(p.hdg)+dx*sin(p.hdg);
-        x_y_hdg.push_back(p.x+ddx);
-        x_y_hdg.push_back(p.y+ddy);
-        x_y_hdg.push_back(p.hdg+theta);
+        double ddx = dx*cos(hdg)-dy*sin(hdg);
+        double ddy = dy*cos(hdg)+dx*sin(hdg);
+        x_y_hdg.push_back(x+ddx);
+        x_y_hdg.push_back(y+ddy);
+        x_y_hdg.push_back(hdg+theta);
     }
     else{
-        double ddx = cos(p.hdg)*p.road_length;
-        double ddy = sin(p.hdg)*p.road_length;
-        x_y_hdg.push_back(p.x+ddx);
-        x_y_hdg.push_back(p.y+ddy);
-        x_y_hdg.push_back(p.hdg);
+        double ddx = cos(hdg)*road_length;
+        double ddy = sin(hdg)*road_length;
+        x_y_hdg.push_back(x+ddx);
+        x_y_hdg.push_back(y+ddy);
+        x_y_hdg.push_back(hdg);
     }
     return x_y_hdg;
+}
+
+std::vector<double> get_end(ROAD_PARAMS& p){
+    return calc_end(p.line_type,p.x,p.y,p.hdg,p.road_length,p.curvature);
+}
+
+std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map)
+{
+    std::vector<std::vector<double>> road_arrows;
+    for (const auto& id_road : odr_map.id_to_road)
+    {
+        const Road& road = id_road.second;
+        if (std::stod(road.id)<0) continue;
+        
+        std::vector<double> tmp_vec;
+        RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);
+        tmp_vec.push_back(RG.x0);
+        tmp_vec.push_back(RG.y0);
+        tmp_vec.push_back(RG.hdg0);
+        // std::cout<<RG.type<<std::endl;
+        if (RG.type == GeometryType::GeometryType_Line){
+            std::vector<double> x_y_hdg = calc_end("line",RG.x0,RG.y0,RG.hdg0,RG.length,0);
+            tmp_vec.push_back(x_y_hdg[0]);
+            tmp_vec.push_back(x_y_hdg[1]);
+            tmp_vec.push_back(x_y_hdg[2]);
+        }
+        else{
+            Arc *arc = dynamic_cast<Arc*>(&RG);
+            std::vector<double> x_y_hdg = calc_end("arc",RG.x0,RG.y0,RG.hdg0,RG.length,(*arc).curvature);
+            tmp_vec.push_back(x_y_hdg[0]);
+            tmp_vec.push_back(x_y_hdg[1]);
+            tmp_vec.push_back(x_y_hdg[2]);
+        }
+        road_arrows.push_back(tmp_vec);
+    }
+    return road_arrows;
 }
 
 void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
