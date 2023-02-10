@@ -387,6 +387,9 @@ std::vector<double> get_end(ROAD_PARAMS& p){
 
 void add_road(OpenDriveMap& odr_map, ROAD_PARAMS& p)
 {
+    if(p.road_length<0.2){
+        return;
+    }
     std::string new_road_id = std::to_string(get_new_road_id(odr_map));
     Road& road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,p.road_length,"-1",new_road_id)}).first->second;
     p.road_id = new_road_id;

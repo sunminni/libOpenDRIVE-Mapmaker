@@ -98,7 +98,6 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
 }
 
 function previewCreateArc1(){
-    scene.remove(arrow1);
     let from = new THREE.Vector3(PREVIEW_PARAMS[0].x, PREVIEW_PARAMS[0].y, 0);
     let to = new THREE.Vector3(mouse_pos.x,mouse_pos.y,0);
     let direction = to.clone().sub(from);
@@ -107,10 +106,6 @@ function previewCreateArc1(){
 }
 
 function previewCreateArc2(){
-    scene.remove(preview_mesh[0]);
-    scene.remove(preview_mesh[1]);
-    validPreview = [false,false];
-
     let xs = PREVIEW_PARAMS[0].x;
     let ys = PREVIEW_PARAMS[0].y;
     let xe = mouse_pos.x;
@@ -190,30 +185,23 @@ function previewCreateArc2(){
 }
 
 function previewCreateLine(){
-    scene.remove(preview_mesh[0]);
-    scene.remove(preview_mesh[1]);
-
     PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
     PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
 
     ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
     preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+    validPreview = [true,false];
 }
 
 function previewExtendLine(){
-    scene.remove(preview_mesh[0]);
-    scene.remove(preview_mesh[1]);
-
     PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
 
     ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
     preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
+    validPreview = [true,false];
 }
 
 function previewLink(){
-    
-    validPreview = [false,false];
-
     let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
     let x1 = std_vec.get(0);
     let y1 = std_vec.get(1);

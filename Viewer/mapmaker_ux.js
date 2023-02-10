@@ -8,9 +8,11 @@ function showRoadControls(bool){
 }
 
 function showPreview(){
+    scene.remove(arrow1);
+    scene.remove(preview_mesh[0]);
+    scene.remove(preview_mesh[1]);
+    validPreview = [false,false];
     if (MapmakerMode === CONNECT){
-        scene.remove(preview_mesh[0]);
-        scene.remove(preview_mesh[1]);
         if (sel_road_id!==null){
             previewLink();
         }
