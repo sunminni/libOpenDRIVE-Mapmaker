@@ -34,7 +34,6 @@ function showPreview(){
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         previewCreateArc2();
     }
-    console.log(g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
     if(validPreview){
         ModuleOpenDrive.update_road(preview_road, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
         preview_mesh = drawRoadMesh(preview_road,preview_mesh);
@@ -70,6 +69,7 @@ function onKeyDown(e){
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);
+            g_hdg1 = fixHdg(g_hdg1);
             g_isarc1 = true;
             g_two_geo = false;
             g_len2 = 0;
@@ -80,6 +80,7 @@ function onKeyDown(e){
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);
+            g_hdg1 = fixHdg(g_hdg1);
             g_isarc1 = false;
             g_two_geo = false;
             g_len2 = 0;

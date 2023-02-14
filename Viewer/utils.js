@@ -199,6 +199,7 @@ function previewRoadLink(){
     g_x1 = std_vec.get(0);
     g_y1 = std_vec.get(1);
     g_hdg1 = std_vec.get(2);
+    g_hdg1 = fixHdg(g_hdg1);
 
     let m1 = Math.tan(g_hdg1);
     let b1 = g_y1-m1*g_x1;
@@ -248,8 +249,11 @@ function previewRoadLink(){
         g_x2 = tmp_vec.get(0);
         g_y2 = tmp_vec.get(1);
         g_hdg2 = tmp_vec.get(2);
+        g_hdg2 = fixHdg(g_hdg2);
+
         let c = Math.hypot(g_x2-x2, g_y2-y2);
         let theta = hdg2-g_hdg1;
+        theta = fixHdg(theta);
         let radius = (c/2)/Math.sin(theta/2);
         g_len2 = theta*radius;
         g_cur2 = 1/radius;
@@ -273,6 +277,7 @@ function previewRoadLink(){
 
         let c = Math.hypot(g_x2-g_x1,g_y2-g_y1);
         let theta = g_hdg2-g_hdg1;
+        theta = fixHdg(theta);
         let radius = (c/2)/Math.sin(theta/2);
         g_len1 = theta*radius;
         g_cur1 = 1/radius;
@@ -286,12 +291,19 @@ function previewRoadLink(){
         g_isarc1 = true;
         let c = Math.hypot(x2-g_x1, y2-g_y1);
         let theta = hdg2-g_hdg1;
+        theta = fixHdg(theta);
         let radius = (c/2)/Math.sin(theta/2);
         g_len1 = theta*radius;
         g_cur1 = 1/radius;
         validPreview = g_len1>0.2 && g_cur1!=0;
         return;
     }
+}
+
+function fixHdg(hdg){
+    if (hdg>Math.PI) return hdg-2*Math.PI;
+    if (hdg<-Math.PI) return hdg+2*Math.PI;
+    return hdg;
 }
 
 function previewJuncLink(){

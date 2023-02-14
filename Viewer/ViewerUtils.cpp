@@ -503,6 +503,7 @@ std::vector<double> calc_end(std::string line_type, double x, double y, double h
         x_y_hdg.push_back(y+ddy);
         x_y_hdg.push_back(hdg);
     }
+    
     return x_y_hdg;
 }
 
