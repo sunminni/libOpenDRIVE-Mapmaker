@@ -98,19 +98,19 @@ function getIntersection(x1,y1,hdg1,x2,y2,hdg2){
 }
 
 function previewCreateArc1(){
-    let from = new THREE.Vector3(PREVIEW_PARAMS[0].x, PREVIEW_PARAMS[0].y, 0);
+    let from = new THREE.Vector3(g_x1, g_y1, 0);
     let to = new THREE.Vector3(mouse_pos.x,mouse_pos.y,0);
     let direction = to.clone().sub(from);
-    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 50, 0xff0000, 10, 10);
+    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 10, 0xff0000, 3, 3);
     scene.add(arrow1);
 }
 
 function previewCreateArc2(){
-    let xs = PREVIEW_PARAMS[0].x;
-    let ys = PREVIEW_PARAMS[0].y;
+    let xs = g_x1;
+    let ys = g_y1;
     let xe = mouse_pos.x;
     let ye = mouse_pos.y;
-    let start_hdg = PREVIEW_PARAMS[0].hdg;
+    let start_hdg = g_hdg1;
 
     let start_m,start_b,m,b,xc,yc;
     let vert = "false";
@@ -177,45 +177,38 @@ function previewCreateArc2(){
     let road_length = Math.abs(theta*radius);
     let curvature = theta>0 ? 1/radius : -1/radius;
     
-    PREVIEW_PARAMS[0].road_length =road_length;
-    PREVIEW_PARAMS[0].curvature = curvature;
-    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
-    preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-    validPreview = [true,false];
+    g_len1 = road_length;
+    g_cur1 = curvature;
+
+    validPreview = g_len1>0.2 && g_cur1!=0;
 }
 
 function previewCreateLine(){
-    PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
-    PREVIEW_PARAMS[0].hdg = Math.atan2(mouse_pos.y-PREVIEW_PARAMS[0].y,mouse_pos.x-PREVIEW_PARAMS[0].x);
-
-    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
-    preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-    validPreview = [true,false];
+    g_len1 = Math.hypot(g_x1-mouse_pos.x, g_y1-mouse_pos.y);
+    g_hdg1 = Math.atan2(mouse_pos.y-g_y1,mouse_pos.x-g_x1);
+    validPreview = g_len1>0.2;
 }
 
 function previewExtendLine(){
-    PREVIEW_PARAMS[0].road_length = Math.hypot(PREVIEW_PARAMS[0].x-mouse_pos.x, PREVIEW_PARAMS[0].y-mouse_pos.y);
-
-    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
-    preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-    validPreview = [true,false];
+    g_len1 = Math.hypot(g_x1-mouse_pos.x, g_y1-mouse_pos.y);
+    validPreview = g_len1>0.2;
 }
 
-function previewLink(){
-    let std_vec = ModuleOpenDrive.get_end(HANDLE_PARAMS);
-    let x1 = std_vec.get(0);
-    let y1 = std_vec.get(1);
-    let hdg1 = std_vec.get(2);
-    let m1 = Math.tan(hdg1);
-    let b1 = y1-m1*x1;
+function previewRoadLink(){
+    let std_vec = ModuleOpenDrive.get_end2(OpenDriveMap,sel_road_id,sel_lane_id);
+    g_x1 = std_vec.get(0);
+    g_y1 = std_vec.get(1);
+    g_hdg1 = std_vec.get(2);
 
-    PREVIEW_PARAMS[0].road_id = sel_road_id;
-    let linkRoad = ModuleOpenDrive.get_road_and_params(OpenDriveMap,PREVIEW_PARAMS[0]);
-    let x2 = PREVIEW_PARAMS[0].x;
-    let y2 = PREVIEW_PARAMS[0].y;
-    let hdg2 = PREVIEW_PARAMS[0].hdg;
+    let m1 = Math.tan(g_hdg1);
+    let b1 = g_y1-m1*g_x1;
+
+    let std_vec2 = ModuleOpenDrive.get_start2(OpenDriveMap,hover_road_id,hover_lane_id);
+    let x2 = std_vec2.get(0);
+    let y2 = std_vec2.get(1);
+    let hdg2 = std_vec2.get(2);
     let m2 = Math.tan(hdg2);
-    let b2 = y1-m2*x1;
+    let b2 = g_y1-m2*g_x1;
 
     m1 = Math.round(m1 * 1000) / 1000
     b1 = Math.round(b1 * 1000) / 1000
@@ -225,102 +218,85 @@ function previewLink(){
     if (m1==m2 && b1==b2){
         //road only
         console.log("road only");
-        PREVIEW_PARAMS[0].x = x1;
-        PREVIEW_PARAMS[0].y = y1;
-        PREVIEW_PARAMS[0].hdg = hdg1;
-        PREVIEW_PARAMS[0].line_type = "line";
-        PREVIEW_PARAMS[0].road_length = Math.hypot(x2-x1, y2-y1);
-        ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
-        preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-        validPreview = [true,false];
+        g_two_geo = false;
+        g_isarc1 = false;
+        g_len1 = Math.hypot(x2-g_x1, y2-g_y1);
+        validPreview = g_len1>0.2;
         return;
     }
 
-    let intersection = getIntersection(x1,y1,hdg1,x2,y2,hdg2);
+    let intersection = getIntersection(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
     console.log(intersection);
     if (intersection===null) return;
     let [xi,yi] = intersection;
 
-    let d1 = Math.hypot(xi-x1, yi-y1);
+    let d1 = Math.hypot(xi-g_x1, yi-g_y1);
     let d2 = Math.hypot(xi-x2, yi-y2);
 
     d1 = Math.round(d1 * 1000) / 1000
     d2 = Math.round(d2 * 1000) / 1000
 
-    arc_only = false;
     if (d2<d1){
         //line + arc
         console.log("line + arc");
-        PREVIEW_PARAMS[0].x = x1;
-        PREVIEW_PARAMS[0].y = y1;
-        PREVIEW_PARAMS[0].hdg = hdg1;
-        PREVIEW_PARAMS[0].line_type = "line";
-        PREVIEW_PARAMS[0].road_length = d1-d2;
+        g_two_geo = true;
+        g_isarc1 = false;
+        g_isarc2 = true;
 
-        let tmp_vec = ModuleOpenDrive.get_end(PREVIEW_PARAMS[0]);
-        PREVIEW_PARAMS[1].x = tmp_vec.get(0);
-        PREVIEW_PARAMS[1].y = tmp_vec.get(1);
-        PREVIEW_PARAMS[1].hdg = tmp_vec.get(2);
-        PREVIEW_PARAMS[1].line_type = "arc";
-        let c = Math.hypot(PREVIEW_PARAMS[1].x-x2, PREVIEW_PARAMS[1].y-y2);
-        let theta = hdg2-hdg1;
+        g_len1 = d1-d2;
+        let tmp_vec = ModuleOpenDrive.calc_end("line",g_x1,g_y1,g_hdg1,g_len1,0);
+        g_x2 = tmp_vec.get(0);
+        g_y2 = tmp_vec.get(1);
+        g_hdg2 = tmp_vec.get(2);
+        let c = Math.hypot(g_x2-x2, g_y2-y2);
+        let theta = hdg2-g_hdg1;
         let radius = (c/2)/Math.sin(theta/2);
-        PREVIEW_PARAMS[1].road_length = theta*radius;
-        PREVIEW_PARAMS[1].curvature = 1/radius;
+        g_len2 = theta*radius;
+        g_cur2 = 1/radius;
+        validPreview = g_len1>0.2 && g_len2>0.2 && g_cur2!=0;
+        return;
     }
     else if (d1<d2){
         //arc + line
         console.log("arc + line");
-        PREVIEW_PARAMS[1].x = x2;
-        PREVIEW_PARAMS[1].y = y2;
-        PREVIEW_PARAMS[1].hdg = hdg2;
-        PREVIEW_PARAMS[1].line_type = "line";
-        PREVIEW_PARAMS[1].road_length = d2-d1;
-        let tmp_vec = ModuleOpenDrive.get_end(PREVIEW_PARAMS[1]);
+        g_two_geo = true;
+        g_isarc1 = true;
+        g_isarc2 = false;
+
+        g_hdg2 = hdg2;
+        g_len2 = d2-d1;
+        let tmp_vec = ModuleOpenDrive.calc_end("line",x2,y2,g_hdg2,g_len2,0);
         let tmp_x = tmp_vec.get(0);
         let tmp_y = tmp_vec.get(1);
-        PREVIEW_PARAMS[1].x = x2-(tmp_x-x2)
-        PREVIEW_PARAMS[1].y = y2-(tmp_y-y2)
+        g_x2 = x2-(tmp_x-x2)
+        g_y2 = y2-(tmp_y-y2)
 
-        PREVIEW_PARAMS[0].x = x1;
-        PREVIEW_PARAMS[0].y = y1;
-        PREVIEW_PARAMS[0].hdg = hdg1;
-        PREVIEW_PARAMS[0].line_type = "arc";
-        let c = Math.hypot(PREVIEW_PARAMS[1].x-x1, PREVIEW_PARAMS[1].y-y1);
-        let theta = hdg2-hdg1;
+        let c = Math.hypot(g_x2-g_x1,g_y2-g_y1);
+        let theta = g_hdg2-g_hdg1;
         let radius = (c/2)/Math.sin(theta/2);
-        PREVIEW_PARAMS[0].road_length = theta*radius;
-        PREVIEW_PARAMS[0].curvature = 1/radius;
+        g_len1 = theta*radius;
+        g_cur1 = 1/radius;
+        validPreview = g_len1>0.2 && g_len2>0.2 && g_cur1!=0;
+        return;
     }
     else{
         //arc only
-        arc_only = true;
         console.log("arc only");
-        PREVIEW_PARAMS[0].x = x1;
-        PREVIEW_PARAMS[0].y = y1;
-        PREVIEW_PARAMS[0].hdg = hdg1;
-        PREVIEW_PARAMS[0].line_type = "arc";
-        let c = Math.hypot(x2-x1, y2-y1);
-        let theta = hdg2-hdg1;
+        g_two_geo = false;
+        g_isarc1 = true;
+        let c = Math.hypot(x2-g_x1, y2-g_y1);
+        let theta = hdg2-g_hdg1;
         let radius = (c/2)/Math.sin(theta/2);
-        PREVIEW_PARAMS[0].road_length = theta*radius;
-        PREVIEW_PARAMS[0].curvature = 1/radius;
+        g_len1 = theta*radius;
+        g_cur1 = 1/radius;
+        validPreview = g_len1>0.2 && g_cur1!=0;
+        return;
+    }
+}
 
-    }
-
-    ModuleOpenDrive.update_road(preview_road[0], PREVIEW_PARAMS[0]);
-    if (!arc_only){
-        ModuleOpenDrive.update_road(preview_road[1], PREVIEW_PARAMS[1]);
-    }
-
-    if (!arc_only){
-        preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),drawRoadMesh(preview_road[1],preview_mesh[1])];
-        validPreview = [true,true];
-    }
-    else{
-        preview_mesh = [drawRoadMesh(preview_road[0],preview_mesh[0]),null];
-        validPreview = [true,false];
-    }
+function previewJuncLink(){
+    console.log("previewJuncLink");
+    
 }
 
 function calcMouseWorldPos(event){
@@ -361,24 +337,10 @@ function drawRoadMesh(road,mesh){
 }
 
 function afterModuleLoad(){
-    HANDLE_PARAMS = ModuleOpenDrive.create_RP();
-    PREVIEW_PARAMS = [ModuleOpenDrive.create_RP(),ModuleOpenDrive.create_RP()];
-
-    new_road_gui = new dat.GUI();
-    new_road_gui.domElement.classList.add('new_road_controls');
-    new_road_gui.domElement.getElementsByClassName('close-button')[0].remove();
-    new_road_gui.domElement.style.display = 'none';
-
-    road_idC = new_road_gui.add(HANDLE_PARAMS, 'road_id').onChange(() => {updateHandleRoad();});
-
-    geometry_folder = new_road_gui.addFolder('Geometry');
-    geometry_folder.open();
-    line_typeC = geometry_folder.add(HANDLE_PARAMS, 'line_type', { 'line' : 'line', 'arc' : 'arc' }).onChange(() => {updateHandleRoad();});
-    road_lengthC = geometry_folder.add(HANDLE_PARAMS, 'road_length', 1).step(0.001).onChange(() => {updateHandleRoad();});
-    xC = geometry_folder.add(HANDLE_PARAMS, 'x').step(0.001).onChange(() => {updateHandleRoad();});
-    yC = geometry_folder.add(HANDLE_PARAMS, 'y').step(0.001).onChange(() => {updateHandleRoad();});
-    hdgC = geometry_folder.add(HANDLE_PARAMS, 'hdg', -Math.PI*2, Math.PI*2, 0.001).onChange(() => {updateHandleRoad();});
-    curvatureC = makeCurvatureC();
+    junc_gui = new dat.GUI();
+    junc_gui.domElement.classList.add('junc_controls');
+    junc_gui.domElement.getElementsByClassName('close-button')[0].remove();
+    junc_gui.domElement.style.display = 'none';
 
     setMode(DEFAULT);
 
@@ -398,9 +360,7 @@ function afterMapLoad(){
     for (let arrow of link_arrows){
         scene.remove(arrow);
     }
-
-    preview_road = [ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1"),
-                    ModuleOpenDrive.create_preview_road(OpenDriveMap,"-2")];
+    preview_road = ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1");
     let std_vec = ModuleOpenDrive.get_road_arrows(OpenDriveMap);
     link_arrows = [];
     let road_points = {};
@@ -475,6 +435,19 @@ function afterMapLoad(){
         }
     }
 
+    if (junc_idC !== null){
+        junc_idC.remove();
+    }
+    let junctions = ModuleOpenDrive.get_junction_ids(OpenDriveMap);
+    junctions_dict = {}
+    for(let i=0;i<junctions.size();i++){
+        console.log(junctions.get(i));
+        junctions_dict[junctions.get(i)] = junctions.get(i);
+    }
+
+    junc_idC = junc_gui.add(JUNCTION_DATA, 'junction_id', junctions_dict).onChange(()=>{updateCurJunction()});
+    if (junctions.size()>0)
+        junc_idC.setValue(junctions.get(0));
 
         // if (std_vec.get(i).get(7) == 1){
         //     let pred_x = std_vec.get(i).get(8);
@@ -519,38 +492,12 @@ function writeXMLFile(){
     });});
 }
 
-function makeCurvatureC(){
-    return geometry_folder.add(HANDLE_PARAMS, 'curvature', -0.1, 0.1, 0.001).onChange(() => {updateHandleRoad();});
-}
-
-
 function createHandleRoad(){
-    handle_road = ModuleOpenDrive.get_road_and_params(OpenDriveMap,HANDLE_PARAMS);
-    updateControllerDisplay();
+    handle_road = ModuleOpenDrive.get_road(OpenDriveMap,sel_road_id);
     handle_mesh = drawRoadMesh(handle_road,handle_mesh);
 }
 
-function updateHandleRoad(){
-    let curTimestamp = Date.now();
-    if (curTimestamp - updateTimestamp < 10){
-        return;
-    }
-    else{
-        updateTimestamp = curTimestamp;
-    }
-
-    if(line_typeC.getValue() == "line" && curvatureC!==null){
-        console.log("line");
-        curvatureC.remove();
-        curvatureC = null;
-    }
-    if (line_typeC.getValue() == "arc" && curvatureC===null){
-        console.log("arc");
-        curvatureC = makeCurvatureC();
-    }
-    if (curvatureC!==null && curvatureC.getValue()==0){
-        curvatureC.setValue(0.001);
-    }
-    ModuleOpenDrive.update_road(handle_road, HANDLE_PARAMS);
-    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
+function updateCurJunction(){
+    console.log("updateCurJunction");
+    
 }

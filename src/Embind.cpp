@@ -99,29 +99,24 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::class_<Road>("Road")
         .property("id", &Road::id);
 
-    emscripten::class_<ROAD_PARAMS>("ROAD_PARAMS")
-        .property("road_id", &ROAD_PARAMS::road_id)
-        .property("line_type", &ROAD_PARAMS::line_type)
-        .property("road_length", &ROAD_PARAMS::road_length)
-        .property("x", &ROAD_PARAMS::x)
-        .property("y", &ROAD_PARAMS::y)
-        .property("hdg", &ROAD_PARAMS::hdg)
-        .property("curvature", &ROAD_PARAMS::curvature);
-
     emscripten::function("get_road_network_mesh", &get_road_network_mesh);
     emscripten::function("get_refline_segments", &get_refline_segments);
     emscripten::function("get_road_arrows", &get_road_arrows);
     emscripten::function("save_map", &save_map);
-    emscripten::function("get_road_and_params", &get_road_and_params);
+    emscripten::function("get_road", &get_road);
     emscripten::function("create_road_mesh", &create_road_mesh);
     emscripten::function("update_road", &update_road);
-    emscripten::function("write_road_xml", &write_road_xml);
+    // emscripten::function("write_road_xml", &write_road_xml);
     emscripten::function("delete_road", &delete_road);
-    emscripten::function("get_end", &get_end);
+    emscripten::function("get_end2", &get_end2);
+    emscripten::function("get_start2", &get_start2);
     emscripten::function("add_road", &add_road);
-    emscripten::function("create_RP", &create_RP);
     emscripten::function("get_new_road_id", &get_new_road_id);
     emscripten::function("create_preview_road", &create_preview_road);
+    emscripten::function("create_new_junction", &create_new_junction);
+    emscripten::function("get_junction_ids", &get_junction_ids);
+    emscripten::function("delete_junction", &delete_junction);
+    emscripten::function("calc_end", &calc_end);
 }
 
 } // namespace odr

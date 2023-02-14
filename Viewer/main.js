@@ -381,9 +381,9 @@ function animate()
                     <tr><th>s/t</th><th>[${st_pixel_buffer[0].toFixed(2)}, ${st_pixel_buffer[1].toFixed(2)}]</th>
                     <tr><th>world</th><th>[${xyz_pixel_buffer[0].toFixed(2)}, ${xyz_pixel_buffer[1].toFixed(2)}, ${xyz_pixel_buffer[2].toFixed(2)}]</th></tr>
                 </table>`;
-        sel_road_id = road_id;
-        sel_lanesec_s0 = lanesec_s0;
-        sel_lane_id = lane_id;
+        hover_road_id = road_id;
+        hover_lanesec_s0 = lanesec_s0;
+        hover_lane_id = lane_id;
         
     } else {
         if (INTERSECTED_LANE_ID != 0xffffffff) {
@@ -395,9 +395,9 @@ function animate()
         }
         INTERSECTED_LANE_ID = 0xffffffff;
         spotlight_info.style.display = "none";
-        sel_road_id = null;
-        sel_lanesec_s0 = null;
-        sel_lane_id = null;
+        hover_road_id = null;
+        hover_lanesec_s0 = null;
+        hover_lane_id = null;
     }
 
     showPreview();
