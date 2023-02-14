@@ -464,15 +464,17 @@ function afterModuleLoad(){
 
     setMode(DEFAULT);
 
-    // let image_loader = new THREE.TextureLoader();
-    // let image_material = new THREE.MeshLambertMaterial({
-    //     map: image_loader.load('songdo.png')
-    // });
+    let image_loader = new THREE.TextureLoader();
+    let image_material = new THREE.MeshLambertMaterial({
+        map: image_loader.load('map_image.png')
+    });
+    image_material.transparent = true;
+    image_material.opacity = 0.5;
 
-    // let image_geometry = new THREE.PlaneGeometry(200, 200*.75);
-    // let image_mesh = new THREE.Mesh(image_geometry, image_material);
-    // image_mesh.position.set(0,0,0)
-    // scene.add(image_mesh);
+    let image_geometry = new THREE.PlaneGeometry(400, 400*.75);
+    let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    image_mesh.position.set(0,0,-0.1);
+    scene.add(image_mesh);
 }
 
 function afterMapLoad(){

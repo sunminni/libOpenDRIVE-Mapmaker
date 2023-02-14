@@ -290,11 +290,11 @@ function loadOdrMap(clear_map = true)
     /* ground grid */
     let bbox_center_pt = new THREE.Vector3();
     bbox_reflines.getCenter(bbox_center_pt);
-    ground_grid = new THREE.GridHelper(max_diag_dist, max_diag_dist / 10, 0x2f2f2f, 0x2f2f2f);
-    ground_grid.geometry.rotateX(Math.PI / 2);
-    ground_grid.position.set(bbox_center_pt.x, bbox_center_pt.y, bbox_reflines.min.z - 0.1);
-    disposable_objs.push(ground_grid.geometry);
-    scene.add(ground_grid);
+    // ground_grid = new THREE.GridHelper(max_diag_dist, max_diag_dist / 10, 0x2f2f2f, 0x2f2f2f);
+    // ground_grid.geometry.rotateX(Math.PI / 2);
+    // ground_grid.position.set(bbox_center_pt.x, bbox_center_pt.y, bbox_reflines.min.z - 0.1);
+    // disposable_objs.push(ground_grid.geometry);
+    // scene.add(ground_grid);
 
     /* fit light */
     light.position.set(bbox_reflines.min.x, bbox_reflines.min.y, bbox_reflines.max.z + max_diag_dist);
