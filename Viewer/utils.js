@@ -195,7 +195,7 @@ function previewExtendLine(){
 }
 
 function previewRoadLink(){
-    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
+    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
     g_x1 = std_vec.get(0);
     g_y1 = std_vec.get(1);
     g_hdg1 = std_vec.get(2);
@@ -204,7 +204,7 @@ function previewRoadLink(){
     let m1 = Math.tan(g_hdg1);
     let b1 = g_y1-m1*g_x1;
 
-    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,-1);
     let x2 = std_vec2.get(0);
     let y2 = std_vec2.get(1);
     let hdg2 = std_vec2.get(2);
@@ -218,7 +218,7 @@ function previewRoadLink(){
 
     if (m1==m2 && b1==b2){
         //road only
-        console.log("road only");
+        // console.log("road only");
         g_two_geo = false;
         g_isarc1 = false;
         g_len2 = 0;
@@ -228,7 +228,7 @@ function previewRoadLink(){
     }
 
     let intersection = getIntersection(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
-    console.log(intersection);
+    // console.log(intersection);
     if (intersection===null) return;
     let [xi,yi] = intersection;
 
@@ -240,7 +240,7 @@ function previewRoadLink(){
 
     if (d2<d1){
         //line + arc
-        console.log("line + arc");
+        // console.log("line + arc");
         g_two_geo = true;
         g_isarc1 = false;
         g_isarc2 = true;
@@ -263,7 +263,7 @@ function previewRoadLink(){
     }
     else if (d1<d2){
         //arc + line
-        console.log("arc + line");
+        // console.log("arc + line");
         g_two_geo = true;
         g_isarc1 = true;
         g_isarc2 = false;
@@ -287,7 +287,7 @@ function previewRoadLink(){
     }
     else{
         //arc only
-        console.log("arc only");
+        // console.log("arc only");
         g_two_geo = false;
         g_isarc1 = true;
         g_len2 = 0;
@@ -309,8 +309,114 @@ function fixHdg(hdg){
 }
 
 function previewJuncLink(){
-    console.log("previewJuncLink");
-    
+    // console.log("previewJuncLink");
+    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,junc_link_start_rid,junc_link_start_lid);
+    g_x1 = std_vec.get(0);
+    g_y1 = std_vec.get(1);
+    g_hdg1 = std_vec.get(2);
+    g_hdg1 = fixHdg(g_hdg1);
+
+    let m1 = Math.tan(g_hdg1);
+    let b1 = g_y1-m1*g_x1;
+    // console.log("previewJuncLink get_end");
+
+    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    let x2 = std_vec2.get(0);
+    let y2 = std_vec2.get(1);
+    let hdg2 = std_vec2.get(2);
+    let m2 = Math.tan(hdg2);
+    let b2 = g_y1-m2*g_x1;
+    // console.log("previewJuncLink get_start");
+
+    m1 = Math.round(m1 * 1000) / 1000
+    b1 = Math.round(b1 * 1000) / 1000
+    m2 = Math.round(m2 * 1000) / 1000
+    b2 = Math.round(b2 * 1000) / 1000
+
+    if (m1==m2 && b1==b2){
+        //road only
+        // console.log("junc road only");
+        g_two_geo = false;
+        g_isarc1 = false;
+        g_len2 = 0;
+        g_len1 = Math.hypot(x2-g_x1, y2-g_y1);
+        validPreview = g_len1>0.2;
+        return;
+    }
+
+    let intersection = getIntersection(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
+    // console.log("junc intersection ",intersection);
+    if (intersection===null) return;
+    let [xi,yi] = intersection;
+
+    let d1 = Math.hypot(xi-g_x1, yi-g_y1);
+    let d2 = Math.hypot(xi-x2, yi-y2);
+
+    d1 = Math.round(d1 * 1000) / 1000
+    d2 = Math.round(d2 * 1000) / 1000
+
+    if (d2<d1){
+        //line + arc
+        // console.log("junc line + arc");
+        g_two_geo = true;
+        g_isarc1 = false;
+        g_isarc2 = true;
+
+        g_len1 = d1-d2;
+        let tmp_vec = ModuleOpenDrive.calc_end("line",g_x1,g_y1,g_hdg1,g_len1,0);
+        g_x2 = tmp_vec.get(0);
+        g_y2 = tmp_vec.get(1);
+        g_hdg2 = tmp_vec.get(2);
+        g_hdg2 = fixHdg(g_hdg2);
+
+        let c = Math.hypot(g_x2-x2, g_y2-y2);
+        let theta = hdg2-g_hdg1;
+        theta = fixHdg(theta);
+        let radius = (c/2)/Math.sin(theta/2);
+        g_len2 = theta*radius;
+        g_cur2 = 1/radius;
+        validPreview = g_len1>0.2 && g_len2>0.2 && g_cur2!=0;
+        return;
+    }
+    else if (d1<d2){
+        //arc + line
+        // console.log("junc arc + line");
+        g_two_geo = true;
+        g_isarc1 = true;
+        g_isarc2 = false;
+
+        g_hdg2 = hdg2;
+        g_len2 = d2-d1;
+        let tmp_vec = ModuleOpenDrive.calc_end("line",x2,y2,g_hdg2,g_len2,0);
+        let tmp_x = tmp_vec.get(0);
+        let tmp_y = tmp_vec.get(1);
+        g_x2 = x2-(tmp_x-x2)
+        g_y2 = y2-(tmp_y-y2)
+
+        let c = Math.hypot(g_x2-g_x1,g_y2-g_y1);
+        let theta = g_hdg2-g_hdg1;
+        theta = fixHdg(theta);
+        let radius = (c/2)/Math.sin(theta/2);
+        g_len1 = theta*radius;
+        g_cur1 = 1/radius;
+        validPreview = g_len1>0.2 && g_len2>0.2 && g_cur1!=0;
+        return;
+    }
+    else{
+        //arc only
+        // console.log("junc arc only");
+        g_two_geo = false;
+        g_isarc1 = true;
+        g_len2 = 0;
+        let c = Math.hypot(x2-g_x1, y2-g_y1);
+        let theta = hdg2-g_hdg1;
+        theta = fixHdg(theta);
+        let radius = (c/2)/Math.sin(theta/2);
+        g_len1 = theta*radius;
+        g_cur1 = 1/radius;
+        validPreview = g_len1>0.2 && g_cur1!=0;
+        return;
+    }
 }
 
 function calcMouseWorldPos(event){
@@ -410,7 +516,7 @@ function afterMapLoad(){
     }
 
     for (const [key, value] of Object.entries(road_points)) {
-        console.log(key, value);
+        // console.log(key, value);
         if (value[6]!=-1){
             //pred
             let my_start_x = road_points[key][0];
@@ -455,7 +561,6 @@ function afterMapLoad(){
     let junctions = ModuleOpenDrive.get_junction_ids(OpenDriveMap);
     junctions_dict = {}
     for(let i=0;i<junctions.size();i++){
-        console.log(junctions.get(i));
         junctions_dict[junctions.get(i)] = junctions.get(i);
     }
 

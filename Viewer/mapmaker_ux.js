@@ -12,6 +12,8 @@ function showPreview(){
     scene.remove(arrow1);
     scene.remove(preview_mesh);
     validPreview = false;
+    let start_lane = -2;
+    let end_lane = 0;
     if (MapmakerMode === CONNECT){
         if (hover_road_id!==null){
             previewRoadLink();
@@ -19,7 +21,8 @@ function showPreview(){
     }
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
-            // previewJuncLink();
+            previewJuncLink();
+            start_lane = -1;
         }
     }
     else if (MapmakerMode === CREATE_LINE_2){
@@ -35,7 +38,7 @@ function showPreview(){
         previewCreateArc2();
     }
     if(validPreview){
-        ModuleOpenDrive.update_road(preview_road, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
+        ModuleOpenDrive.update_road(preview_road, start_lane, end_lane, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
         preview_mesh = drawRoadMesh(preview_road,preview_mesh);
     }
 }
@@ -65,7 +68,7 @@ function onKeyDown(e){
     console.log(e.key);
     if (MapmakerMode === SELECTED){
         if (e.key=='a'){
-            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
+            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);
@@ -76,7 +79,7 @@ function onKeyDown(e){
             setMode(EXTEND_ARC);
         }
         if (e.key=='l'){
-            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
+            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);
@@ -221,9 +224,11 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
-            ModuleOpenDrive.add_link(OpenDriveMap, junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
-            setMode(DEFAULT);
-            writeXMLFile();
+            if (validPreview){
+                ModuleOpenDrive.add_link(OpenDriveMap, preview_road, JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
+                setMode(JUNCTION);
+                writeXMLFile();
+            }
         }
     }
 }

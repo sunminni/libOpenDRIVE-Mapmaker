@@ -117,6 +117,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("get_junction_ids", &get_junction_ids);
     emscripten::function("delete_junction", &delete_junction);
     emscripten::function("calc_end", &calc_end);
+    emscripten::function("add_link", &add_link);
 }
 
 } // namespace odr
