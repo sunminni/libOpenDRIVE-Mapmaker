@@ -506,20 +506,25 @@ std::vector<double> calc_end(std::string line_type, double x, double y, double h
     return x_y_hdg;
 }
 
-std::vector<double> get_end2(OpenDriveMap& odr_map, std::string road_id, int lane_id)
+std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane_id)
 {
     Road& road = odr_map.id_to_road.at(road_id);
     RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);
-    if (RG.type == GeometryType::GeometryType_Line){
-        return calc_end("line",RG.x0,RG.y0,RG.hdg0,RG.length,0);
+    double temp_s = 0;
+    if (RG.length<road.length){
+        temp_s = RG.length;
+    }
+    RoadGeometry& RG2 = *road.ref_line.s0_to_geometry.at(temp_s);
+    if (RG2.type == GeometryType::GeometryType_Line){
+        return calc_end("line",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,0);
     }
     else{
-        Arc *arc = dynamic_cast<Arc*>(&RG);
-        return calc_end("arc",RG.x0,RG.y0,RG.hdg0,RG.length,(*arc).curvature);
+        Arc *arc = dynamic_cast<Arc*>(&RG2);
+        return calc_end("arc",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,(*arc).curvature);
     }
 }
 
-std::vector<double> get_start2(OpenDriveMap& odr_map, std::string road_id, int lane_id)
+std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int lane_id)
 {
     Road& road = odr_map.id_to_road.at(road_id);
     RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);

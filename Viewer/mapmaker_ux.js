@@ -66,7 +66,7 @@ function onKeyDown(e){
     console.log(e.key);
     if (MapmakerMode === SELECTED){
         if (e.key=='a'){
-            let std_vec = ModuleOpenDrive.get_end2(OpenDriveMap,sel_road_id,sel_lane_id);
+            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);
@@ -76,7 +76,7 @@ function onKeyDown(e){
             setMode(EXTEND_ARC);
         }
         if (e.key=='l'){
-            let std_vec = ModuleOpenDrive.get_end2(OpenDriveMap,sel_road_id,sel_lane_id);
+            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
             g_x1 = std_vec.get(0);
             g_y1 = std_vec.get(1);
             g_hdg1 = std_vec.get(2);

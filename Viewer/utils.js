@@ -195,7 +195,7 @@ function previewExtendLine(){
 }
 
 function previewRoadLink(){
-    let std_vec = ModuleOpenDrive.get_end2(OpenDriveMap,sel_road_id,sel_lane_id);
+    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
     g_x1 = std_vec.get(0);
     g_y1 = std_vec.get(1);
     g_hdg1 = std_vec.get(2);
@@ -203,7 +203,7 @@ function previewRoadLink(){
     let m1 = Math.tan(g_hdg1);
     let b1 = g_y1-m1*g_x1;
 
-    let std_vec2 = ModuleOpenDrive.get_start2(OpenDriveMap,hover_road_id,hover_lane_id);
+    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
     let x2 = std_vec2.get(0);
     let y2 = std_vec2.get(1);
     let hdg2 = std_vec2.get(2);

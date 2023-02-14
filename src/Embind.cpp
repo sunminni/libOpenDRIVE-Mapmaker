@@ -108,8 +108,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("update_road", &update_road);
     // emscripten::function("write_road_xml", &write_road_xml);
     emscripten::function("delete_road", &delete_road);
-    emscripten::function("get_end2", &get_end2);
-    emscripten::function("get_start2", &get_start2);
+    emscripten::function("get_end", &get_end);
+    emscripten::function("get_start", &get_start);
     emscripten::function("add_road", &add_road);
     emscripten::function("get_new_road_id", &get_new_road_id);
     emscripten::function("create_preview_road", &create_preview_road);

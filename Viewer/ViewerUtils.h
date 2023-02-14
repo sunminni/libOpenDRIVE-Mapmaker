@@ -33,8 +33,8 @@ void update_road(Road& road, bool isarc1, double x1, double y1, double hdg1, dou
                  bool two_geo, bool isarc2, double x2, double y2, double hdg2, double len2, double cur2);
 // void write_road_xml(OpenDriveMap& odr_map);
 void delete_road(OpenDriveMap& odr_map, std::string id);
-std::vector<double> get_end2(OpenDriveMap& odr_map, std::string road_id, int lane_id);
-std::vector<double> get_start2(OpenDriveMap& odr_map, std::string road_id, int lane_id);
+std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane_id);
+std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int lane_id);
 void add_road(OpenDriveMap& odr_map, Road& road, std::string pred_road_id, std::string succ_road_id);
 int get_new_road_id(const OpenDriveMap& odr_map);
 Road create_preview_road(OpenDriveMap& odr_map, std::string road_id);
