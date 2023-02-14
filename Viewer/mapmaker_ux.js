@@ -12,8 +12,8 @@ function showPreview(){
     scene.remove(arrow1);
     scene.remove(preview_mesh);
     validPreview = false;
-    let start_lane = -2;
-    let end_lane = 0;
+    let start_lane = g_start_lane;
+    let end_lane = g_end_lane;
     if (MapmakerMode === CONNECT){
         if (hover_road_id!==null){
             previewRoadLink();
@@ -23,6 +23,7 @@ function showPreview(){
         if (hover_road_id!==null){
             previewJuncLink();
             start_lane = -1;
+            end_lane = 0;
         }
     }
     else if (MapmakerMode === CREATE_LINE_2){
@@ -154,6 +155,21 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
+    if (e.key=='7'){
+        g_start_lane -= 1;
+    }
+    if (e.key=='8'){
+        g_start_lane += 1;
+    }
+    if (e.key=='9'){
+        g_end_lane -= 1;
+    }
+    if (e.key=='0'){
+        g_end_lane += 1;
+    }
+    g_start_lane = Math.min(g_start_lane,0);
+    g_end_lane = Math.max(g_end_lane,0);
+
 }
 
 function onMouseClick(event){

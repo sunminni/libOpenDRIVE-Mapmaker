@@ -60,5 +60,7 @@ var g_hdg2 = 0;
 var g_len2 = 0;
 var g_cur2 = 0;
 
+var g_start_lane = -1;
+var g_end_lane = 0;
 
 var mode_info = document.getElementById('mode_info');
