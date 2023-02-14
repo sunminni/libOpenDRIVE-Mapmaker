@@ -152,19 +152,25 @@ Road get_road(const OpenDriveMap& odr_map, std::string id)
     return odr_map.id_to_road.at(id);
 }
 
-RoadNetworkMesh create_road_mesh(double eps, Road road){
+RoadNetworkMesh create_road_mesh(double eps, Road& road)
+{
     RoadNetworkMesh  out_mesh;
     LanesMesh&       lanes_mesh = out_mesh.lanes_mesh;
+
+    std::cout<<"road.ref_line.get_geometries().size() "<<road.ref_line.get_geometries().size()<<std::endl;
     lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
 
     for (const auto& s_lanesec : road.s_to_lanesection)
     {
         const LaneSection& lanesec = s_lanesec.second;
+        std::cout<<"lanes_mesh.vertices.size() "<<lanes_mesh.vertices.size()<<std::endl;
         lanes_mesh.lanesec_start_indices[lanes_mesh.vertices.size()] = lanesec.s0;
         for (const auto& id_lane : lanesec.id_to_lane)
         {
             const Lane&       lane = id_lane.second;
             const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
+            std::cout<<"lanes_idx_offset "<<lanes_idx_offset<<std::endl;
+
             if (lane.type != "driving"){continue;}
             lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
             lanes_mesh.add_mesh(road.get_lane_mesh(lane, eps));
@@ -236,6 +242,8 @@ void update_road(Road& road, bool isarc1, double x1, double y1, double hdg1, dou
     g_cur2 = cur2;
 
     road.length = len1+len2;
+
+    road.ref_line.s0_to_geometry.clear();
 
     if (road.length<0.1) return;
 
@@ -503,7 +511,7 @@ std::vector<double> calc_end(std::string line_type, double x, double y, double h
         x_y_hdg.push_back(y+ddy);
         x_y_hdg.push_back(hdg);
     }
-    
+
     return x_y_hdg;
 }
 

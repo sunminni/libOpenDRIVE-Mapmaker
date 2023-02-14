@@ -28,7 +28,7 @@ RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps);
 std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map);
 std::string save_map(const OpenDriveMap& odr_map);
 Road get_road(const OpenDriveMap& odr_map, std::string id);
-RoadNetworkMesh create_road_mesh(double eps, Road road);
+RoadNetworkMesh create_road_mesh(double eps, Road& road);
 void update_road(Road& road, bool isarc1, double x1, double y1, double hdg1, double len1, double cur1,
                  bool two_geo, bool isarc2, double x2, double y2, double hdg2, double len2, double cur2);
 // void write_road_xml(OpenDriveMap& odr_map);

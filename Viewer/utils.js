@@ -221,6 +221,7 @@ function previewRoadLink(){
         console.log("road only");
         g_two_geo = false;
         g_isarc1 = false;
+        g_len2 = 0;
         g_len1 = Math.hypot(x2-g_x1, y2-g_y1);
         validPreview = g_len1>0.2;
         return;
@@ -289,6 +290,7 @@ function previewRoadLink(){
         console.log("arc only");
         g_two_geo = false;
         g_isarc1 = true;
+        g_len2 = 0;
         let c = Math.hypot(x2-g_x1, y2-g_y1);
         let theta = hdg2-g_hdg1;
         theta = fixHdg(theta);
