@@ -157,19 +157,16 @@ RoadNetworkMesh create_road_mesh(double eps, Road& road)
     RoadNetworkMesh  out_mesh;
     LanesMesh&       lanes_mesh = out_mesh.lanes_mesh;
 
-    std::cout<<"road.ref_line.get_geometries().size() "<<road.ref_line.get_geometries().size()<<std::endl;
     lanes_mesh.road_start_indices[lanes_mesh.vertices.size()] = road.id;
 
     for (const auto& s_lanesec : road.s_to_lanesection)
     {
         const LaneSection& lanesec = s_lanesec.second;
-        std::cout<<"lanes_mesh.vertices.size() "<<lanes_mesh.vertices.size()<<std::endl;
         lanes_mesh.lanesec_start_indices[lanes_mesh.vertices.size()] = lanesec.s0;
         for (const auto& id_lane : lanesec.id_to_lane)
         {
             const Lane&       lane = id_lane.second;
             const std::size_t lanes_idx_offset = lanes_mesh.vertices.size();
-            std::cout<<"lanes_idx_offset "<<lanes_idx_offset<<std::endl;
 
             if (lane.type != "driving"){continue;}
             lanes_mesh.lane_start_indices[lanes_idx_offset] = lane.id;
@@ -620,7 +617,6 @@ void add_road(OpenDriveMap& odr_map, Road& road, std::string pred_road_id, std::
             Road& new_road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,road.length,"-1",new_road_id)}).first->second;
             new_road.xml_node = create_road_xml(odr_map,new_road_id);
             new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(pred_road_id.c_str());
-            std::cout<<"asdf "<<new_road.xml_node.child("link").child("predecessor").attribute("elementId").value()<<std::endl;
             pred_successor.attribute("elementId").set_value(new_road_id.c_str());
         }
         else{
