@@ -28,6 +28,11 @@ function showPreview(){
             previewRoadLink();
         }
     }
+    else if (MapmakerMode === JUNCTION_1){
+        if (hover_road_id!==null){
+            previewJuncStart();
+        }
+    }
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             previewJuncLink();

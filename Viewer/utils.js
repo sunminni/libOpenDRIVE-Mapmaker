@@ -221,6 +221,25 @@ function previewRoadEnd(out_dir=true){
     scene.add(arrow1);
 }
 
+function previewJuncStart(){
+    let vec;
+    if (hover_lane_id<0){
+        vec = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
+    else{
+        vec = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
+    let x = vec.get(0);
+    let y = vec.get(1);
+    let hdg = vec.get(2);
+
+    let from = new THREE.Vector3(x, y, 0);
+    let direction = new THREE.Vector3(Math.cos(hover_lane_id<0?hdg:hdg-Math.PI),Math.sin(hover_lane_id<0?hdg:hdg-Math.PI),0);
+    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 10, 0xff0000, 3, 3);
+    arrow1.line.material.linewidth = 5;
+    scene.add(arrow1);
+}
+
 function previewRoadLink(){
     if (sel_near_start){
         let std_vec = ModuleOpenDrive.get_start(OpenDriveMap,sel_road_id,-1);
@@ -357,23 +376,38 @@ function fixHdg(hdg){
 
 function previewJuncLink(){
     // console.log("previewJuncLink");
-    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,junc_link_start_rid,junc_link_start_lid);
+    let std_vec;
+    if (junc_link_start_lid<0){
+        std_vec = ModuleOpenDrive.get_end(OpenDriveMap,junc_link_start_rid,junc_link_start_lid);
+    }
+    else{
+        std_vec = ModuleOpenDrive.get_start(OpenDriveMap,junc_link_start_rid,junc_link_start_lid);
+    }
     g_x1 = std_vec.get(0);
     g_y1 = std_vec.get(1);
     g_hdg1 = std_vec.get(2);
+    g_hdg1 = junc_link_start_lid<0?g_hdg1:g_hdg1-Math.PI;
     g_hdg1 = fixHdg(g_hdg1);
 
     let m1 = Math.tan(g_hdg1);
     let b1 = g_y1-m1*g_x1;
-    // console.log("previewJuncLink get_end");
 
-    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    let std_vec2;
+
+    if (hover_lane_id<0){
+        std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
+    else{
+        std_vec2 = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
     let x2 = std_vec2.get(0);
     let y2 = std_vec2.get(1);
     let hdg2 = std_vec2.get(2);
+    hdg2 = hover_lane_id<0?hdg2:hdg2-Math.PI;
+    hdg2 = fixHdg(hdg2);
+
     let m2 = Math.tan(hdg2);
     let b2 = g_y1-m2*g_x1;
-    // console.log("previewJuncLink get_start");
 
     m1 = Math.round(m1 * 1000) / 1000
     b1 = Math.round(b1 * 1000) / 1000
@@ -392,7 +426,6 @@ function previewJuncLink(){
     }
 
     let intersection = getIntersection(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
-    // console.log("junc intersection ",intersection);
     if (intersection===null) return;
     let [xi,yi] = intersection;
 
@@ -404,7 +437,6 @@ function previewJuncLink(){
 
     if (d2<d1){
         //line + arc
-        // console.log("junc line + arc");
         g_two_geo = true;
         g_isarc1 = false;
         g_isarc2 = true;
@@ -427,7 +459,6 @@ function previewJuncLink(){
     }
     else if (d1<d2){
         //arc + line
-        // console.log("junc arc + line");
         g_two_geo = true;
         g_isarc1 = true;
         g_isarc2 = false;
@@ -451,7 +482,6 @@ function previewJuncLink(){
     }
     else{
         //arc only
-        // console.log("junc arc only");
         g_two_geo = false;
         g_isarc1 = true;
         g_len2 = 0;
