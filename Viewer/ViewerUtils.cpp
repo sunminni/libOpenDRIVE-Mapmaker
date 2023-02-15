@@ -270,23 +270,26 @@ Road create_preview_road(OpenDriveMap& odr_map, std::string road_id)
 void delete_road(OpenDriveMap& odr_map, std::string id)
 {   
     Road& road = odr_map.id_to_road.at(id);
-    std::cout<< "road.junction " << road.junction<<std::endl;
-    if (road.junction == "-1"){
-        std::cout<<"road.junction "<<road.junction <<std::endl;
-        std::cout<<"road.predecessor.id "<<road.predecessor.id <<std::endl;
-        std::cout<<"road.successor.id "<<road.successor.id <<std::endl;
-        if (road.predecessor.id != "-1"){
+    std::cout<<"road.junction "<<road.junction <<std::endl;
+    std::cout<<"road.predecessor.id "<<road.predecessor.id <<std::endl;
+    std::cout<<"road.successor.id "<<road.successor.id <<std::endl;
+    if (road.predecessor.id != "-1"){
+        if (road.predecessor.type==RoadLink::Type_Road){
             Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
             pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
             pred_successor.attribute("elementId").set_value("-1");
+            pred_successor.attribute("elementType").set_value("road");
         }
-        if (road.successor.id != "-1"){
+    }
+    if (road.successor.id != "-1"){
+        if (road.successor.type==RoadLink::Type_Road){
             Road& succ_road = odr_map.id_to_road.at(road.successor.id);
             pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
             succ_predecessor.attribute("elementId").set_value("-1");
+            succ_predecessor.attribute("elementType").set_value("road");
         }
     }
-    else{
+    if (road.junction != "-1"){
         std::cout<< "road.junction " << road.junction<<std::endl;
         for (auto& id_junction_pair : odr_map.id_to_junction)
         {
@@ -297,17 +300,6 @@ void delete_road(OpenDriveMap& odr_map, std::string id)
                     junc.xml_node.remove_child(connection);
                 }
             }
-
-            // for (auto& id_connection_pair : junc.id_to_connection)
-            // {
-            //     JunctionConnection& conn = id_connection_pair.second;
-            //     if (conn.connecting_road==id){
-                    
-
-            //         junc.xml_node.children()
-            //         junc.id_to_connection.erase(id_connection_pair.first);
-            //     }
-            // }
         }
     }
     odr_map.id_to_road.erase(id);
