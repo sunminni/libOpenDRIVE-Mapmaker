@@ -14,7 +14,8 @@ var INTERSECTED_LANE_ID = 0xffffffff;
 var INTERSECTED_ROADMARK_ID = 0xffffffff;
 var spotlight_paused = false;
 var fit_view = true
-
+var startX = null;
+var startY = null;
 const COLORS = {
     road : 1.0,
     roadmark : 1.0,
@@ -31,6 +32,7 @@ window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('mousemove', onDocumentMouseMove, false);
 window.addEventListener('keydown', onKeyDown, false);
 window.addEventListener('click', onMouseClick, false);
+window.addEventListener("pointerdown", onPointerDown, false);
 // window.addEventListener('dblclick', onDocumentMouseDbClick, false);
 
 /* notifactions */
@@ -505,6 +507,12 @@ function onWindowResize()
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function onPointerDown(event)
+{
+    startX = event.clientX;
+    startY = event.clientY;
 }
 
 function onDocumentMouseMove(event)

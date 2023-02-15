@@ -216,6 +216,9 @@ function onKeyDown(e){
 }
 
 function onMouseClick(event){
+    if (Math.hypot(event.clientX-startX,event.clientY-startY)>5){
+        return;
+    }
 
     calcMouseWorldPos(event);
 
