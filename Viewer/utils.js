@@ -102,6 +102,7 @@ function previewCreateArc1(){
     let to = new THREE.Vector3(mouse_pos.x,mouse_pos.y,0);
     let direction = to.clone().sub(from);
     arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 10, 0xff0000, 3, 3);
+    arrow1.line.material.linewidth = 5;
     scene.add(arrow1);
 }
 
@@ -194,20 +195,66 @@ function previewExtendLine(){
     validPreview = g_len1>0.2;
 }
 
+function previewRoadEnd(out_dir=true){
+    let start_vec = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,-1);
+    let s_x = start_vec.get(0);
+    let s_y = start_vec.get(1);
+    let s_hdg = start_vec.get(2);
+    let end_vec = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,-1);
+    let e_x = end_vec.get(0);
+    let e_y = end_vec.get(1);
+    let e_hdg = end_vec.get(2);
+
+    let s_dist = Math.hypot(mouse_pos.x-s_x,mouse_pos.y-s_y);
+    let e_dist = Math.hypot(mouse_pos.x-e_x,mouse_pos.y-e_y);
+
+    hover_near_start = s_dist<e_dist;
+
+    let from = new THREE.Vector3(e_x, e_y, 0);
+    let direction = new THREE.Vector3(Math.cos(out_dir?e_hdg:e_hdg-Math.PI),Math.sin(out_dir?e_hdg:e_hdg-Math.PI),0);
+    if (hover_near_start){
+        from = new THREE.Vector3(s_x, s_y, 0);
+        direction = new THREE.Vector3(Math.cos(out_dir?s_hdg-Math.PI:s_hdg),Math.sin(out_dir?s_hdg-Math.PI:s_hdg),0);
+    }
+    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 10, 0xff0000, 3, 3);
+    arrow1.line.material.linewidth = 5;
+    scene.add(arrow1);
+}
+
 function previewRoadLink(){
-    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
-    g_x1 = std_vec.get(0);
-    g_y1 = std_vec.get(1);
-    g_hdg1 = std_vec.get(2);
-    g_hdg1 = fixHdg(g_hdg1);
+    if (sel_near_start){
+        let std_vec = ModuleOpenDrive.get_start(OpenDriveMap,sel_road_id,-1);
+        g_x1 = std_vec.get(0);
+        g_y1 = std_vec.get(1);
+        g_hdg1 = std_vec.get(2);
+        g_hdg1 = fixHdg(g_hdg1-Math.PI);
+    }
+    else{
+        let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
+        g_x1 = std_vec.get(0);
+        g_y1 = std_vec.get(1);
+        g_hdg1 = std_vec.get(2);
+        g_hdg1 = fixHdg(g_hdg1);
+    }
 
     let m1 = Math.tan(g_hdg1);
     let b1 = g_y1-m1*g_x1;
-
-    let std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,-1);
-    let x2 = std_vec2.get(0);
-    let y2 = std_vec2.get(1);
-    let hdg2 = std_vec2.get(2);
+    
+    let std_vec2,x2,y2,hdg2;
+    if (hover_near_start){
+        std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,-1);
+        x2 = std_vec2.get(0);
+        y2 = std_vec2.get(1);
+        hdg2 = std_vec2.get(2);
+        hdg2 = fixHdg(hdg2);
+    }
+    else{
+        std_vec2 = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,-1);
+        x2 = std_vec2.get(0);
+        y2 = std_vec2.get(1);
+        hdg2 = std_vec2.get(2);
+        hdg2 = fixHdg(hdg2-Math.PI);
+    }
     let m2 = Math.tan(hdg2);
     let b2 = g_y1-m2*g_x1;
 

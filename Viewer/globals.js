@@ -2,8 +2,10 @@
 const CREATE_LINE_1 = "create line: set start point";
 const CREATE_LINE_2 = "create line: set end point";
 const DEFAULT = "default";
+const EXTEND = "extend road: select road end";
 const EXTEND_ROAD_LINE = "extend road: line";
-const CONNECT = "connect roads: select next road";
+const CONNECT_1 = "connect roads: select starting road end";
+const CONNECT_2 = "connect roads: select next road end";
 const SELECTED = "road selected";
 const CREATE_ARC_1 = "create arc: set start point";
 const CREATE_ARC_2 = "create arc: set start direction";
@@ -23,10 +25,12 @@ var mouse_pos = new THREE.Vector3();
 var hover_road_id = null;
 var hover_lanesec_s0 = null;
 var hover_lane_id = null;
+var hover_near_start = null;
 
 var sel_road_id = null;
 var sel_lanesec_s0 = null;
 var sel_lane_id = null;
+var sel_near_start = null;
 
 var JUNCTION_DATA = {'junction_id':-1};
 var junc_gui = null;

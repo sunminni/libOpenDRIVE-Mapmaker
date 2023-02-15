@@ -10,7 +10,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-
+#define _USE_MATH_DEFINES
+ 
 namespace odr
 {
 
@@ -667,16 +668,36 @@ std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane
     if (lane_id>0) lane_id-=1;
     if (lane_id<0) lane_id+=1;
     Vec3D xyz = road.get_xyz(road.length,3.5*lane_id,0);
-    RoadGeometry& RG2 = *road.ref_line.s0_to_geometry.at(temp_s);
-    std::vector<double> end;
-    if (RG2.type == GeometryType::GeometryType_Line){
-        end = calc_end("line",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,0);
-    }
-    else{
-        Arc *arc = dynamic_cast<Arc*>(&RG2);
-        end = calc_end("arc",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,(*arc).curvature);
-    }
-    return {xyz[0],xyz[1],end[2]};
+
+    double hdg = RG.hdg0;
+
+    for (auto itr : road.ref_line.get_geometries())
+    {
+        if (itr->type == GeometryType::GeometryType_Arc){
+            Arc *arc = dynamic_cast<Arc*>(itr);
+            double curvature = (*arc).curvature;
+            double radius = 1/curvature;
+            hdg += itr->length/radius;
+            if (hdg>M_PI){
+                hdg-=M_PI*2;
+            }
+            if (hdg<-M_PI){
+                hdg+=M_PI*2;
+            }
+        }
+    } 
+    // RoadGeometry& RG2 = *road.ref_line.s0_to_geometry.at(temp_s);
+    // std::vector<double> end;
+    // if (RG2.type == GeometryType::GeometryType_Line){
+    //     end = calc_end("line",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,0);
+    // }
+    // else{
+    //     Arc *arc = dynamic_cast<Arc*>(&RG2);
+    //     end = calc_end("arc",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,(*arc).curvature);
+        
+    // }
+    // return {xyz[0],xyz[1],end[2]};
+    return {xyz[0],xyz[1],hdg};
 }
 
 std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int lane_id)
