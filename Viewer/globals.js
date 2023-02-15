@@ -48,6 +48,8 @@ var handle_mesh = null;
 
 var preview_road = null;
 var preview_mesh = null;
+var preview_reflines = null;
+var preview_lanelines = null;
 var validPreview = false;
 
 var g_isarc1 = false;
@@ -66,5 +68,6 @@ var g_cur2 = 0;
 
 var g_start_lane = -1;
 var g_end_lane = 0;
+var g_lane_width = 3.5;
 
 var mode_info = document.getElementById('mode_info');

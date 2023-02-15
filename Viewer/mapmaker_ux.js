@@ -11,6 +11,9 @@ function showJuncControls(bool){
 function showPreview(){
     scene.remove(arrow1);
     scene.remove(preview_mesh);
+    scene.remove(preview_reflines);
+    scene.remove(preview_lanelines);
+    
     validPreview = false;
     let start_lane = g_start_lane;
     let end_lane = g_end_lane;
@@ -50,8 +53,8 @@ function showPreview(){
         }
     }
     if(validPreview){
-        ModuleOpenDrive.update_road(preview_road, start_lane, end_lane, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
-        preview_mesh = drawRoadMesh(preview_road,preview_mesh);
+        ModuleOpenDrive.update_road(preview_road, start_lane, end_lane, g_lane_width, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
+        preview_mesh = drawRoadMesh(preview_road,preview_mesh,true);
     }
 }
 
@@ -135,7 +138,7 @@ function onKeyDown(e){
             setMode(DEFAULT);
         }
     }
-    else if ([CONNECT_1,CONNECT_2].includes(MapmakerMode)){
+    else if ([CONNECT_1,CONNECT_2,EXTEND].includes(MapmakerMode)){
         if (e.key=='Escape'){
             setMode(DEFAULT);
         }
@@ -201,9 +204,15 @@ function onKeyDown(e){
     if (e.key=='0'){
         g_end_lane += 1;
     }
+    if (e.key=='-'){
+        g_lane_width -= 0.1;
+    }
+    if (e.key=='='){
+        g_lane_width += 0.1;
+    }
     g_start_lane = Math.min(g_start_lane,0);
     g_end_lane = Math.max(g_end_lane,0);
-
+    g_lane_width = Math.max(3,Math.min(g_lane_width,5));
 }
 
 function onMouseClick(event){

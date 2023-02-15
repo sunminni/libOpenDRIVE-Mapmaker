@@ -474,7 +474,21 @@ function calcMouseWorldPos(event){
     mouse_pos.copy( camera.position ).add( mouse_vec.multiplyScalar( -camera.position.z / mouse_vec.z ) );
 }
 
-function drawRoadMesh(road,mesh){
+function drawRoadMesh(road,mesh,preview){
+    if(preview){
+        scene.remove(preview_reflines);
+        const reflines_geom = new THREE.BufferGeometry();
+        const odr_refline_segments = ModuleOpenDrive.create_road_reflines(parseFloat(PARAMS.resolution),road);
+        reflines_geom.setAttribute('position', new THREE.Float32BufferAttribute(getStdVecEntries(odr_refline_segments.vertices).flat(), 3));
+        reflines_geom.setIndex(getStdVecEntries(odr_refline_segments.indices, true));
+        preview_reflines = new THREE.LineSegments(reflines_geom, refline_material);
+        preview_reflines.renderOrder = 10;
+        preview_reflines.visible = PARAMS.ref_line;
+        preview_reflines.matrixAutoUpdate = false;
+        disposable_objs.push(reflines_geom);
+        scene.add(preview_reflines);
+    }
+
     scene.remove(mesh);
     const odr_road_network_mesh = ModuleOpenDrive.create_road_mesh(parseFloat(PARAMS.resolution),road);
     const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
@@ -498,6 +512,18 @@ function drawRoadMesh(road,mesh){
     mesh.matrixAutoUpdate = false;
     mesh.visible = !(PARAMS.view_mode == 'Outlines');
     scene.add(mesh);
+    
+    if (preview){
+        scene.remove(preview_lanelines);
+        const lane_outlines_geom = new THREE.BufferGeometry();
+        lane_outlines_geom.setAttribute('position', road_network_geom_new.attributes.position);
+        lane_outlines_geom.setIndex(getStdVecEntries(odr_lanes_mesh_new.get_lane_outline_indices(), true));
+        preview_lanelines = new THREE.LineSegments(lane_outlines_geom, lane_outlines_material);
+        preview_lanelines.renderOrder = 9;
+        disposable_objs.push(lane_outlines_geom);
+        scene.add(preview_lanelines);
+    }
+
 
     odr_lanes_mesh_new.delete();
     return mesh;
@@ -662,7 +688,7 @@ function writeXMLFile(){
 
 function createHandleRoad(){
     handle_road = ModuleOpenDrive.get_road(OpenDriveMap,sel_road_id);
-    handle_mesh = drawRoadMesh(handle_road,handle_mesh);
+    handle_mesh = drawRoadMesh(handle_road,handle_mesh,false);
 }
 
 function updateCurJunction(){
