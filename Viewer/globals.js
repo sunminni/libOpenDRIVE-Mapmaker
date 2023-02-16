@@ -47,24 +47,11 @@ var handle_road = null;
 var handle_mesh = null;
 
 var preview_road = null;
+var preview_geometries = null;
 var preview_mesh = null;
 var preview_reflines = null;
 var preview_lanelines = null;
 var validPreview = false;
-
-var g_isarc1 = false;
-var g_x1 = 0;
-var g_y1 = 0;
-var g_hdg1 = 0;
-var g_len1 = 0;
-var g_cur1 = 0;
-var g_two_geo = false;
-var g_isarc2 = false;
-var g_x2 = 0;
-var g_y2 = 0;
-var g_hdg2 = 0;
-var g_len2 = 0;
-var g_cur2 = 0;
 
 var g_start_lane = -1;
 var g_end_lane = 0;

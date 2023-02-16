@@ -58,7 +58,7 @@ function showPreview(){
         }
     }
     if(validPreview){
-        ModuleOpenDrive.update_road(preview_road, start_lane, end_lane, g_lane_width, g_isarc1, g_x1, g_y1, g_hdg1, g_len1, g_cur1, g_two_geo, g_isarc2, g_x2, g_y2, g_hdg2, g_len2, g_cur2);
+        ModuleOpenDrive.update_road(preview_road, preview_geometries, start_lane, end_lane, g_lane_width);
         preview_mesh = drawRoadMesh(preview_road,preview_mesh,true);
     }
 }
@@ -79,34 +79,10 @@ function setMode(mode){
         scene.remove(preview_mesh);
     }
     else if (mode == EXTEND_ARC){
-        console.log(sel_road_id);
-        if (sel_near_start){
-            let std_vec = ModuleOpenDrive.get_start(OpenDriveMap,sel_road_id,-1);
-            g_x1 = std_vec.get(0);
-            g_y1 = std_vec.get(1);
-            g_hdg1 = std_vec.get(2);
-            g_hdg1 = fixHdg(g_hdg1-Math.PI);
-        }
-        else{
-            let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
-            g_x1 = std_vec.get(0);
-            g_y1 = std_vec.get(1);
-            g_hdg1 = std_vec.get(2);
-            g_hdg1 = fixHdg(g_hdg1);
-        }
-        g_isarc1 = true;
-        g_two_geo = false;
-        g_len2 = 0;
+        writeExtend(1);
     }
     else if (mode == EXTEND_ROAD_LINE){
-        let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,-1);
-        g_x1 = std_vec.get(0);
-        g_y1 = std_vec.get(1);
-        g_hdg1 = std_vec.get(2);
-        g_hdg1 = fixHdg(g_hdg1);
-        g_isarc1 = false;
-        g_two_geo = false;
-        g_len2 = 0;
+        writeExtend(0);
     }
     console.log("mode "+mode);
     MapmakerMode = mode;
@@ -166,13 +142,9 @@ function onKeyDown(e){
             setMode(CONNECT_1);
         }
         if (e.key=='a'){
-            g_two_geo = false;
-            g_len2 = 0;
             setMode(CREATE_ARC_1);
         }
         if (e.key=='l'){
-            g_two_geo = false;
-            g_len2 = 0;
             setMode(CREATE_LINE_1);
         }
         if (e.key=='j'){
@@ -228,13 +200,11 @@ function onMouseClick(event){
     calcMouseWorldPos(event);
 
     if (MapmakerMode === CREATE_LINE_1){
-        g_x1 = mouse_pos.x;
-        g_y1 = mouse_pos.y;
-        g_isarc1 = false;
+        writeStart(0);
         setMode(CREATE_LINE_2);
     }
     else if (MapmakerMode === CREATE_LINE_2){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, "-1", "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, "-1", "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
@@ -256,24 +226,22 @@ function onMouseClick(event){
         }
     }
     else if (MapmakerMode === EXTEND_ROAD_LINE){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, sel_road_id, "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, sel_road_id, "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
     }
     else if (MapmakerMode === CREATE_ARC_1){
-        g_x1 = mouse_pos.x;
-        g_y1 = mouse_pos.y;
-        g_isarc1 = true;
+        writeStart(1);
         setMode(CREATE_ARC_2);
     }
     else if (MapmakerMode === CREATE_ARC_2){
-        g_hdg1 = Math.atan2(mouse_pos.y-g_y1,mouse_pos.x-g_x1);
+        writeHdg(Math.atan2(mouse_pos.y-preview_geometries.get(0).get(2),mouse_pos.x-preview_geometries.get(0).get(1)));
         setMode(CREATE_ARC_3);
     }
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         if (validPreview){
-            ModuleOpenDrive.add_road(OpenDriveMap, preview_road, MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
             sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
             setMode(SELECTED);
             writeXMLFile();
@@ -291,7 +259,7 @@ function onMouseClick(event){
     else if (MapmakerMode === CONNECT_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_road(OpenDriveMap, preview_road, sel_road_id, hover_road_id);
+                ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, sel_road_id, hover_road_id);
             }
             setMode(DEFAULT);
             writeXMLFile();

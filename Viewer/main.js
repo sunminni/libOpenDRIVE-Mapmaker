@@ -37,7 +37,7 @@ window.addEventListener("pointerdown", onPointerDown, false);
 
 /* notifactions */
 const notyf = new Notyf({
-    duration : 3000,
+    duration : 1000,
     position : { x : 'left', y : 'bottom' },
     types : [ { type : 'info', background : '#607d8b', icon : false } ]
 });
@@ -53,6 +53,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
 camera.up.set(0, 0, 1); /* Coordinate system with Z pointing up */
 const controls = new THREE.MapControls(camera, renderer.domElement);
+controls.zoomSpeed = 5;
 // controls.addEventListener('start', () => { spotlight_paused = true; controls.autoRotate = false; });
 // controls.addEventListener('end', () => { spotlight_paused = false; });
 // controls.autoRotate = true;
@@ -282,7 +283,7 @@ function loadOdrMap(clear_map = true)
     /* fit view and camera */
     const bbox_reflines = new THREE.Box3().setFromObject(refline_lines);
     const max_diag_dist = bbox_reflines.min.distanceTo(bbox_reflines.max);
-    camera.far = max_diag_dist * 1.5;
+    // camera.far = max_diag_dist * 1.5;
     // controls.autoRotate = fit_view;
     if (fit_view){
         fitViewToBbox(bbox_reflines);
@@ -419,7 +420,7 @@ function get_geometry(odr_meshunion)
     return geom;
 }
 
-function fitViewToBbox(bbox, restrict_zoom = true)
+function fitViewToBbox(bbox, restrict_zoom = false)
 {
     let center_pt = new THREE.Vector3();
     bbox.getCenter(center_pt);

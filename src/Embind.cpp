@@ -26,8 +26,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::register_vector<std::size_t>("vector<std::size_t>");
     emscripten::register_vector<std::uint32_t>("vector<std::uint32_t>");
     emscripten::register_vector<int>("vector<int>");
-    emscripten::register_vector<double>("vector<double>");
-    emscripten::register_vector<std::vector<double>>("vector<vector<double>>");
+    emscripten::register_vector<double>("vectorDouble");
+    emscripten::register_vector<std::vector<double>>("vectorVectorDouble");
     emscripten::register_vector<Vec2D>("vector<Vec2D>");
     emscripten::register_vector<Vec3D>("vector<Vec3D>");
     emscripten::register_vector<std::string>("vector<string>");
