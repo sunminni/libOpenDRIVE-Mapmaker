@@ -295,9 +295,10 @@ Road create_preview_road(OpenDriveMap& odr_map, std::string road_id)
 void delete_road(OpenDriveMap& odr_map, std::string id)
 {   
     Road& road = odr_map.id_to_road.at(id);
-    std::cout<<"road.junction "<<road.junction <<std::endl;
-    std::cout<<"road.predecessor.id "<<road.predecessor.id <<std::endl;
-    std::cout<<"road.successor.id "<<road.successor.id <<std::endl;
+    std::cout<<"delete road: "<<id<<std::endl;
+    // std::cout<<"road.junction "<<road.junction <<std::endl;
+    // std::cout<<"road.predecessor.id "<<road.predecessor.id <<std::endl;
+    // std::cout<<"road.successor.id "<<road.successor.id <<std::endl;
     if (road.junction != "-1"){
         // deleted road is junction type
         Junction& junc = odr_map.id_to_junction.at(road.junction);
@@ -351,15 +352,16 @@ void delete_road(OpenDriveMap& odr_map, std::string id)
     }
     else{
         // deleted road is road type
+        // can't delete if road is connected to junction
+        if (road.predecessor.id != "-1" && road.predecessor.type==RoadLink::Type_Junction) return;
+        if (road.successor.id != "-1" && road.successor.type==RoadLink::Type_Junction) return;
+
         if (road.predecessor.id != "-1"){
             if (road.predecessor.type==RoadLink::Type_Road){
                 Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
                 pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
                 pred_successor.attribute("elementId").set_value("-1");
                 pred_successor.attribute("elementType").set_value("road");
-            }
-            else{
-                //need to remove all references of junction to the deleted road
             }
         }
         if (road.successor.id != "-1"){
@@ -368,9 +370,6 @@ void delete_road(OpenDriveMap& odr_map, std::string id)
                 pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
                 succ_predecessor.attribute("elementId").set_value("-1");
                 succ_predecessor.attribute("elementType").set_value("road");
-            }
-            else{
-                //need to remove all references of junction to the deleted road
             }
         }
     }
