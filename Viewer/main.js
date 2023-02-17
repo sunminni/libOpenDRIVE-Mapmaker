@@ -121,26 +121,33 @@ const roadmarks_material = new THREE.MeshBasicMaterial({
 libOpenDrive().then(Module => {
     ModuleOpenDrive = Module;
     afterModuleLoad();
+});
 
+function fetch_map(){
     fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
-            loadFile(file_text, false);
+            loadFile(file_text, fetched_dict[map_filepath]);
+            fetched_dict[map_filepath] = true;
+            if (MapmakerMode === SELECTED){
+                createHandleRoad();
+            }
         });
     });
-});
+}
 
 function onFileSelect(file)
 {
-    let file_reader = new FileReader();
-    file_reader.onload = () => { loadFile(file_reader.result, true); };
-    file_reader.readAsText(file);
+    // let file_reader = new FileReader();
+    // file_reader.onload = () => { loadFile(file_reader.result, true); };
+    // file_reader.readAsText(file);
 }
 
 function loadFile(file_text, clear_map)
 {
+    console.log(file_text.length,clear_map);
     if (clear_map)
-        ModuleOpenDrive['FS_unlink'](map_filepath);
-    ModuleOpenDrive['FS_createDataFile'](".", map_filename, file_text, true, true);
+        ModuleOpenDrive['FS_unlink'](map_filename);
+    ModuleOpenDrive['FS_createDataFile']('.', map_filename, file_text, true, true);
     if (OpenDriveMap)
         OpenDriveMap.delete();
     odr_map_config = {
@@ -150,25 +157,15 @@ function loadFile(file_text, clear_map)
         center_map : false,
         abs_z_for_for_local_road_obj_outline : true
     };
-    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
+    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filename, odr_map_config);
     afterMapLoad();
-    loadOdrMap(clear_map);
-}
-
-function reloadOdrMap()
-{
-    if (OpenDriveMap)
-        OpenDriveMap.delete();
-    odr_map_config = {
-        with_lateralProfile : PARAMS.lateralProfile,
-        with_laneHeight : PARAMS.laneHeight,
-        with_road_objects : false,
-        center_map : false,
-        abs_z_for_for_local_road_obj_outline : true
-    };
-    OpenDriveMap = new ModuleOpenDrive.OpenDriveMap(map_filepath, odr_map_config);
-    afterMapLoad();
-    loadOdrMap(true, false);
+    if (first_load){
+        loadOdrMap(false);
+        first_load = false;
+    }
+    else{
+        loadOdrMap(true);
+    }
 }
 
 function loadOdrMap(clear_map = true)

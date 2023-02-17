@@ -91,6 +91,15 @@ function setMode(mode){
 
 function onKeyDown(e){
     console.log(e.key);
+    if (e.ctrlKey && e.key=='s'){
+        // save
+        console.log(e);
+        e.preventDefault();
+        map_filename = map_folder + '_' + getTimestring()+'.xodr';
+        map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
+        writeXMLFile(true);
+        return;
+    }
     if (MapmakerMode === SELECTED){
         
         if (e.key=='s'){

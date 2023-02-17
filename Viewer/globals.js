@@ -40,8 +40,12 @@ var junc_link_start_lid = null;
 
 var updateTimestamp = Date.now();
 
-var map_filename = 'RandomRoad.xodr'
-var map_filepath = './'+map_filename;
+var files_gui = null;
+var map_filename = null;
+var map_folder = null;
+var map_filepath = null;
+var fetched_dict = {};
+var first_load = true;
 
 var handle_road = null;
 var handle_mesh = null;

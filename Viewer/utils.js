@@ -620,6 +620,8 @@ function drawRoadMesh(road,mesh,preview){
 }
 
 function afterModuleLoad(){
+    getMapList();
+
     junc_gui = new dat.GUI();
     junc_gui.domElement.classList.add('junc_controls');
     junc_gui.domElement.getElementsByClassName('close-button')[0].remove();
@@ -708,9 +710,69 @@ function afterMapLoad(){
         // console.log(predecessor,successor);
 }
 
-function writeXMLFile(){
+function getMapList(){
+    fetch('http://localhost:8000/getMapList', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: "",
+    }).then((response)=>{
+        return response.text();
+    }).then(function(data) {
+        files_gui = new dat.GUI();
+        files_gui.domElement.classList.add('files_controls');
+        files_gui.domElement.getElementsByClassName('close-button')[0].remove();
+        files_dict = JSON.parse(data);
+        for (const [folder, files] of Object.entries(files_dict)) {
+            let folderC = files_gui.addFolder(folder);
+            let html_string = "";
+            let first = true;
+            for (const file of files){
+                map_filename = file;
+                map_folder = folder;
+                map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
+                if (!map_filepath in fetched_dict){
+                    fetched_dict[map_filepath] = false;
+                }
+            }
+
+            for (const file of files){
+                if (first){
+                    first = false;
+                    map_filename = file;
+                    map_folder = folder;
+                    map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
+                    html_string+="<div onclick='onFileClick(this)' class='file selected'>"+file+"</div>";
+                }
+                else{
+                    html_string+="<div onclick='onFileClick(this)' class='file'>"+file+"</div>";
+                }
+            }
+            folderC.domElement.innerHTML = html_string;
+        }
+        console.log('asdf');
+        console.log(map_filepath,map_filename);
+        fetch_map();
+    });
+}
+
+function onFileClick(dom){
+    map_filename = dom.innerHTML;
+    map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
+    console.log(map_filename,map_filepath);
+    for (file of document.getElementsByClassName("file")){
+        file.classList.remove('selected');
+    }
+    dom.classList.add('selected');
+    setMode(DEFAULT);
+    fetch_map();
+}
+
+function writeXMLFile(new_file=false){
     let body_dict = {};
-    body_dict['filename'] = map_filename;
+    body_dict['filepath'] = map_filepath;
     body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
     fetch('http://localhost:8000/save', {
         method: 'POST',
@@ -719,14 +781,14 @@ function writeXMLFile(){
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body_dict),
-    }).then(()=>{fetch(map_filepath).then((file_data) => {
-        file_data.text().then((file_text) => {
-            loadFile(file_text, true);
-            if (MapmakerMode === SELECTED){
-                createHandleRoad();
-            }
-        });
-    });});
+    }).then(()=>{
+        if (new_file){
+            getMapList();
+        }
+        else{
+            fetch_map();
+        }
+    });
 }
 
 function createHandleRoad(){
@@ -737,4 +799,16 @@ function createHandleRoad(){
 function updateCurJunction(){
     console.log("updateCurJunction");
     
+}
+
+function getTimestring(){
+    let date = new Date();
+    let year = date.getFullYear();
+    let month = ('0'+date.getMonth()).slice(-2);
+    let day = ('0'+date.getDay()).slice(-2);
+    let hour = ('0'+date.getHours()).slice(-2);
+    let min = ('0'+date.getMinutes()).slice(-2);
+    let sec = ('0'+date.getSeconds()).slice(-2);
+    let timestring = year+month+day+'_'+hour+min+sec;
+    return timestring;
 }

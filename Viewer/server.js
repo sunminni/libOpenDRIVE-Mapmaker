@@ -25,11 +25,30 @@ http.createServer((request, response) => {
             body.push(chunk);
         }).on("end", () => {
             body_dict = JSON.parse(Buffer.concat(body).toString());
-            filename = body_dict['filename'];
+            filepath = body_dict['filepath'];
             data = body_dict['data'];
-            fs.writeFileSync(filename, data);
+            fs.writeFileSync(filepath, data);
             response.writeHead(200);
             response.end();
         });
     }
+
+    if (request.method === "POST" && request.url === "/getMapList") {
+        response.writeHead(200);
+        let files_dict = {};
+        let folders = fs.readdirSync("maps");
+        folders.forEach(folder => {
+            files_dict[folder] = [];
+            let files = fs.readdirSync("maps/"+folder);
+            files.sort();
+            files.reverse();
+            files.forEach(file => {
+                files_dict[folder].push(file);
+            });
+        });
+        response.write(JSON.stringify(files_dict));
+        response.end();
+        return;
+    }
+
 }).listen(8000);
