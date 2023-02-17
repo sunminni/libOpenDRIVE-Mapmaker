@@ -17,6 +17,7 @@ const JUNCTION_2 = "create junction link: select out lane";
 
 var arrow1 = null;
 var link_arrows = [];
+var junc_lines = [];
 var MapmakerMode = "init";
 
 var mouse_vec = new THREE.Vector3();

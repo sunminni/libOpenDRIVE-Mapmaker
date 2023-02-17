@@ -769,6 +769,50 @@ std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int la
     return {xyz[0],xyz[1],RG.hdg0};
 }
 
+std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map)
+{
+    std::vector<std::vector<double>> junction_bboxes;
+    for (auto& id_junction : odr_map.id_to_junction){
+        std::vector<double> junction_bbox;
+        junction_bbox.push_back(std::stod(id_junction.first));
+        Junction& junc = id_junction.second;
+        double minx = std::numeric_limits<double>::max();
+        double miny = std::numeric_limits<double>::max();
+        double maxx = std::numeric_limits<double>::min();
+        double maxy = std::numeric_limits<double>::min();
+        Vec3D xyz;
+        for (auto& id_conn : junc.id_to_connection){
+            Road& road = odr_map.id_to_road.at(id_conn.second.connecting_road);
+            xyz = road.get_xyz(0,-get_lane_width(road),0);
+            if (xyz[0]>maxx) maxx = xyz[0];
+            if (xyz[0]<minx) minx = xyz[0];
+            if (xyz[1]>maxy) maxy = xyz[1];
+            if (xyz[1]<miny) miny = xyz[1];
+            xyz = road.get_xyz(road.length,-get_lane_width(road),0);
+            if (xyz[0]>maxx) maxx = xyz[0];
+            if (xyz[0]<minx) minx = xyz[0];
+            if (xyz[1]>maxy) maxy = xyz[1];
+            if (xyz[1]<miny) miny = xyz[1];
+            xyz = road.get_xyz(0,0,0);
+            if (xyz[0]>maxx) maxx = xyz[0];
+            if (xyz[0]<minx) minx = xyz[0];
+            if (xyz[1]>maxy) maxy = xyz[1];
+            if (xyz[1]<miny) miny = xyz[1];
+            xyz = road.get_xyz(road.length,0,0);
+            if (xyz[0]>maxx) maxx = xyz[0];
+            if (xyz[0]<minx) minx = xyz[0];
+            if (xyz[1]>maxy) maxy = xyz[1];
+            if (xyz[1]<miny) miny = xyz[1];
+        }
+        junction_bbox.push_back(minx);
+        junction_bbox.push_back(miny);
+        junction_bbox.push_back(maxx);
+        junction_bbox.push_back(maxy);
+        junction_bboxes.push_back(junction_bbox);
+    }
+    return junction_bboxes;
+}
+
 std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
 {
     std::vector<std::vector<double>> road_arrows;

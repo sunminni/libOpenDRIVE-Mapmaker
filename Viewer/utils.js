@@ -644,8 +644,7 @@ function afterModuleLoad(){
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
 
-function afterMapLoad(){
-
+function drawLinks(){
     for (let arrow of link_arrows){
         scene.remove(arrow);
     }
@@ -674,6 +673,45 @@ function afterMapLoad(){
         scene.add(arrow);
         link_arrows.push(arrow);
     }
+}
+
+function drawJunctionBBoxes(){
+    for (let line of junc_lines){
+        scene.remove(line);
+    }
+    junc_lines = [];
+    std_vec = ModuleOpenDrive.get_junction_bboxes(OpenDriveMap);
+    console.log("SDFDSFDSFDSFDSFDS",std_vec.size());
+    for(let i=0;i<std_vec.size();i++){
+        let junc_id = std_vec.get(i).get(0);
+        let minx = std_vec.get(i).get(1);
+        let miny = std_vec.get(i).get(2);
+        let maxx = std_vec.get(i).get(3);
+        let maxy = std_vec.get(i).get(4);
+        console.log(minx,miny,maxx,maxy);
+        const material = new THREE.LineBasicMaterial({
+            color: 0xffffff
+        });
+        
+        const points = [];
+        points.push( new THREE.Vector3( minx, miny, 0.01 ) );
+        points.push( new THREE.Vector3( minx, maxy, 0.01 ) );
+        points.push( new THREE.Vector3( maxx, maxy, 0.01 ) );
+        points.push( new THREE.Vector3( maxx, miny, 0.01 ) );
+        points.push( new THREE.Vector3( minx, miny, 0.01 ) );
+        
+        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+        
+        let line = new THREE.Line( geometry, material );
+        scene.add( line );
+        junc_lines.push( line );
+    }
+}
+
+function afterMapLoad(){
+    drawLinks();
+
+    drawJunctionBBoxes();
 
     if (junc_idC !== null){
         junc_idC.remove();
@@ -688,26 +726,6 @@ function afterMapLoad(){
     if (junctions.size()>0)
         junc_idC.setValue(junctions.get(0));
 
-        // if (std_vec.get(i).get(7) == 1){
-        //     let pred_x = std_vec.get(i).get(8);
-        //     let pred_y = std_vec.get(i).get(9);
-        //     let x = std_vec.get(i).get(0);
-        //     let y = std_vec.get(i).get(1);
-        //     let hdg = std_vec.get(i).get(2);
-        //     let from = new THREE.Vector3(x, y, 0);
-        //     let to = new THREE.Vector3(pred_x, pred_y, 0);
-        //     let direction = new THREE.Vector3(Math.cos(hdg),Math.sin(hdg),0);
-        //     let arrow = new THREE.ArrowHelper(direction, from, 1, 0xffff00, 1, 1);
-        //     arrow.line.material.linewidth = 5;
-        //     scene.add(arrow);
-        //     link_arrows.push(arrow);
-
-        // }
-        // if (std_vec.get(i).get(10) == 1){
-        //     let succ_x = std_vec.get(i).get(11);
-        //     let succ_y = std_vec.get(i).get(12);
-        // }
-        // console.log(predecessor,successor);
 }
 
 function getMapList(){

@@ -30,5 +30,6 @@ std::vector<double> calc_end(std::string line_type, double x, double y, double h
 void add_link(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::vector<double>> geometries, std::string junc_id, std::string in_road_id, int in_lane_id, std::string out_road_id, int out_lane_id);
 pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_lane_id, int max_lane_id, double lane_width, std::vector<std::vector<double>> geometries);
 double get_lane_width(Road& road);
+std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map);
 
 } // namespace odr
