@@ -10,7 +10,7 @@ class OpenDriveMap;
 
 Mesh3D get_refline_segments(const OpenDriveMap& odr_map, double eps);
 RoadNetworkMesh get_road_network_mesh(const OpenDriveMap& odr_map, double eps);
-std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map);
+std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map);
 std::string save_map(const OpenDriveMap& odr_map);
 Road get_road(const OpenDriveMap& odr_map, std::string id);
 RoadNetworkMesh create_road_mesh(double eps, Road& road);

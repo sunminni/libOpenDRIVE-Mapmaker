@@ -275,7 +275,7 @@ function onMouseClick(event){
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_link(OpenDriveMap, preview_road, JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
+                ModuleOpenDrive.add_link(OpenDriveMap, preview_road, preview_geometries, JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
                 setMode(JUNCTION);
                 writeXMLFile();
             }

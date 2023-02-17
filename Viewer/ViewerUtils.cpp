@@ -298,32 +298,79 @@ void delete_road(OpenDriveMap& odr_map, std::string id)
     std::cout<<"road.junction "<<road.junction <<std::endl;
     std::cout<<"road.predecessor.id "<<road.predecessor.id <<std::endl;
     std::cout<<"road.successor.id "<<road.successor.id <<std::endl;
-    if (road.predecessor.id != "-1"){
-        if (road.predecessor.type==RoadLink::Type_Road){
-            Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
-            pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
-            pred_successor.attribute("elementId").set_value("-1");
-            pred_successor.attribute("elementType").set_value("road");
-        }
-    }
-    if (road.successor.id != "-1"){
-        if (road.successor.type==RoadLink::Type_Road){
-            Road& succ_road = odr_map.id_to_road.at(road.successor.id);
-            pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
-            succ_predecessor.attribute("elementId").set_value("-1");
-            succ_predecessor.attribute("elementType").set_value("road");
-        }
-    }
     if (road.junction != "-1"){
-        std::cout<< "road.junction " << road.junction<<std::endl;
-        for (auto& id_junction_pair : odr_map.id_to_junction)
-        {
-            Junction& junc = id_junction_pair.second;
-            for (pugi::xml_node connection: junc.xml_node.children("connection")){
-                std::cout<<connection.attribute("connectingRoad").value()<<std::endl;
-                if (connection.attribute("connectingRoad").value()==id){
-                    junc.xml_node.remove_child(connection);
-                }
+        // deleted road is junction type
+        Junction& junc = odr_map.id_to_junction.at(road.junction);
+        for (pugi::xml_node connection: junc.xml_node.children("connection")){
+            if (connection.attribute("connectingRoad").value()==id){
+                junc.xml_node.remove_child(connection);
+                break;
+            }
+        }
+        Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
+        Road& succ_road = odr_map.id_to_road.at(road.successor.id);
+        
+        int pred_count = 0;
+        int succ_count = 0;
+        // look at all the roads within the junction and check if there are any references to pred/succ
+        for (pugi::xml_node connection: junc.xml_node.children("connection")){
+            Road& con_road = odr_map.id_to_road.at(connection.attribute("connectingRoad").value());
+            if (con_road.predecessor.id == pred_road.id) pred_count++;
+            if (con_road.successor.id == pred_road.id) pred_count++;
+            if (con_road.predecessor.id == succ_road.id) succ_count++;
+            if (con_road.successor.id == succ_road.id) succ_count++;
+        }
+        if (pred_count==0){
+            // deleted road was last link
+            int pred_lane_id = road.get_lanesection(0).id_to_lane.at(-1).predecessor;
+            pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
+            pugi::xml_node pred_predecessor = pred_road.xml_node.child("link").child("predecessor");
+            if (pred_lane_id<0){
+                pred_successor.attribute("elementId").set_value("-1");
+                pred_successor.attribute("elementType").set_value("road");
+            }
+            else{
+                pred_predecessor.attribute("elementId").set_value("-1");
+                pred_predecessor.attribute("elementType").set_value("road");
+            }
+        }
+        if (succ_count==0){
+            // deleted road was last link
+            int succ_lane_id = road.get_lanesection(0).id_to_lane.at(-1).successor;
+            pugi::xml_node succ_successor = succ_road.xml_node.child("link").child("successor");
+            pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
+            if (succ_lane_id<0){
+                succ_predecessor.attribute("elementId").set_value("-1");
+                succ_predecessor.attribute("elementType").set_value("road");
+            }
+            else{
+                succ_successor.attribute("elementId").set_value("-1");
+                succ_successor.attribute("elementType").set_value("road");
+            }
+        }
+    }
+    else{
+        // deleted road is road type
+        if (road.predecessor.id != "-1"){
+            if (road.predecessor.type==RoadLink::Type_Road){
+                Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
+                pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
+                pred_successor.attribute("elementId").set_value("-1");
+                pred_successor.attribute("elementType").set_value("road");
+            }
+            else{
+                //need to remove all references of junction to the deleted road
+            }
+        }
+        if (road.successor.id != "-1"){
+            if (road.successor.type==RoadLink::Type_Road){
+                Road& succ_road = odr_map.id_to_road.at(road.successor.id);
+                pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
+                succ_predecessor.attribute("elementId").set_value("-1");
+                succ_predecessor.attribute("elementType").set_value("road");
+            }
+            else{
+                //need to remove all references of junction to the deleted road
             }
         }
     }
@@ -380,9 +427,11 @@ void add_link_road(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::v
     // CONNECT
     Road& pred_road = odr_map.id_to_road.at(pred_road_id);
     pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
+    pugi::xml_node pred_predecessor = pred_road.xml_node.child("link").child("predecessor");
 
     Road& succ_road = odr_map.id_to_road.at(succ_road_id);
     pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
+    pugi::xml_node succ_successor = succ_road.xml_node.child("link").child("successor");
 
     std::string new_road_id = std::to_string(get_new_road_id(odr_map));
     Road& new_road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,preview_road.length,junc_id,new_road_id)}).first->second;
@@ -392,39 +441,48 @@ void add_link_road(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::v
     new_road.xml_node.child("link").child("successor").attribute("elementId").set_value(succ_road_id.c_str());
     new_road.xml_node.child("lanes").child("laneSection").child("right").child("lane").child("link").child("predecessor").attribute("id").set_value(pred_lane_id);
     new_road.xml_node.child("lanes").child("laneSection").child("right").child("lane").child("link").child("successor").attribute("id").set_value(succ_lane_id);
-    pred_successor.attribute("elementType").set_value("junction");
-    pred_successor.attribute("elementId").set_value(junc_id.c_str());
 
-    succ_predecessor.attribute("elementType").set_value("junction");
-    succ_predecessor.attribute("elementId").set_value(junc_id.c_str());
+    if(pred_lane_id<0){
+        pred_successor.attribute("elementType").set_value("junction");
+        pred_successor.attribute("elementId").set_value(junc_id.c_str());
+    }
+    else{
+        pred_predecessor.attribute("elementType").set_value("junction");
+        pred_predecessor.attribute("elementId").set_value(junc_id.c_str());
+    }
+
+    if(succ_lane_id<0){
+        succ_predecessor.attribute("elementType").set_value("junction");
+        succ_predecessor.attribute("elementId").set_value(junc_id.c_str());
+    }
+    else{
+        succ_successor.attribute("elementType").set_value("junction");
+        succ_successor.attribute("elementId").set_value(junc_id.c_str());
+    }
 }
 
 void add_link(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::vector<double>> geometries, std::string junc_id, std::string in_road_id, int in_lane_id, std::string out_road_id, int out_lane_id)
 {
     Junction& junc = odr_map.id_to_junction.at(junc_id);
-    int count = 0;
+    int max_con_id = 0;
     for (pugi::xml_node connection: junc.xml_node.children("connection"))
     {
-        // TODO: check if a connection already exists between the two roads 
-        // if (std::stoi(connection.attribute("incomingRoad").value())==std::stoi(in_road_id)){
-        //     std::string con_road_id = connection.attribute("connectingRoad").value();
-        //     Road& con_road = odr_map.id_to_road.at(con_road_id);
-        //     if (con_road.successor.id == out_road_id){
-        //         Lane lane = con_road.s_to_lanesection[0].id_to_lane[-1];
-        //         if (lane.predecessor == in_lane_id && lane.successor == out_lane_id ){
-        //             // if so, return;
-        //             std::cout<<"connection already exists"<<std::endl;
-        //             return;
-        //         }
-        //     }
-        // }
-        count++;
+        // check if a connection already exists between the two lanes 
+        std::string con_road_id = connection.attribute("connectingRoad").value();
+        Road& con_road = odr_map.id_to_road.at(con_road_id);
+        int pred_lane_id = con_road.get_lanesection(0).id_to_lane.at(-1).predecessor;
+        int succ_lane_id = con_road.get_lanesection(0).id_to_lane.at(-1).successor;
+        if (con_road.predecessor.id == in_road_id && con_road.successor.id == out_road_id && pred_lane_id == in_lane_id && succ_lane_id == out_lane_id){
+            std::cout<<"connection already exists"<<std::endl;
+            return;
+        }
+        if (std::stoi(connection.attribute("id").value())>max_con_id) max_con_id = std::stoi(connection.attribute("id").value());
     }
 
     add_link_road(odr_map, preview_road, geometries, junc_id, in_road_id, in_lane_id, out_road_id, out_lane_id);
 
     pugi::xml_node connection = junc.xml_node.append_child("connection");
-    connection.append_attribute("id").set_value(count+1);
+    connection.append_attribute("id").set_value(max_con_id+1);
     connection.append_attribute("incomingRoad").set_value(in_road_id.c_str());
     connection.append_attribute("connectingRoad").set_value(get_new_road_id(odr_map)-1);
     connection.append_attribute("contactPoint").set_value("start");
@@ -621,7 +679,7 @@ void delete_junction(OpenDriveMap& odr_map, std::string junction_id)
     //         succ_predecessor.attribute("elementId").set_value("-1");
     //     }
     // }
-    odr_map.id_to_junction.erase(junction_id);
+    // odr_map.id_to_junction.erase(junction_id);
 }
 
 std::vector<double> calc_end(std::string line_type, double x, double y, double hdg, double road_length, double curvature)
@@ -712,59 +770,213 @@ std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int la
     return {xyz[0],xyz[1],RG.hdg0};
 }
 
-std::vector<std::vector<double>> get_road_arrows(const OpenDriveMap& odr_map)
+std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
 {
     std::vector<std::vector<double>> road_arrows;
-    for (const auto& id_road : odr_map.id_to_road)
+    for (auto& id_road : odr_map.id_to_road)
     {
-        const Road& road = id_road.second;
-        
+        Road& road = id_road.second;
         if (std::stod(road.id)<0) continue;
-        
+
         std::vector<double> tmp_vec;
-        RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);
-        tmp_vec.push_back(RG.x0);
-        tmp_vec.push_back(RG.y0);
-        tmp_vec.push_back(RG.hdg0);
+        Vec3D xyz;
+        double type;
+
+        for (auto& ls : road.get_lanesections()){
+            type = road.junction=="-1"?0:1; 
+            for (auto& lane : ls.get_lanes()){
+                double lane_w = get_lane_width(road);
+                if (lane.id<0) {
+                    tmp_vec.clear();
+                    tmp_vec.push_back(type);
+                    xyz = road.get_xyz(1,lane.id*lane_w+lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    xyz = road.get_xyz(2,lane.id*lane_w+lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    road_arrows.push_back(tmp_vec);
+
+                    tmp_vec.clear();
+                    tmp_vec.push_back(type);
+                    xyz = road.get_xyz(road.length-2,lane.id*lane_w+lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    xyz = road.get_xyz(road.length-1,lane.id*lane_w+lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    road_arrows.push_back(tmp_vec);
+                }
+                else if (lane.id>0) {
+                    tmp_vec.clear();
+                    tmp_vec.push_back(type);
+                    xyz = road.get_xyz(2,lane.id*lane_w-lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    xyz = road.get_xyz(1,lane.id*lane_w-lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    road_arrows.push_back(tmp_vec);
+
+                    tmp_vec.clear();
+                    tmp_vec.push_back(type);
+                    xyz = road.get_xyz(road.length-1,lane.id*lane_w-lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    xyz = road.get_xyz(road.length-2,lane.id*lane_w-lane_w/2,0);
+                    tmp_vec.push_back(xyz.at(0));
+                    tmp_vec.push_back(xyz.at(1));
+                    road_arrows.push_back(tmp_vec);
+                }
+            }
+        }
+
+        if (road.junction=="-1"){
+            if (road.predecessor.type==RoadLink::Type_Road && road.predecessor.id!="-1"){
+                //pred_road->road
+                tmp_vec.clear();
+                tmp_vec.push_back(2);
+                Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
+                xyz = pred_road.get_xyz(pred_road.length,0,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                xyz = road.get_xyz(1,0,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                road_arrows.push_back(tmp_vec);
+            }
+            else if (road.predecessor.type==RoadLink::Type_Junction && road.predecessor.id!="-1"){
+                //pred_junc->road
+                Junction& pred_junc = odr_map.id_to_junction.at(road.predecessor.id);
+                for (auto& id_conn : pred_junc.id_to_connection){
+                    Road& pred_junc_road = odr_map.id_to_road.at(id_conn.second.connecting_road);
+                    if (pred_junc_road.successor.id==road.id){
+                        tmp_vec.clear();
+                        tmp_vec.push_back(4);
+                        double pred_junc_road_lw = get_lane_width(pred_junc_road);
+                        xyz = pred_junc_road.get_xyz(pred_junc_road.length,-pred_junc_road_lw/2,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        double road_lw = get_lane_width(road);
+                        int to_lane_id = pred_junc_road.get_lanesection(0).id_to_lane.at(-1).successor;
+                        double t = to_lane_id>0?to_lane_id*road_lw-road_lw/2:to_lane_id*road_lw+road_lw/2;
+                        xyz = road.get_xyz(1,t,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        road_arrows.push_back(tmp_vec);
+                    }
+                    if (pred_junc_road.predecessor.id==road.id){
+                        tmp_vec.clear();
+                        tmp_vec.push_back(4);
+                        double road_lw = get_lane_width(road);
+                        int from_lane_id = pred_junc_road.get_lanesection(0).id_to_lane.at(-1).predecessor;
+                        double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
+                        xyz = road.get_xyz(1,t,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        double pred_junc_road_lw = get_lane_width(pred_junc_road);
+                        xyz = pred_junc_road.get_xyz(0,-pred_junc_road_lw/2,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        road_arrows.push_back(tmp_vec);
+                    }
+                }
+            }
+            if (road.successor.type==RoadLink::Type_Road && road.successor.id!="-1"){
+                //road->succ_road
+                tmp_vec.clear();
+                tmp_vec.push_back(2);
+                xyz = road.get_xyz(road.length-1,0,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                Road& succ_road = odr_map.id_to_road.at(road.successor.id);
+                xyz = succ_road.get_xyz(0,0,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                road_arrows.push_back(tmp_vec);
+            }
+            else if (road.successor.type==RoadLink::Type_Junction && road.successor.id!="-1"){
+                //road->succ_junc
+                Junction& succ_junc = odr_map.id_to_junction.at(road.successor.id);
+                for (auto& id_conn : succ_junc.id_to_connection){
+                    Road& succ_junc_road = odr_map.id_to_road.at(id_conn.second.connecting_road);
+                    if (succ_junc_road.predecessor.id==road.id){
+                        tmp_vec.clear();
+                        tmp_vec.push_back(4);
+                        double road_lw = get_lane_width(road);
+                        int from_lane_id = succ_junc_road.get_lanesection(0).id_to_lane.at(-1).predecessor;
+                        double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
+                        xyz = road.get_xyz(from_lane_id>0?1:road.length-1,t,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        double succ_junc_road_lw = get_lane_width(succ_junc_road);
+                        xyz = succ_junc_road.get_xyz(0,-succ_junc_road_lw/2,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        road_arrows.push_back(tmp_vec);
+                    }
+                    if (succ_junc_road.successor.id==road.id){
+                        tmp_vec.clear();
+                        tmp_vec.push_back(4);
+                        double succ_junc_road_lw = get_lane_width(succ_junc_road);
+                        xyz = succ_junc_road.get_xyz(succ_junc_road.length,-succ_junc_road_lw/2,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        double road_lw = get_lane_width(road);
+                        int from_lane_id = succ_junc_road.get_lanesection(0).id_to_lane.at(-1).successor;
+                        double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
+                        xyz = road.get_xyz(from_lane_id>0?road.length-1:1,t,0);
+                        tmp_vec.push_back(xyz.at(0));
+                        tmp_vec.push_back(xyz.at(1));
+                        road_arrows.push_back(tmp_vec);
+                    }
+                }
+            }
+        }
+        else{
+            if (road.predecessor.type==RoadLink::Type_Road){
+                //pred_road->junc
+                tmp_vec.clear();
+                tmp_vec.push_back(3);
+                int from_lane_id = road.get_lanesection(0).id_to_lane.at(-1).predecessor;
+                Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
+                double pred_road_lw = get_lane_width(pred_road);
+                double t = from_lane_id>0?from_lane_id*pred_road_lw-pred_road_lw/2:from_lane_id*pred_road_lw+pred_road_lw/2;
+                xyz = pred_road.get_xyz(from_lane_id>0?0:pred_road.length,t,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                double road_lw = get_lane_width(road);
+                Vec3D xyz = road.get_xyz(1,-road_lw/2,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                road_arrows.push_back(tmp_vec);
+                // tmp_vec.push_back(-1);tmp_vec.push_back(-1);tmp_vec.push_back(-1);
+            }
+            else{
+                //pred_junc->junc
+            }
+            if (road.successor.type==RoadLink::Type_Road){
+                //junc->succ_road
+                tmp_vec.clear();
+                tmp_vec.push_back(3);
+                int to_lane_id = road.get_lanesection(0).id_to_lane.at(-1).successor;
+                double road_lw = get_lane_width(road);
+                Vec3D xyz = road.get_xyz(road.length-1,-road_lw/2,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                Road& succ_road = odr_map.id_to_road.at(road.successor.id);
+                double succ_road_lw = get_lane_width(succ_road);
+                double t = to_lane_id>0?to_lane_id*succ_road_lw-succ_road_lw/2:to_lane_id*succ_road_lw+succ_road_lw/2;
+                xyz = succ_road.get_xyz(to_lane_id>0?succ_road.length:0,t,0);
+                tmp_vec.push_back(xyz.at(0));
+                tmp_vec.push_back(xyz.at(1));
+                road_arrows.push_back(tmp_vec);
+            }
+            else{
+                //junc->succ_junc
+            }
+        }
         
-        double temp_s = 0;
-        if (RG.length<road.length){
-            temp_s = RG.length;
-        }
-
-        RoadGeometry& RG2 = *road.ref_line.s0_to_geometry.at(temp_s);
-
-        // std::cout<<RG.type<<std::endl;
-        if (RG2.type == GeometryType::GeometryType_Line){
-            std::vector<double> x_y_hdg = calc_end("line",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,0);
-            tmp_vec.push_back(x_y_hdg[0]);
-            tmp_vec.push_back(x_y_hdg[1]);
-            tmp_vec.push_back(x_y_hdg[2]);
-        }
-        else{
-            Arc *arc = dynamic_cast<Arc*>(&RG2);
-            std::vector<double> x_y_hdg = calc_end("arc",RG2.x0,RG2.y0,RG2.hdg0,RG2.length,(*arc).curvature);
-            tmp_vec.push_back(x_y_hdg[0]);
-            tmp_vec.push_back(x_y_hdg[1]);
-            tmp_vec.push_back(x_y_hdg[2]);
-        }
-
-        tmp_vec.push_back(std::stod(road.junction));
-        tmp_vec.push_back(std::stod(road.id));
-
-        if (road.predecessor.type==RoadLink::Type_Road && road.junction=="-1"){
-            tmp_vec.push_back(std::stod(road.predecessor.id));
-        }
-        else{
-            tmp_vec.push_back(-1);
-        }
-        if (road.successor.type==RoadLink::Type_Road && road.junction=="-1"){
-            tmp_vec.push_back(std::stod(road.successor.id));
-        }
-        else{
-            tmp_vec.push_back(-1);
-        }
-        road_arrows.push_back(tmp_vec);
     }
     return road_arrows;
 }
