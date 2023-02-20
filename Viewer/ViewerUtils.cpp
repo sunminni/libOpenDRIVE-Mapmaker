@@ -778,8 +778,8 @@ std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map)
         Junction& junc = id_junction.second;
         double minx = std::numeric_limits<double>::max();
         double miny = std::numeric_limits<double>::max();
-        double maxx = std::numeric_limits<double>::min();
-        double maxy = std::numeric_limits<double>::min();
+        double maxx = std::numeric_limits<double>::lowest();
+        double maxy = std::numeric_limits<double>::lowest();
         Vec3D xyz;
         for (auto& id_conn : junc.id_to_connection){
             Road& road = odr_map.id_to_road.at(id_conn.second.connecting_road);
