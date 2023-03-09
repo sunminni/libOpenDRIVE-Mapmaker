@@ -144,7 +144,6 @@ function onFileSelect(file)
 
 function loadFile(file_text, clear_map)
 {
-    console.log(file_text.length,clear_map);
     if (clear_map)
         ModuleOpenDrive['FS_unlink'](map_filename);
     ModuleOpenDrive['FS_createDataFile']('.', map_filename, file_text, true, true);

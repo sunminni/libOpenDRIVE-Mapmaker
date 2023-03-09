@@ -687,7 +687,7 @@ function drawJunctionBBoxes(){
         let miny = std_vec.get(i).get(2);
         let maxx = std_vec.get(i).get(3);
         let maxy = std_vec.get(i).get(4);
-        console.log(minx,miny,maxx,maxy);
+        // console.log(minx,miny,maxx,maxy);
         const material = new THREE.LineBasicMaterial({
             color: 0xffffff
         });
@@ -769,8 +769,7 @@ function getMapList(){
             }
             folderC.domElement.innerHTML = html_string;
         }
-        console.log('asdf');
-        console.log(map_filepath,map_filename);
+        // console.log(map_filepath,map_filename);
         fetch_map();
     });
 }

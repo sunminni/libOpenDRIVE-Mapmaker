@@ -880,7 +880,8 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 tmp_vec.clear();
                 tmp_vec.push_back(2);
                 Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
-                xyz = pred_road.get_xyz(pred_road.length,0,0);
+                bool opposite_dir = euclDistance(road.get_xyz(0,0,0),pred_road.get_xyz(0,0,0))<0.1;
+                xyz = pred_road.get_xyz(opposite_dir?0:pred_road.length,0,0);
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
                 xyz = road.get_xyz(1,0,0);
@@ -933,7 +934,8 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
                 Road& succ_road = odr_map.id_to_road.at(road.successor.id);
-                xyz = succ_road.get_xyz(0,0,0);
+                bool opposite_dir = euclDistance(road.get_xyz(road.length,0,0),succ_road.get_xyz(succ_road.length,0,0))<0.1;
+                xyz = succ_road.get_xyz(opposite_dir?succ_road.length:0,0,0);
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
                 road_arrows.push_back(tmp_vec);
@@ -1049,26 +1051,56 @@ void add_road(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::vector
         Road& pred_road = odr_map.id_to_road.at(pred_road_id);
         pugi::xml_node pred_successor = pred_road.xml_node.child("link").child("successor");
         bool pred_no_succ = std::stoi(pred_successor.attribute("elementId").value())==-1;
+        pugi::xml_node pred_predecessor = pred_road.xml_node.child("link").child("predecessor");
+        bool pred_no_pred = std::stoi(pred_predecessor.attribute("elementId").value())==-1;
+        bool opposite_dir_pred = euclDistance(preview_road.get_xyz(0,0,0),pred_road.get_xyz(0,0,0))<0.1;
 
         if (succ_road_id=="-1"){
             // EXTEND
-            if (!pred_no_succ) return; // predecessor already has successor
-                
-            // predecessor has no successor
+            if (opposite_dir_pred && (!pred_no_pred)) return; // opposite facing predecessor already has predecessor
+            if ((!opposite_dir_pred) && (!pred_no_succ)) return; // same facing predecessor already has successor
+
             std::string new_road_id = std::to_string(get_new_road_id(odr_map));
             Road& new_road = odr_map.id_to_road.insert({new_road_id,Road(new_road_id,preview_road.length,"-1",new_road_id)}).first->second;
             new_road.xml_node = create_road_xml(odr_map,new_road_id,min_lane_id,max_lane_id,lane_width,geometries);
             new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(pred_road_id.c_str());
-            pred_successor.attribute("elementId").set_value(new_road_id.c_str());
+            if (opposite_dir_pred){
+                pred_predecessor.attribute("elementId").set_value(new_road_id.c_str());
+            }
+            else{
+                pred_successor.attribute("elementId").set_value(new_road_id.c_str());
+            }
+
         }
         else{
             // CONNECT
             Road& succ_road = odr_map.id_to_road.at(succ_road_id);
             pugi::xml_node succ_predecessor = succ_road.xml_node.child("link").child("predecessor");
             bool succ_no_pred = std::stoi(succ_predecessor.attribute("elementId").value())==-1;
+            pugi::xml_node succ_successor = succ_road.xml_node.child("link").child("successor");
+            bool succ_no_succ = std::stoi(succ_successor.attribute("elementId").value())==-1;
+            bool opposite_dir_succ = euclDistance(preview_road.get_xyz(preview_road.length,0,0),succ_road.get_xyz(succ_road.length,0,0))<0.1;
 
-            if (!pred_no_succ) return; // predecessor already has successor
-            if (!succ_no_pred) return; // successor already has predecessor
+            if (opposite_dir_pred && (!pred_no_pred)){
+                // opposite facing predecessor already has predecessor
+                std::cout<<"opposite facing predecessor already has predecessor"<<std::endl;
+                return;
+            }
+            if ((!opposite_dir_pred) && (!pred_no_succ)){
+                // same facing predecessor already has successor
+                std::cout<<"same facing predecessor already has successor"<<std::endl;
+                return;
+            }
+            if (opposite_dir_succ && (!succ_no_succ)){
+                // opposite facing successor already has successor
+                std::cout<<"opposite facing successor already has successor"<<std::endl;
+                return;
+            }
+            if ((!opposite_dir_succ) && (!succ_no_pred)){
+                // same facing successor already has predecessor
+                std::cout<<"same facing successor already has predecessor"<<std::endl;
+                return;
+            }
 
             // connect two roads that weren't connected to anything
             std::string new_road_id = std::to_string(get_new_road_id(odr_map));
@@ -1077,8 +1109,18 @@ void add_road(OpenDriveMap& odr_map, Road& preview_road, std::vector<std::vector
             new_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(pred_road_id.c_str());
             new_road.xml_node.child("link").child("successor").attribute("elementId").set_value(succ_road_id.c_str());
 
-            pred_successor.attribute("elementId").set_value(new_road_id.c_str());
-            succ_predecessor.attribute("elementId").set_value(new_road_id.c_str());
+            if (opposite_dir_pred){
+                pred_predecessor.attribute("elementId").set_value(new_road_id.c_str());
+            }
+            else{
+                pred_successor.attribute("elementId").set_value(new_road_id.c_str());
+            }
+            if (opposite_dir_succ){
+                succ_successor.attribute("elementId").set_value(new_road_id.c_str());
+            }
+            else{
+                succ_predecessor.attribute("elementId").set_value(new_road_id.c_str());
+            }
         }
     }
 }
