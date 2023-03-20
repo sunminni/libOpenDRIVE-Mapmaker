@@ -629,17 +629,87 @@ function afterModuleLoad(){
 
     setMode(DEFAULT);
 
-    let image_loader = new THREE.TextureLoader();
-    let image_material = new THREE.MeshLambertMaterial({
-        map: image_loader.load('map_image.png')
-    });
-    image_material.transparent = true;
-    image_material.opacity = 0.5;
+    // Load screenshot of map
 
-    let image_geometry = new THREE.PlaneGeometry(400, 400*.75);
-    let image_mesh = new THREE.Mesh(image_geometry, image_material);
-    image_mesh.position.set(0,0,-0.1);
-    scene.add(image_mesh);
+    // let image_loader = new THREE.TextureLoader();
+    // let image_material = new THREE.MeshLambertMaterial({
+    //     map: image_loader.load('map_image.png')
+    // });
+    // image_material.transparent = true;
+    // image_material.opacity = 0.5;
+
+    // let image_geometry = new THREE.PlaneGeometry(400, 400*.75);
+    // let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    // image_mesh.position.set(0,0,-0.1);
+    // scene.add(image_mesh);
+
+    // Load vector lines
+    fetch("KCITY_LINES.bin")
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+            const view = new Float32Array(buffer);
+            let dict = {};
+
+            for (let i=0;i<view.length/5;i++){
+                let x = view[i*5+2];
+                let y = view[i*5+3];
+                map_offset_x = Math.min(map_offset_x,x);
+                map_offset_y = Math.min(map_offset_y,y);
+            }
+
+            for (let i=0;i<view.length/5;i++){
+                let type = view[i*5];
+                let id = view[i*5+1];
+                let x = view[i*5+2];
+                let y = view[i*5+3];
+                let z = view[i*5+4];
+
+                if (id in dict){
+                    dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
+                }
+                else{
+                    dict[id] = {};
+                    dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
+                    dict[id]['type'] = type;
+                }
+            }
+            
+            const white_material = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                linewidth: 1,
+            });
+            const yellow_material = new THREE.LineBasicMaterial({
+                color: 0xffff00,
+                linewidth: 1,
+            });
+            const blue_material = new THREE.LineBasicMaterial({
+                color: 0x0000ff,
+                linewidth: 1,
+            });
+
+            for (const [key, value] of Object.entries(dict)) {
+                const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
+                let material = white_material;
+                if (value['type'] < 200){
+                    material = yellow_material;
+                }
+                else if (value['type'] < 300){
+                    material = white_material;
+                }
+                else if (value['type'] < 400){
+                    material = blue_material;
+                }
+                let line = new THREE.Line( geometry, material );
+                line.matrixAutoUpdate = false;
+                scene.add( line );
+                
+                // for moving to lines when xodr file is empty..
+                // if (key==1){
+                //     const bbox = new THREE.Box3().setFromObject(line);
+                //     fitViewToBbox(bbox);
+                // }
+            }
+        });
 
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
@@ -741,17 +811,15 @@ function getMapList(){
         files_gui = new dat.GUI();
         files_gui.domElement.classList.add('files_controls');
         files_gui.domElement.getElementsByClassName('close-button')[0].remove();
-        files_dict = JSON.parse(data);
+        let files_dict = JSON.parse(data);
+        let first = true;
+        let folderC = files_gui.addFolder("folder");
+        let html_string = "";
         for (const [folder, files] of Object.entries(files_dict)) {
-            let folderC = files_gui.addFolder(folder);
-            let html_string = "";
-            let first = true;
             for (const file of files){
-                map_filename = file;
-                map_folder = folder;
-                map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
-                if (!map_filepath in fetched_dict){
-                    fetched_dict[map_filepath] = false;
+                let filepath = 'maps'+'/'+folder+'/'+file;
+                if (!filepath in fetched_dict){
+                    fetched_dict[filepath] = false;
                 }
             }
 
@@ -767,8 +835,8 @@ function getMapList(){
                     html_string+="<div onclick='onFileClick(this)' class='file'>"+file+"</div>";
                 }
             }
-            folderC.domElement.innerHTML = html_string;
         }
+        folderC.domElement.innerHTML = html_string;
         // console.log(map_filepath,map_filename);
         fetch_map();
     });
@@ -776,8 +844,9 @@ function getMapList(){
 
 function onFileClick(dom){
     map_filename = dom.innerHTML;
+    map_folder = map_filename.split('.')[0].split('_')[0];
     map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
-    console.log(map_filename,map_filepath);
+    // console.log(map_filename,map_filepath);
     for (file of document.getElementsByClassName("file")){
         file.classList.remove('selected');
     }

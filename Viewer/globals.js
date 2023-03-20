@@ -61,5 +61,6 @@ var validPreview = false;
 var g_start_lane = -1;
 var g_end_lane = 0;
 var g_lane_width = 3.5;
-
+var map_offset_x = 999999999;
+var map_offset_y = 999999999;
 var mode_info = document.getElementById('mode_info');
