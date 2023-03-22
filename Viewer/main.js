@@ -129,7 +129,7 @@ function fetch_map(){
             loadFile(file_text, fetched_dict[map_filepath]);
             fetched_dict[map_filepath] = true;
             if (MapmakerMode === SELECTED){
-                createHandleRoad();
+                drawHandleMesh();
             }
         });
     });
@@ -459,6 +459,21 @@ function getStdMapKeys(std_map, delete_map = false)
     if (delete_map)
         std_map.delete();
     return map_keys;
+}
+
+function dictToStdMap(dict){
+    let stdMap = new ModuleOpenDrive.mapIntDouble();
+    for (const [key, value] of Object.entries(dict)) {
+        stdMap.set(parseInt(key), value);
+    }
+    return stdMap;
+}
+
+function stdMapToDict(stdMap){
+    let dict = {};
+    for (let key of getStdMapKeys(stdMap))
+        dict[key.toString()] = stdMap.get(key);
+    return dict;
 }
 
 function getStdMapEntries(std_map)

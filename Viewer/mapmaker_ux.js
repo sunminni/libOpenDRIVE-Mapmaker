@@ -15,8 +15,6 @@ function showPreview(){
     scene.remove(preview_lanelines);
     
     validPreview = false;
-    let start_lane = g_start_lane;
-    let end_lane = g_end_lane;
     if (MapmakerMode === CONNECT_1){
         if (hover_road_id!==null){
             previewRoadEnd();
@@ -36,8 +34,7 @@ function showPreview(){
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             previewJuncLink();
-            start_lane = -1;
-            end_lane = 0;
+            // TODO: need to set lane_widths to contain only one lane
         }
     }
     else if (MapmakerMode === CREATE_LINE_2){
@@ -58,8 +55,8 @@ function showPreview(){
         }
     }
     if(validPreview){
-        ModuleOpenDrive.update_road(preview_road, preview_geometries, start_lane, end_lane, g_lane_width);
-        preview_mesh = drawRoadMesh(preview_road,preview_mesh,true);
+        ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMap(lane_widths));
+        drawPreviewMesh();
     }
 }
 
@@ -101,19 +98,38 @@ function onKeyDown(e){
         return;
     }
     if (MapmakerMode === SELECTED){
-        
-        if (e.key=='s'){
-            ModuleOpenDrive.write_road_xml(OpenDriveMap, HANDLE_PARAMS);
-            setMode(DEFAULT);
-            writeXMLFile();
-        }
-        
         if (e.key=='Escape'){
             setMode(DEFAULT);
         }
         if (e.key=='Delete'){
             ModuleOpenDrive.delete_road(OpenDriveMap, sel_road_id);
             setMode(DEFAULT);
+            writeXMLFile();
+        }
+        if ('7890-='.includes(e.key)){
+            if (e.key=='7'){
+                lane_widths[(getMinLane()-1).toString()] = 3.5;
+            }
+            if (e.key=='8'){
+                if(getMinLane()<-1){
+                    delete lane_widths[getMinLane().toString()];
+                }
+            }
+            if (e.key=='9'){
+                if(getMaxLane()>0){
+                    delete lane_widths[getMaxLane().toString()];
+                }
+            }
+            if (e.key=='0'){
+                lane_widths[(getMaxLane()+1).toString()] = 3.5;
+            }
+            if (e.key=='-' && hover_lane_id!==null){
+                lane_widths[hover_lane_id.toString()] = Math.max(3,Math.min(lane_widths[hover_lane_id.toString()]-0.1,5));
+            }
+            if (e.key=='=' && hover_lane_id!==null){
+                lane_widths[hover_lane_id.toString()] = Math.max(3,Math.min(lane_widths[hover_lane_id.toString()]+0.1,5));
+            }
+            ModuleOpenDrive.edit_road(OpenDriveMap, sel_road_id, dictToStdMap(lane_widths));
             writeXMLFile();
         }
     }
@@ -178,27 +194,7 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
-    if (e.key=='7'){
-        g_start_lane -= 1;
-    }
-    if (e.key=='8'){
-        g_start_lane += 1;
-    }
-    if (e.key=='9'){
-        g_end_lane -= 1;
-    }
-    if (e.key=='0'){
-        g_end_lane += 1;
-    }
-    if (e.key=='-'){
-        g_lane_width -= 0.1;
-    }
-    if (e.key=='='){
-        g_lane_width += 0.1;
-    }
-    g_start_lane = Math.min(g_start_lane,0);
-    g_end_lane = Math.max(g_end_lane,0);
-    g_lane_width = Math.max(3,Math.min(g_lane_width,5));
+    
 }
 
 function onMouseClick(event){
@@ -213,7 +209,7 @@ function onMouseClick(event){
         setMode(CREATE_LINE_2);
     }
     else if (MapmakerMode === CREATE_LINE_2){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, "-1", "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), "-1", "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
@@ -222,7 +218,7 @@ function onMouseClick(event){
         if (hover_road_id!==null){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
-            createHandleRoad();
+            drawHandleMesh();
             setMode(EXTEND_ARC);
         }
     }
@@ -230,12 +226,12 @@ function onMouseClick(event){
         if (hover_road_id!==null){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
-            createHandleRoad();
+            drawHandleMesh();
             setMode(CONNECT_2);
         }
     }
     else if (MapmakerMode === EXTEND_ROAD_LINE){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, sel_road_id, "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), sel_road_id, "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
@@ -250,7 +246,7 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         if (validPreview){
-            ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
             sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
             setMode(SELECTED);
             writeXMLFile();
@@ -261,14 +257,15 @@ function onMouseClick(event){
             sel_road_id = hover_road_id;
             sel_lanesec_s0 = hover_lanesec_s0;
             sel_lane_id = hover_lane_id;
-            createHandleRoad();
+            drawHandleMesh();
+            getLaneWidths();
             setMode(SELECTED);
         }
     }
     else if (MapmakerMode === CONNECT_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_road(OpenDriveMap, preview_road, preview_geometries, sel_road_id, hover_road_id);
+                ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), sel_road_id, hover_road_id);
             }
             setMode(DEFAULT);
             writeXMLFile();
@@ -284,7 +281,7 @@ function onMouseClick(event){
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_link(OpenDriveMap, preview_road, preview_geometries, JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
+                ModuleOpenDrive.add_link(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
                 setMode(JUNCTION);
                 writeXMLFile();
             }

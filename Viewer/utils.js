@@ -564,23 +564,21 @@ function calcMouseWorldPos(event){
     mouse_pos.copy( camera.position ).add( mouse_vec.multiplyScalar( -camera.position.z / mouse_vec.z ) );
 }
 
-function drawRoadMesh(road,mesh,preview){
-    if(preview){
-        scene.remove(preview_reflines);
-        const reflines_geom = new THREE.BufferGeometry();
-        const odr_refline_segments = ModuleOpenDrive.create_road_reflines(parseFloat(PARAMS.resolution),road);
-        reflines_geom.setAttribute('position', new THREE.Float32BufferAttribute(getStdVecEntries(odr_refline_segments.vertices).flat(), 3));
-        reflines_geom.setIndex(getStdVecEntries(odr_refline_segments.indices, true));
-        preview_reflines = new THREE.LineSegments(reflines_geom, refline_material);
-        preview_reflines.renderOrder = 10;
-        preview_reflines.visible = PARAMS.ref_line;
-        preview_reflines.matrixAutoUpdate = false;
-        disposable_objs.push(reflines_geom);
-        scene.add(preview_reflines);
-    }
+function drawPreviewMesh(){
+    scene.remove(preview_reflines);
+    const reflines_geom = new THREE.BufferGeometry();
+    const odr_refline_segments = ModuleOpenDrive.create_preview_reflines(parseFloat(PARAMS.resolution));
+    reflines_geom.setAttribute('position', new THREE.Float32BufferAttribute(getStdVecEntries(odr_refline_segments.vertices).flat(), 3));
+    reflines_geom.setIndex(getStdVecEntries(odr_refline_segments.indices, true));
+    preview_reflines = new THREE.LineSegments(reflines_geom, refline_material);
+    preview_reflines.renderOrder = 10;
+    preview_reflines.visible = PARAMS.ref_line;
+    preview_reflines.matrixAutoUpdate = false;
+    disposable_objs.push(reflines_geom);
+    scene.add(preview_reflines);
 
-    scene.remove(mesh);
-    const odr_road_network_mesh = ModuleOpenDrive.create_road_mesh(parseFloat(PARAMS.resolution),road);
+    scene.remove(preview_mesh);
+    const odr_road_network_mesh = ModuleOpenDrive.create_preview_mesh(parseFloat(PARAMS.resolution));
     const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
     const road_network_geom_new = get_geometry(odr_lanes_mesh_new);
     road_network_geom_new.attributes.color.array.fill(COLORS.road);
@@ -595,28 +593,52 @@ function drawRoadMesh(road,mesh,preview){
     }
     disposable_objs.push(road_network_geom_new);
 
-    mesh = new THREE.Mesh(road_network_geom_new, road_network_material);
+    preview_mesh = new THREE.Mesh(road_network_geom_new, road_network_material);
     
-    mesh.renderOrder = 0;
-    mesh.userData = { odr_road_network_mesh };
-    mesh.matrixAutoUpdate = false;
-    mesh.visible = !(PARAMS.view_mode == 'Outlines');
-    scene.add(mesh);
+    preview_mesh.renderOrder = 0;
+    preview_mesh.userData = { odr_road_network_mesh };
+    preview_mesh.matrixAutoUpdate = false;
+    preview_mesh.visible = !(PARAMS.view_mode == 'Outlines');
+    scene.add(preview_mesh);
     
-    if (preview){
-        scene.remove(preview_lanelines);
-        const lane_outlines_geom = new THREE.BufferGeometry();
-        lane_outlines_geom.setAttribute('position', road_network_geom_new.attributes.position);
-        lane_outlines_geom.setIndex(getStdVecEntries(odr_lanes_mesh_new.get_lane_outline_indices(), true));
-        preview_lanelines = new THREE.LineSegments(lane_outlines_geom, lane_outlines_material);
-        preview_lanelines.renderOrder = 9;
-        disposable_objs.push(lane_outlines_geom);
-        scene.add(preview_lanelines);
-    }
-
+    scene.remove(preview_lanelines);
+    const lane_outlines_geom = new THREE.BufferGeometry();
+    lane_outlines_geom.setAttribute('position', road_network_geom_new.attributes.position);
+    lane_outlines_geom.setIndex(getStdVecEntries(odr_lanes_mesh_new.get_lane_outline_indices(), true));
+    preview_lanelines = new THREE.LineSegments(lane_outlines_geom, lane_outlines_material);
+    preview_lanelines.renderOrder = 9;
+    disposable_objs.push(lane_outlines_geom);
+    scene.add(preview_lanelines);
 
     odr_lanes_mesh_new.delete();
-    return mesh;
+}
+
+function drawHandleMesh(){
+    scene.remove(handle_mesh);
+    const odr_road_network_mesh = ModuleOpenDrive.create_handle_mesh(OpenDriveMap, parseFloat(PARAMS.resolution),sel_road_id);
+    const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
+    const road_network_geom_new = get_geometry(odr_lanes_mesh_new);
+    road_network_geom_new.attributes.color.array.fill(COLORS.road);
+    for (const [vert_start_idx, _] of getStdMapEntries(odr_lanes_mesh_new.lane_start_indices)) {
+        const vert_idx_interval = odr_lanes_mesh_new.get_idx_interval_lane(vert_start_idx);
+        const vert_count = vert_idx_interval[1] - vert_idx_interval[0];
+        const vert_start_idx_encoded = encodeUInt32(vert_start_idx);
+        const attr_arr = new Float32Array(vert_count * 4);
+        for (let i = 0; i < vert_count; i++)
+            attr_arr.set(vert_start_idx_encoded, i * 4);
+        road_network_geom_new.attributes.id.array.set(attr_arr, vert_idx_interval[0] * 4);
+    }
+    disposable_objs.push(road_network_geom_new);
+
+    handle_mesh = new THREE.Mesh(road_network_geom_new, road_network_material);
+    
+    handle_mesh.renderOrder = 0;
+    handle_mesh.userData = { odr_road_network_mesh };
+    handle_mesh.matrixAutoUpdate = false;
+    handle_mesh.visible = !(PARAMS.view_mode == 'Outlines');
+    scene.add(handle_mesh);
+    
+    odr_lanes_mesh_new.delete();
 }
 
 function afterModuleLoad(){
@@ -718,7 +740,6 @@ function drawLinks(){
     for (let arrow of link_arrows){
         scene.remove(arrow);
     }
-    preview_road = ModuleOpenDrive.create_preview_road(OpenDriveMap,"-1");
     let std_vec = ModuleOpenDrive.get_road_arrows(OpenDriveMap);
     link_arrows = [];
     for(let i=0;i<std_vec.size();i++){
@@ -778,6 +799,9 @@ function drawJunctionBBoxes(){
 }
 
 function afterMapLoad(){
+
+    ModuleOpenDrive.create_preview_road(OpenDriveMap);
+
     drawLinks();
 
     drawJunctionBBoxes();
@@ -876,11 +900,6 @@ function writeXMLFile(new_file=false){
     });
 }
 
-function createHandleRoad(){
-    handle_road = ModuleOpenDrive.get_road(OpenDriveMap,sel_road_id);
-    handle_mesh = drawRoadMesh(handle_road,handle_mesh,false);
-}
-
 function updateCurJunction(){
     console.log("updateCurJunction");
     
@@ -896,4 +915,24 @@ function getTimestring(){
     let sec = ('0'+date.getSeconds()).slice(-2);
     let timestring = year+month+day+'_'+hour+min+sec;
     return timestring;
+}
+
+function getMinLane(){
+    let minLane = 0;
+    for (const key of Object.keys(lane_widths)) {
+        minLane = Math.min(parseInt(key),minLane);
+    }
+    return minLane;
+}
+
+function getMaxLane(){
+    let maxLane = 0;
+    for (const key of Object.keys(lane_widths)) {
+        maxLane = Math.max(parseInt(key),maxLane);
+    }
+    return maxLane;
+}
+
+function getLaneWidths(){
+    lane_widths = stdMapToDict(ModuleOpenDrive.get_lane_widths(OpenDriveMap,sel_road_id));
 }
