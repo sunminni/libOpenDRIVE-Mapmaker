@@ -36,7 +36,8 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_la
 double get_lane_width(Road& road, int lane_id);
 double calc_t(Road& road, int lane_id);
 std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map);
-void edit_road(OpenDriveMap& odr_map, std::string sel_road_id, std::map<int, double> lane_widths);
+void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, double> lane_widths);
 std::map<int, double> get_lane_widths(OpenDriveMap& odr_map, std::string id);
+void merge_to_next_road(OpenDriveMap& odr_map, std::string road_id);
 
 } // namespace odr

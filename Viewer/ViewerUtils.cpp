@@ -612,7 +612,8 @@ pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_la
     pugi::xml_node left = laneSection.append_child("left");
     pugi::xml_node right = laneSection.append_child("right");
     for (int i=min_lane_id;i<=max_lane_id;i++){
-        add_lane_xml(right,i,lane_widths.at(i));
+        if (i==0) continue;
+        add_lane_xml(i<0?right:left,i,lane_widths.at(i));
     }
     return new_road_node;
 }
@@ -1053,9 +1054,9 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
     return road_arrows;
 }
 
-void edit_road(OpenDriveMap& odr_map, std::string sel_road_id, std::map<int, double> lane_widths)
+void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, double> lane_widths)
 {
-    Road& sel_road = odr_map.id_to_road.at(sel_road_id);
+    Road& sel_road = odr_map.id_to_road.at(road_id);
     // no need to change the actual road object, just change the xml because we're gonna write it
     sel_road.xml_node.child("lanes").child("laneSection").remove_child("left");
     sel_road.xml_node.child("lanes").child("laneSection").remove_child("right");
@@ -1171,6 +1172,78 @@ void add_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries
     }
 }
 
+void merge_to_next_road(OpenDriveMap& odr_map, std::string road_id)
+{
+    // merge with next road
+    Road& road = odr_map.id_to_road.at(road_id);
+    pugi::xml_node successor = road.xml_node.child("link").child("successor");
+    std::string succ_road_id = successor.attribute("elementId").value();
+    std::string succ_road_type = successor.attribute("elementType").value();
+    // check that there is a successor to this road
+    if (succ_road_id=="-1"){
+        std::cout<<"doesn't have successor"<<std::endl;
+        return;
+    } 
+    // check that the successor is not a junction
+    if (succ_road_type!="road"){
+        std::cout<<"successor is not road"<<std::endl;
+        return;
+    }
+
+    // check that the successor has the same lanes_ids
+    pugi::xml_node road_left = road.xml_node.child("lanes").child("laneSection").child("left");
+    size_t road_left_n = std::distance(road_left.children("lane").begin(), road_left.children("lane").end());
+    pugi::xml_node road_right = road.xml_node.child("lanes").child("laneSection").child("right");
+    size_t road_right_n = std::distance(road_right.children("lane").begin(), road_right.children("lane").end());
+
+    Road& succ_road = odr_map.id_to_road.at(succ_road_id);
+    pugi::xml_node succ_left = succ_road.xml_node.child("lanes").child("laneSection").child("left");
+    size_t succ_left_n = std::distance(succ_left.children("lane").begin(), succ_left.children("lane").end());
+    pugi::xml_node succ_right = succ_road.xml_node.child("lanes").child("laneSection").child("right");
+    size_t succ_right_n = std::distance(succ_right.children("lane").begin(), succ_right.children("lane").end());
+
+    if (road_left_n!=succ_left_n || road_right_n!=succ_right_n){
+        std::cout<<"successor doesn't have the same lane_ids"<<std::endl;
+        return;
+    }
+
+    // set the successor of the current one to be the successor of the next road
+    const pugi::char_t* succ_succ_id = succ_road.xml_node.child("link").child("successor").attribute("elementId").value();
+    const pugi::char_t* succ_succ_type = succ_road.xml_node.child("link").child("successor").attribute("elementType").value();
+
+    delete_road(odr_map,succ_road_id);
+
+    successor.attribute("elementId").set_value(succ_succ_id);
+    successor.attribute("elementType").set_value(succ_succ_type);
+
+    // add the geometry of the next road to the current one
+    pugi::xml_node road_planView = road.xml_node.child("planView");
+    pugi::xml_node succ_planView = succ_road.xml_node.child("planView");
+    double s = std::stod(road.xml_node.attribute("length").value());
+
+    for (pugi::xml_node succ_geometry: succ_planView.children("geometry")){
+        double length = std::stod(succ_geometry.attribute("length").value());
+        pugi::xml_node geometry = road_planView.append_child("geometry");
+        geometry.append_attribute("s").set_value(s);
+        geometry.append_attribute("x").set_value(succ_geometry.attribute("x").value());
+        geometry.append_attribute("y").set_value(succ_geometry.attribute("y").value());
+        geometry.append_attribute("hdg").set_value(succ_geometry.attribute("hdg").value());
+        geometry.append_attribute("length").set_value(length);
+
+        if (succ_geometry.child("arc")){
+            pugi::xml_node arc = geometry.append_child("arc");
+            arc.append_attribute("curvature").set_value(succ_geometry.child("arc").attribute("curvature").value());
+        }
+        else{
+            geometry.append_child("line");
+        }
+        s+=length;
+    }
+    road.xml_node.attribute("length").set_value(s);
+    odr_map.id_to_road.erase(succ_road_id);
+
+    std::cout<<road_id<<std::endl;
+}
 
 
 } // namespace odr

@@ -133,6 +133,10 @@ function onKeyDown(e){
             ModuleOpenDrive.edit_road(OpenDriveMap, sel_road_id, dictToStdMap(lane_widths));
             writeXMLFile();
         }
+        if (e.key=='m'){
+            ModuleOpenDrive.merge_to_next_road(OpenDriveMap, sel_road_id);
+            writeXMLFile();
+        }
     }
     else if ([EXTEND_LINE,EXTEND_ARC].includes(MapmakerMode)){
         if (e.key=='a'){
@@ -195,7 +199,6 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
-    
 }
 
 function onMouseClick(event){
@@ -219,8 +222,7 @@ function onMouseClick(event){
         if (hover_road_id!==null){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
-            drawHandleMesh();
-            getLaneWidths();
+            selectRoad();
             setMode(EXTEND_ARC);
         }
     }
@@ -228,8 +230,7 @@ function onMouseClick(event){
         if (hover_road_id!==null){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
-            drawHandleMesh();
-            getLaneWidths();
+            selectRoad();
             setMode(CONNECT_2);
         }
     }
@@ -260,8 +261,7 @@ function onMouseClick(event){
             sel_road_id = hover_road_id;
             sel_lanesec_s0 = hover_lanesec_s0;
             sel_lane_id = hover_lane_id;
-            drawHandleMesh();
-            getLaneWidths();
+            selectRoad();
             setMode(SELECTED);
         }
     }

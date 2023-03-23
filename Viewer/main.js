@@ -124,12 +124,13 @@ libOpenDrive().then(Module => {
 });
 
 function fetch_map(){
+    console.log('fetch_map');
     fetch(map_filepath).then((file_data) => {
         file_data.text().then((file_text) => {
             loadFile(file_text, fetched_dict[map_filepath]);
             fetched_dict[map_filepath] = true;
             if (MapmakerMode === SELECTED){
-                drawHandleMesh();
+                selectRoad();
             }
         });
     });

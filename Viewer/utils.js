@@ -958,3 +958,8 @@ function getLaneWidths(){
 function resetLaneWidths(){
     lane_widths = {"-1":3.5, "0":0};
 }
+
+function selectRoad(){
+    drawHandleMesh();
+    getLaneWidths();
+}
