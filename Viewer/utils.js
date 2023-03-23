@@ -853,10 +853,10 @@ function getMapList(){
                     map_filename = file;
                     map_folder = folder;
                     map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
-                    html_string+="<div onclick='onFileClick(this)' class='file selected'>"+file+"</div>";
+                    html_string+="<div onclick='onFileLeftClick(this)' oncontextmenu='onFileRightClick(this);return false;' class='file selected'>"+file+"</div>";
                 }
                 else{
-                    html_string+="<div onclick='onFileClick(this)' class='file'>"+file+"</div>";
+                    html_string+="<div onclick='onFileLeftClick(this)' oncontextmenu='onFileRightClick(this);return false;' class='file'>"+file+"</div>";
                 }
             }
         }
@@ -866,7 +866,7 @@ function getMapList(){
     });
 }
 
-function onFileClick(dom){
+function onFileLeftClick(dom){
     map_filename = dom.innerHTML;
     map_folder = map_filename.split('.')[0].split('_')[0];
     map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
@@ -877,6 +877,24 @@ function onFileClick(dom){
     dom.classList.add('selected');
     setMode(DEFAULT);
     fetch_map();
+}
+
+function onFileRightClick(dom){
+    map_filename = dom.innerHTML;
+    map_folder = map_filename.split('.')[0].split('_')[0];
+    map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
+    let body_dict = {};
+    body_dict['filepath'] = map_filepath;
+    fetch('http://localhost:8000/delete', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body_dict),
+    }).then(()=>{
+        getMapList();
+    });
 }
 
 function writeXMLFile(new_file=false){
