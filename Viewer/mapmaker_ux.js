@@ -40,7 +40,7 @@ function showPreview(){
     else if (MapmakerMode === CREATE_LINE_2){
         previewCreateLine();
     }
-    else if (MapmakerMode === EXTEND_ROAD_LINE){
+    else if (MapmakerMode === EXTEND_LINE){
         previewExtendLine();
     }
     else if (MapmakerMode === CREATE_ARC_2){
@@ -63,6 +63,7 @@ function showPreview(){
 function setMode(mode){
     if (mode == DEFAULT){
         showJuncControls(false);
+        resetLaneWidths();
         scene.remove(handle_mesh);
         scene.remove(preview_mesh);
         scene.remove(arrow1);
@@ -78,7 +79,7 @@ function setMode(mode){
     else if (mode == EXTEND_ARC){
         writeExtend(1);
     }
-    else if (mode == EXTEND_ROAD_LINE){
+    else if (mode == EXTEND_LINE){
         writeExtend(0);
     }
     console.log("mode "+mode);
@@ -133,12 +134,12 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
-    else if ([EXTEND_ROAD_LINE,EXTEND_ARC].includes(MapmakerMode)){
+    else if ([EXTEND_LINE,EXTEND_ARC].includes(MapmakerMode)){
         if (e.key=='a'){
             setMode(EXTEND_ARC);
         }
         if (e.key=='l'){
-            setMode(EXTEND_ROAD_LINE);
+            setMode(EXTEND_LINE);
         }
         if (e.key=='Escape'){
             setMode(DEFAULT);
@@ -219,6 +220,7 @@ function onMouseClick(event){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
             drawHandleMesh();
+            getLaneWidths();
             setMode(EXTEND_ARC);
         }
     }
@@ -227,10 +229,11 @@ function onMouseClick(event){
             sel_near_start = hover_near_start;
             sel_road_id = hover_road_id;
             drawHandleMesh();
+            getLaneWidths();
             setMode(CONNECT_2);
         }
     }
-    else if (MapmakerMode === EXTEND_ROAD_LINE){
+    else if (MapmakerMode === EXTEND_LINE){
         ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), sel_road_id, "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);

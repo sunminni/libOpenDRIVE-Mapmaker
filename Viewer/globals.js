@@ -1,16 +1,16 @@
 // Globals
+const DEFAULT = "default";
+const SELECTED = "road selected";
 const CREATE_LINE_1 = "create line: set start point";
 const CREATE_LINE_2 = "create line: set end point";
-const DEFAULT = "default";
-const EXTEND = "extend road: select road end";
-const EXTEND_ROAD_LINE = "extend road: line";
-const CONNECT_1 = "connect roads: select starting road end";
-const CONNECT_2 = "connect roads: select next road end";
-const SELECTED = "road selected";
 const CREATE_ARC_1 = "create arc: set start point";
 const CREATE_ARC_2 = "create arc: set start direction";
 const CREATE_ARC_3 = "create arc: set end point";
+const EXTEND = "extend road: select road end";
+const EXTEND_LINE = "extend road: line";
 const EXTEND_ARC = "extend road: arc";
+const CONNECT_1 = "connect roads: select starting road end";
+const CONNECT_2 = "connect roads: select next road end";
 const JUNCTION = "junctions";
 const JUNCTION_1 = "create junction link: select in lane";
 const JUNCTION_2 = "create junction link: select out lane";

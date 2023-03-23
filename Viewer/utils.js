@@ -936,3 +936,7 @@ function getMaxLane(){
 function getLaneWidths(){
     lane_widths = stdMapToDict(ModuleOpenDrive.get_lane_widths(OpenDriveMap,sel_road_id));
 }
+
+function resetLaneWidths(){
+    lane_widths = {"-1":3.5, "0":0};
+}
