@@ -771,7 +771,7 @@ function drawJunctionBBoxes(){
         scene.remove(line);
     }
     junc_lines = [];
-    std_vec = ModuleOpenDrive.get_junction_bboxes(OpenDriveMap);
+    let std_vec = ModuleOpenDrive.get_junction_bboxes(OpenDriveMap);
     for(let i=0;i<std_vec.size();i++){
         let junc_id = std_vec.get(i).get(0);
         let minx = std_vec.get(i).get(1);

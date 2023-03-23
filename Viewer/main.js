@@ -473,6 +473,7 @@ function stdMapToDict(stdMap){
     let dict = {};
     for (let key of getStdMapKeys(stdMap))
         dict[key.toString()] = stdMap.get(key);
+    stdMap.delete();
     return dict;
 }
 
