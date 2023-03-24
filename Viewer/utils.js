@@ -641,6 +641,7 @@ function drawHandleMesh(){
     odr_lanes_mesh_new.delete();
 }
 
+
 function afterModuleLoad(){
     getMapList();
 
@@ -712,6 +713,10 @@ function afterModuleLoad(){
             for (const [key, value] of Object.entries(dict)) {
                 const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
                 let material = white_material;
+                let randomMaterial = new THREE.LineBasicMaterial({
+                    color: Math.floor(Math.random() * 0xffffff),
+                    linewidth: 1,
+                });
                 if (value['type'] < 200){
                     material = yellow_material;
                 }
@@ -721,7 +726,7 @@ function afterModuleLoad(){
                 else if (value['type'] < 400){
                     material = blue_material;
                 }
-                let line = new THREE.Line( geometry, material );
+                let line = new THREE.Line( geometry, randomMaterial );
                 line.matrixAutoUpdate = false;
                 scene.add( line );
                 
