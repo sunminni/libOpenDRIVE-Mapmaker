@@ -60,3 +60,7 @@ var lane_widths = {"-1":3.5, "0":0};
 var map_offset_x = 999999999;
 var map_offset_y = 999999999;
 var mode_info = document.getElementById('mode_info');
+
+var lines_dict = {};
+var selected_line = null;
+var selected_points = null;

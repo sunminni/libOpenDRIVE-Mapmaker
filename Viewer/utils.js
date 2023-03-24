@@ -671,7 +671,6 @@ function afterModuleLoad(){
         .then(response => response.arrayBuffer())
         .then(buffer => {
             const view = new Float32Array(buffer);
-            let dict = {};
 
             for (let i=0;i<view.length/5;i++){
                 let x = view[i*5+2];
@@ -687,13 +686,13 @@ function afterModuleLoad(){
                 let y = view[i*5+3];
                 let z = view[i*5+4];
 
-                if (id in dict){
-                    dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
+                if (id in lines_dict){
+                    lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
                 }
                 else{
-                    dict[id] = {};
-                    dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
-                    dict[id]['type'] = type;
+                    lines_dict[id] = {};
+                    lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
+                    lines_dict[id]['type'] = type;
                 }
             }
             
@@ -710,12 +709,17 @@ function afterModuleLoad(){
                 linewidth: 1,
             });
 
-            for (const [key, value] of Object.entries(dict)) {
+            for (const [key, value] of Object.entries(lines_dict)) {
                 const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
                 let material = white_material;
-                let randomMaterial = new THREE.LineBasicMaterial({
-                    color: Math.floor(Math.random() * 0xffffff),
+                let randomColor = Math.floor(Math.random() * 0xffffff);
+                let randomLineMaterial = new THREE.LineBasicMaterial({
+                    color: randomColor,
                     linewidth: 1,
+                });
+                let randomPointsMaterial = new THREE.PointsMaterial({
+                    color: randomColor,
+                    size: 0.2,
                 });
                 if (value['type'] < 200){
                     material = yellow_material;
@@ -726,9 +730,12 @@ function afterModuleLoad(){
                 else if (value['type'] < 400){
                     material = blue_material;
                 }
-                let line = new THREE.Line( geometry, randomMaterial );
+                let line = new THREE.Line( geometry, randomLineMaterial );
+                let points = new THREE.Points( geometry, randomPointsMaterial );
                 line.matrixAutoUpdate = false;
+                points.matrixAutoUpdate = false;
                 scene.add( line );
+                scene.add( points );
                 
                 // for moving to lines when xodr file is empty..
                 // if (key==1){
@@ -739,6 +746,38 @@ function afterModuleLoad(){
         });
 
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
+}
+
+function selectLine(){
+    scene.remove(selected_line);
+    scene.remove(selected_points);
+    
+    for (const [key, value] of Object.entries(lines_dict)) {
+        for (const point of value['points']){
+            if (mouse_pos.distanceTo(point)<0.5){
+                scene.remove(selected_line);
+                scene.remove(selected_points);
+                const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
+                let selectedLineMaterial = new THREE.LineBasicMaterial({
+                    color: 0xff0000,
+                    linewidth: 5,
+                });
+                let selectedPointsMaterial = new THREE.PointsMaterial({
+                    color: 0xff0000,
+                    size: 0.3,
+                });
+                selected_line = new THREE.Line( geometry, selectedLineMaterial );
+                selected_points = new THREE.Points( geometry, selectedPointsMaterial );
+                selected_line.matrixAutoUpdate = false;
+                selected_points.matrixAutoUpdate = false;
+                selected_line.renderOrder = 20;
+                selected_points.renderOrder = 20;
+                scene.add( selected_line );
+                scene.add( selected_points );
+                break;
+            }
+        }
+    }
 }
 
 function drawLinks(){

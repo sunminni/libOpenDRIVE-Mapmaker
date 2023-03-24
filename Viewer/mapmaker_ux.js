@@ -58,6 +58,7 @@ function showPreview(){
         ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMap(lane_widths));
         drawPreviewMesh();
     }
+    selectLine();
 }
 
 function setMode(mode){
