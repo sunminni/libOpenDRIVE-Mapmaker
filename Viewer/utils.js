@@ -667,7 +667,7 @@ function afterModuleLoad(){
     // scene.add(image_mesh);
 
     // Load vector lines
-    fetch("KCITY_LINES.bin")
+    fetch("KCITY/KCITY_LINES.bin")
         .then(response => response.arrayBuffer())
         .then(buffer => {
             const view = new Float32Array(buffer);
