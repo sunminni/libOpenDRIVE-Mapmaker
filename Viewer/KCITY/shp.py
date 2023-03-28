@@ -3,16 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import time
-color = ['black', 'darkorange', 'red', 'green', 'yellow', 'saddlebrown', 'cyan', 'purple', 'violet']
-address = './SEC01_첨단주행시험로/HDMap_UTM52N_타원체고/'
-address = './SEC01_첨단주행시험로/HDMap_UTMK_정표고/'
+# color = ['black', 'darkorange', 'red', 'green', 'yellow', 'saddlebrown', 'cyan', 'purple', 'violet']
+# address = './SEC01_첨단주행시험로/HDMap_UTM52N_타원체고/'
+# address = './SEC01_첨단주행시험로/HDMap_UTMK_정표고/'
 address = './SEC01_첨단주행시험로/HDMap_UTMK_타원체고/'
 
 info = list(filter(lambda x: 'SURFACELINEMARK.shp' in x, os.listdir(address)))
 datas = []
-plt.rcParams['figure.figsize'] = (10, 10) 
-plt.rcParams['lines.linewidth'] = 1 
-plt.rcParams['lines.markersize'] = 3 
+# plt.rcParams['figure.figsize'] = (10, 10) 
+# plt.rcParams['lines.linewidth'] = 1 
+# plt.rcParams['lines.markersize'] = 3 
 for i in info:
     datas.append(gpd.read_file(address + i, encoding='utf-8'))
 
@@ -26,6 +26,9 @@ for index, row in df.iterrows():
         data.append([float(row['Type']),lineID,float(x),float(y),float(z)])
 np_data = np.array(data)
 np_data = np_data.astype(np.float32)
+mins = np.min(np_data,0)
+np_data = np_data.flatten()
+np_data = np.insert(np_data, 0, mins[2:4], axis=None)
 np_data.tofile("KCITY_LINES.bin")
 
 # x = 935655

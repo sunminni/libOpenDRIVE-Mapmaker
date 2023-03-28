@@ -64,3 +64,4 @@ var mode_info = document.getElementById('mode_info');
 var lines_dict = {};
 var selected_line = null;
 var selected_points = null;
+var selected_line_id = -1;

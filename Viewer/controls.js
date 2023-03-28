@@ -1,6 +1,6 @@
 var PARAMS = {
     load_file : () => { document.getElementById('xodr_file_input').click(); },
-    resolution : 0.3,
+    resolution : 0.1,
     ref_line : true,
     roadmarks : true,
     wireframe : false,

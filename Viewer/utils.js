@@ -251,6 +251,22 @@ function writeLen(len){
     }
     preview_geometries.set(0,vd);
 }
+function writeABC(abc){
+    let vd = preview_geometries.get(0);
+    vd.push_back(abc[2]);
+    vd.push_back(abc[1]);
+    vd.push_back(abc[0]);
+    preview_geometries.set(0,vd);
+}
+function writeABCD(abcd){
+    let vd = preview_geometries.get(0);
+    vd.push_back(abcd[3]);
+    vd.push_back(abcd[2]);
+    vd.push_back(abcd[1]);
+    vd.push_back(abcd[0]);
+    preview_geometries.set(0,vd);
+}
+
 
 function previewCreateArc2(){
     let [len,cur] = calcArc(preview_geometries.get(0).get(1),preview_geometries.get(0).get(2),mouse_pos.x,mouse_pos.y,preview_geometries.get(0).get(3));
@@ -671,20 +687,16 @@ function afterModuleLoad(){
         .then(response => response.arrayBuffer())
         .then(buffer => {
             const view = new Float32Array(buffer);
-
+            
+            map_offset_x = view[0];
+            map_offset_y = view[1];
+            let offset_idx = 2;
             for (let i=0;i<view.length/5;i++){
-                let x = view[i*5+2];
-                let y = view[i*5+3];
-                map_offset_x = Math.min(map_offset_x,x);
-                map_offset_y = Math.min(map_offset_y,y);
-            }
-
-            for (let i=0;i<view.length/5;i++){
-                let type = view[i*5];
-                let id = view[i*5+1];
-                let x = view[i*5+2];
-                let y = view[i*5+3];
-                let z = view[i*5+4];
+                let type = view[i*5+0+offset_idx];
+                let id = view[i*5+1+offset_idx];
+                let x = view[i*5+2+offset_idx];
+                let y = view[i*5+3+offset_idx];
+                let z = view[i*5+4+offset_idx];
 
                 if (id in lines_dict){
                     lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
@@ -755,6 +767,95 @@ function selectLine(){
     for (const [key, value] of Object.entries(lines_dict)) {
         for (const point of value['points']){
             if (mouse_pos.distanceTo(point)<0.5){
+                fetch("http://localhost:8001/fit", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({"line_id":key}),
+                }).then(response => response.json())
+                .then(response => {
+                    let point0,pointe,x0,y0;
+
+                    point0 = value['points'][0];
+                    pointe = value['points'][value['points'].length-1];
+                    if (pointe.x<point0.x){
+                        y0 = pointe.y;
+                        x0 = pointe.x;
+                        ye = point0.y;
+                        xe = point0.x;
+                    }
+                    else{
+                        y0 = point0.y;
+                        x0 = point0.x;
+                        ye = pointe.y;
+                        xe = pointe.x;
+                    }
+                    preview_geometries.delete();
+                    preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
+                    let vd = new ModuleOpenDrive.vectorDouble();
+                    if (false){
+                    //     console.log(response['poly1']);
+                    //     vd.push_back(0);
+                    //     let m,b;
+                    //     [m,b] = response['poly1'];
+                    //     let m_ = -1/m;
+
+                    //     let xis, yis, xie, yie;
+                    //     [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
+                    //     [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);
+                    //     vd.push_back(xis);
+                    //     vd.push_back(yis);
+                    //     console.log(xis,yis,xie,yie);
+                    //     preview_geometries.push_back(vd);
+                    //     let len = ((yis-yie)**2+(xis-xie)**2)**0.5;
+                    //     let hdg = Math.atan(m);
+                    //     validPreview = len>0.2;
+                    //     writeHdgLen(hdg,len);
+
+                    // }
+                    // else{
+                    //     vd.push_back(2);
+                    //     let a,b,c,d;
+                    //     [a,b,c,d] = response['poly3'];
+                    //     console.log(a,b,c,d);
+
+                    //     // [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
+                    //     // [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);                        
+                    //     vd.push_back(x0);
+                    //     vd.push_back(y0);
+                    //     preview_geometries.push_back(vd);
+                    //     let len = xe-x0;
+                    //     m = 3*a*x0**2+2*b*x0+c;
+                    //     let hdg = 0;
+                    //     // let hdg = Math.atan(m);
+                    //     validPreview = len>0.2;
+                    //     writeHdgLen(hdg,len);
+                    //     writeABCD(response['poly3']);
+                    }
+                    else{
+                        vd.push_back(3);
+                        let a,b,c;
+                        [a,b,c] = response['poly2'];
+                        console.log(a,b,c);
+
+                        // [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
+                        // [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);                        
+                        vd.push_back(x0);
+                        vd.push_back(y0);
+                        preview_geometries.push_back(vd);
+                        let len = xe-x0;
+                        m = 2*a*x0+b;
+                        let hdg = 0;
+                        // let hdg = Math.atan(m);
+                        validPreview = len>0.2;
+                        writeHdgLen(hdg,len);
+                        writeABC(response['poly2']);
+                    }
+                    ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMap(lane_widths));
+                    drawPreviewMesh();
+                });
                 scene.remove(selected_line);
                 scene.remove(selected_points);
                 const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
@@ -774,10 +875,24 @@ function selectLine(){
                 selected_points.renderOrder = 20;
                 scene.add( selected_line );
                 scene.add( selected_points );
-                break;
+                selected_line_id = key;
+                return;
             }
         }
     }
+    selected_line_id = -1;
+}
+
+function get_intersect(m_1,b_1,m_2,b_2){
+    let a1 = m_1;
+    let a2 = m_2;
+    let b1 = -1;
+    let b2 = -1;
+    let c1 = b_1;
+    let c2 = b_2;
+    let xi = (b1*c2-b2*c1)/(a1*b2-a2*b1);
+    let yi = (c1*a2-c2*a1)/(a1*b2-a2*b1);
+    return [xi,yi];
 }
 
 function drawLinks(){
