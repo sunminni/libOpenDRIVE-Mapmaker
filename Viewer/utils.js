@@ -666,6 +666,19 @@ function afterModuleLoad(){
     junc_gui.domElement.getElementsByClassName('close-button')[0].remove();
     junc_gui.domElement.style.display = 'none';
 
+    road_gui = new dat.GUI();
+    road_gui.domElement.classList.add('road_controls');
+    road_gui.domElement.getElementsByClassName('close-button')[0].remove();
+    road_gui.domElement.style.display = 'none';
+    road_idC = road_gui.add(ROAD_DATA, 'road_id');
+    road_laneOffsetF = road_gui.addFolder('LaneOffset');
+    road_laneOffsetF.open();
+    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_a').name('a'));
+    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_b').name('b'));
+    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_c').name('c'));
+    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_d').name('d'));
+    road_lanesF = road_gui.addFolder('Lanes');
+    road_lanesF.open();
     setMode(DEFAULT);
 
     // Load screenshot of map
@@ -708,42 +721,37 @@ function afterModuleLoad(){
                 }
             }
             
-            const white_material = new THREE.LineBasicMaterial({
-                color: 0xffffff,
-                linewidth: 1,
-            });
-            const yellow_material = new THREE.LineBasicMaterial({
-                color: 0xffff00,
-                linewidth: 1,
-            });
-            const blue_material = new THREE.LineBasicMaterial({
-                color: 0x0000ff,
-                linewidth: 1,
-            });
-
             for (const [key, value] of Object.entries(lines_dict)) {
                 const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
-                let material = white_material;
-                let randomColor = Math.floor(Math.random() * 0xffffff);
-                let randomLineMaterial = new THREE.LineBasicMaterial({
-                    color: randomColor,
+                let line_m = new THREE.LineBasicMaterial({
                     linewidth: 1,
                 });
-                let randomPointsMaterial = new THREE.PointsMaterial({
-                    color: randomColor,
+                let point_m = new THREE.PointsMaterial({
                     size: 0.2,
                 });
+                // let randomColor = Math.floor(0xff0000 + Math.random() * 0x00ffff);
+                // let randomLineMaterial = new THREE.LineBasicMaterial({
+                //     color: randomColor,
+                //     linewidth: 1,
+                // });
+                // let randomPointsMaterial = new THREE.PointsMaterial({
+                //     color: randomColor,
+                //     size: 0.2,
+                // });
                 if (value['type'] < 200){
-                    material = yellow_material;
+                    line_m.setValues({"color" : 0xffff00});
+                    point_m.setValues({"color" : 0xffff00});
                 }
                 else if (value['type'] < 300){
-                    material = white_material;
+                    line_m.setValues({"color" : 0xffffff});
+                    point_m.setValues({"color" : 0xffffff});
                 }
                 else if (value['type'] < 400){
-                    material = blue_material;
+                    line_m.setValues({"color" : 0x0000ff});
+                    point_m.setValues({"color" : 0x0000ff});
                 }
-                let line = new THREE.Line( geometry, randomLineMaterial );
-                let points = new THREE.Points( geometry, randomPointsMaterial );
+                let line = new THREE.Line( geometry, line_m );
+                let points = new THREE.Points( geometry, point_m );
                 line.matrixAutoUpdate = false;
                 points.matrixAutoUpdate = false;
                 scene.add( line );
@@ -767,95 +775,35 @@ function selectLine(){
     for (const [key, value] of Object.entries(lines_dict)) {
         for (const point of value['points']){
             if (mouse_pos.distanceTo(point)<0.5){
-                fetch("http://localhost:8001/fit", {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({"line_id":key}),
-                }).then(response => response.json())
-                .then(response => {
-                    let point0,pointe,x0,y0;
 
-                    point0 = value['points'][0];
-                    pointe = value['points'][value['points'].length-1];
-                    if (pointe.x<point0.x){
-                        y0 = pointe.y;
-                        x0 = pointe.x;
-                        ye = point0.y;
-                        xe = point0.x;
+                preview_geometries.delete();
+                preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
+                for (let i=0;i<value['points'].length-1;i++){
+                    let cur_point,nxt_point;
+                    if (flip){
+                        cur_point = value['points'][value['points'].length-1-i];
+                        nxt_point = value['points'][value['points'].length-1-i-1];
                     }
                     else{
-                        y0 = point0.y;
-                        x0 = point0.x;
-                        ye = pointe.y;
-                        xe = pointe.x;
+                        cur_point = value['points'][i];
+                        nxt_point = value['points'][i+1];
                     }
-                    preview_geometries.delete();
-                    preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
+                    let cx = cur_point.x;
+                    let cy = cur_point.y;
+                    let nx = nxt_point.x;
+                    let ny = nxt_point.y;
+                    let hdg = Math.atan2(ny-cy,nx-cx);
+                    let length = ((ny-cy)**2+(nx-cx)**2)**0.5;
                     let vd = new ModuleOpenDrive.vectorDouble();
-                    if (false){
-                    //     console.log(response['poly1']);
-                    //     vd.push_back(0);
-                    //     let m,b;
-                    //     [m,b] = response['poly1'];
-                    //     let m_ = -1/m;
+                    vd.push_back(0);
+                    vd.push_back(cx);
+                    vd.push_back(cy);
+                    vd.push_back(hdg);
+                    vd.push_back(length);
+                    preview_geometries.push_back(vd);
+                }
+                validPreview = true;
 
-                    //     let xis, yis, xie, yie;
-                    //     [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
-                    //     [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);
-                    //     vd.push_back(xis);
-                    //     vd.push_back(yis);
-                    //     console.log(xis,yis,xie,yie);
-                    //     preview_geometries.push_back(vd);
-                    //     let len = ((yis-yie)**2+(xis-xie)**2)**0.5;
-                    //     let hdg = Math.atan(m);
-                    //     validPreview = len>0.2;
-                    //     writeHdgLen(hdg,len);
-
-                    // }
-                    // else{
-                    //     vd.push_back(2);
-                    //     let a,b,c,d;
-                    //     [a,b,c,d] = response['poly3'];
-                    //     console.log(a,b,c,d);
-
-                    //     // [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
-                    //     // [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);                        
-                    //     vd.push_back(x0);
-                    //     vd.push_back(y0);
-                    //     preview_geometries.push_back(vd);
-                    //     let len = xe-x0;
-                    //     m = 3*a*x0**2+2*b*x0+c;
-                    //     let hdg = 0;
-                    //     // let hdg = Math.atan(m);
-                    //     validPreview = len>0.2;
-                    //     writeHdgLen(hdg,len);
-                    //     writeABCD(response['poly3']);
-                    }
-                    else{
-                        vd.push_back(3);
-                        let a,b,c;
-                        [a,b,c] = response['poly2'];
-                        console.log(a,b,c);
-
-                        // [xis,yis] = get_intersect(m,b,m_,y0-m_*x0);
-                        // [xie,yie] = get_intersect(m,b,m_,ye-m_*xe);                        
-                        vd.push_back(x0);
-                        vd.push_back(y0);
-                        preview_geometries.push_back(vd);
-                        let len = xe-x0;
-                        m = 2*a*x0+b;
-                        let hdg = 0;
-                        // let hdg = Math.atan(m);
-                        validPreview = len>0.2;
-                        writeHdgLen(hdg,len);
-                        writeABC(response['poly2']);
-                    }
-                    ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMap(lane_widths));
-                    drawPreviewMesh();
-                });
                 scene.remove(selected_line);
                 scene.remove(selected_points);
                 const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
@@ -965,19 +913,18 @@ function afterMapLoad(){
 
     drawJunctionBBoxes();
 
-    if (junc_idC !== null){
-        junc_idC.remove();
-    }
     let junctions = ModuleOpenDrive.get_junction_ids(OpenDriveMap);
-    junctions_dict = {}
+    let junctions_dict = {};
     for(let i=0;i<junctions.size();i++){
         junctions_dict[junctions.get(i)] = junctions.get(i);
     }
-
+    
+    if (junc_idC !== null){
+        junc_idC.remove();
+    }
     junc_idC = junc_gui.add(JUNCTION_DATA, 'junction_id', junctions_dict).onChange(()=>{updateCurJunction()});
     if (junctions.size()>0)
         junc_idC.setValue(junctions.get(0));
-
 }
 
 function getMapList(){
@@ -1079,8 +1026,12 @@ function writeXMLFile(new_file=false){
 
 function updateCurJunction(){
     console.log("updateCurJunction");
-    
 }
+
+function updateCurRoad(){
+    console.log("updateCurRoad");
+}
+
 
 function getTimestring(){
     let date = new Date();

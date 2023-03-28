@@ -8,6 +8,16 @@ function showJuncControls(bool){
     }
 }
 
+function showRoadControls(bool){
+    if (bool){
+        road_gui.domElement.style.display = 'block';
+        road_idC.setValue(sel_road_id);
+    }
+    else{
+        road_gui.domElement.style.display = 'none';
+    }
+}
+
 function showPreview(){
     scene.remove(arrow1);
     scene.remove(preview_mesh);
@@ -54,7 +64,9 @@ function showPreview(){
             previewRoadEnd();
         }
     }
-    // selectLine();
+    else if (MapmakerMode === REFLINE){
+        selectLine();
+    }
     if(validPreview){
         ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMap(lane_widths));
         drawPreviewMesh();
@@ -64,6 +76,7 @@ function showPreview(){
 function setMode(mode){
     if (mode == DEFAULT){
         showJuncControls(false);
+        showRoadControls(false);
         resetLaneWidths();
         scene.remove(handle_mesh);
         scene.remove(preview_mesh);
@@ -71,10 +84,12 @@ function setMode(mode){
     }
     else if (mode == SELECTED){
         showJuncControls(false);
+        showRoadControls(true);
         scene.remove(preview_mesh);
     }
     else if (mode == JUNCTION){
         showJuncControls(true);
+        showRoadControls(false);
         scene.remove(preview_mesh);
     }
     else if (mode == EXTEND_ARC){
@@ -83,7 +98,7 @@ function setMode(mode){
     else if (mode == EXTEND_LINE){
         writeExtend(0);
     }
-    console.log("mode "+mode);
+    // console.log("mode "+mode);
     MapmakerMode = mode;
     mode_info.innerHTML = mode;
 }
@@ -92,11 +107,14 @@ function onKeyDown(e){
     console.log(e.key);
     if (e.ctrlKey && e.key=='s'){
         // save
-        console.log(e);
         e.preventDefault();
         map_filename = map_folder + '_' + getTimestring()+'.xodr';
         map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
         writeXMLFile(true);
+        return;
+    }
+    if (e.key=='f'){
+        flip = !flip;
         return;
     }
     if (MapmakerMode === SELECTED){
@@ -155,7 +173,7 @@ function onKeyDown(e){
             setMode(DEFAULT);
         }
     }
-    else if ([CREATE_LINE_1,CREATE_LINE_2,CREATE_ARC_1,CREATE_ARC_2,CREATE_ARC_3].includes(MapmakerMode)){
+    else if ([CREATE_LINE_1,CREATE_LINE_2,CREATE_ARC_1,CREATE_ARC_2,CREATE_ARC_3,REFLINE].includes(MapmakerMode)){
         if (e.key=='Escape'){
             setMode(DEFAULT);
         }
@@ -180,6 +198,10 @@ function onKeyDown(e){
         }
         if (e.key=='j'){
             setMode(JUNCTION);
+        }
+        if (e.key=='r'){
+            resetLaneWidths();
+            setMode(REFLINE);
         }
     }
     else if (MapmakerMode === JUNCTION){
@@ -290,5 +312,12 @@ function onMouseClick(event){
                 writeXMLFile();
             }
         }
+    }
+    else if (MapmakerMode === REFLINE){
+        if (validPreview){
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMap(lane_widths), "-1", "-1");
+        }
+        setMode(REFLINE);
+        writeXMLFile();
     }
 }

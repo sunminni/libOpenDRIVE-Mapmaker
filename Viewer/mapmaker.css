@@ -8,6 +8,16 @@
     margin-right: 5px;
 }
 
+.dg.a.road_controls{
+    position: absolute;
+    top: 0px;
+    right: 255px;
+    border: 2px solid gray;
+    padding: 5px;
+    background-color: black;
+    margin-top: 5px;
+}
+
 .file{
     width: 230px;
     height: 20px;
@@ -45,4 +55,9 @@
 
 *{
     user-select: none;
+}
+
+.dg .property-name {
+    width: 80px !important;
+    margin-left: 5px !important;
 }
