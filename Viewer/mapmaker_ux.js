@@ -139,7 +139,7 @@ function onKeyDown(e){
     }
     if (MapmakerMode === SELECTED){
         if (e.key=='Escape'){
-            ModuleOpenDrive.edit_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths));
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
             writeXMLFile();
             setMode(DEFAULT);
         }
@@ -148,7 +148,7 @@ function onKeyDown(e){
             setMode(DEFAULT);
             writeXMLFile();
         }
-        if ('7890-='.includes(e.key)){
+        if ('7890'.includes(e.key)){
             if (e.key=='7'){
                 lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
             }
@@ -165,13 +165,7 @@ function onKeyDown(e){
             if (e.key=='0'){
                 lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
             }
-            if (e.key=='-' && hover_lane_id!==null){
-                lane_widths[hover_lane_id.toString()] = Math.max(3,Math.min(lane_widths[hover_lane_id.toString()]-0.1,5));
-            }
-            if (e.key=='=' && hover_lane_id!==null){
-                lane_widths[hover_lane_id.toString()] = Math.max(3,Math.min(lane_widths[hover_lane_id.toString()]+0.1,5));
-            }
-            ModuleOpenDrive.edit_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths));
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
             writeXMLFile();
         }
         if (e.key=='m'){

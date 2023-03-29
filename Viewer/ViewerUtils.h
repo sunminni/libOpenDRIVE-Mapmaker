@@ -21,7 +21,7 @@ Mesh3D create_preview_reflines(double eps);
 Mesh3D create_handle_reflines(OpenDriveMap& odr_map, double eps, std::string id);
 Mesh3D create_road_reflines(double eps, Road& road);
 void update_preview_road(std::vector<std::vector<double>> geometries, std::map<int, std::vector<double>> lane_widths);
-void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths);
+void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset);
 void delete_road(OpenDriveMap& odr_map, std::string id);
 std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane_id);
 std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int lane_id);
@@ -36,7 +36,7 @@ void add_link(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries
 pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_lane_id, int max_lane_id, std::map<int, std::vector<double>> lane_widths, std::vector<std::vector<double>> geometries);
 double calc_t(Road& road, int lane_id, double s);
 std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map);
-void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths);
+void write_handle_road_xml(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset);
 std::vector<double> get_lane_offset(OpenDriveMap& odr_map, std::string id);
 std::map<int, std::vector<double>> get_lane_widths(OpenDriveMap& odr_map, std::string id);
 void merge_to_next_road(OpenDriveMap& odr_map, std::string road_id);

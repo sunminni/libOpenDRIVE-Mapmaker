@@ -1096,14 +1096,15 @@ function getLaneWidths(){
             lane_width_dict[i.toString()+'_d'] = lane_width[i*5+4];
         }
         for (const [key, value] of Object.entries(lane_width_dict)) {
+            if (key.endsWith('_c') || key.endsWith('_d')) continue;
             let tempC = laneFolder.add(lane_width_dict, key);
             tempC.name = lane_id.toString()+"_"+key;
             tempC.setValue(value);
-            tempC.step(0.01);
+            tempC.step(key.endsWith('_b')?0.001:0.01);
             tempC.onChange(function(e){
                 let [lane_id,idx,param] = this.name.split("_");
                 lane_widths[lane_id][parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
-                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths));
+                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
                 selectRoad();
             });
             road_laneCs.push(tempC);
@@ -1127,14 +1128,15 @@ function getLaneOffset(){
     }
 
     for (const [key, value] of Object.entries(lane_offset_dict)) {
+        if (key.endsWith('_c') || key.endsWith('_d')) continue;
         let tempC = road_laneOffsetF.add(lane_offset_dict, key);
         tempC.name = key;
         tempC.setValue(value);
-        tempC.step(0.01);
+        tempC.step(key.endsWith('_b')?0.001:0.01);
         tempC.onChange(function(e){
             let [idx,param] = this.name.split("_");
             lane_offset[parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
-            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMap(lane_offset));
+            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
             selectRoad();
         });
         road_laneOffsetCs.push(tempC);

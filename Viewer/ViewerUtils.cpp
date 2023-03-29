@@ -432,11 +432,19 @@ void update_preview_road(std::vector<std::vector<double>> geometries, std::map<i
     preview_road.length = s;
 }
 
-void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths)
+void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset)
 {   
     Road& road = odr_map.id_to_road.at(road_id);
     road.s_to_lanesection.clear();
     insert_lanes(road, lane_widths);
+    road.lane_offset.s0_to_poly.clear();
+    for (int i = 0; i*5<lane_offset.size(); i++){
+        road.lane_offset.s0_to_poly[lane_offset[i*5+0]] = Poly3(lane_offset[i*5+0],
+                                                                lane_offset[i*5+1],
+                                                                lane_offset[i*5+2],
+                                                                lane_offset[i*5+3],
+                                                                lane_offset[i*5+4]);
+    }
 }
 
 void add_lane_xml(pugi::xml_node& laneSectionChild, int lane_id, std::vector<double> lane_width){
@@ -758,13 +766,19 @@ std::vector<double> get_lane_offset(OpenDriveMap& odr_map, std::string id)
 {
     std::vector<double> lane_offset;
     Road& road = odr_map.id_to_road.at(id);
-    for (const auto& s_poly : road.lane_offset.s0_to_poly)
+    for (const auto& ele : road.lane_offset.s0_to_poly)
     {
-        lane_offset.push_back(s_poly.first);
-        lane_offset.push_back(s_poly.second.a);
-        lane_offset.push_back(s_poly.second.b);
-        lane_offset.push_back(s_poly.second.c);
-        lane_offset.push_back(s_poly.second.d);
+        double s0 = ele.first;
+        odr::Poly3 poly3 = ele.second;
+        double d = poly3.d;
+        double c = poly3.c+ 3 * d * s0;
+        double b = poly3.b+ 2 * c * s0 - 3 * d * s0 * s0;
+        double a = poly3.a+ b * s0 - c * s0 * s0 + d * s0 * s0 * s0;
+        lane_offset.push_back(s0);
+        lane_offset.push_back(a);
+        lane_offset.push_back(b);
+        lane_offset.push_back(c);
+        lane_offset.push_back(d);
     }
     return lane_offset;
 }
@@ -1123,7 +1137,7 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
     return road_arrows;
 }
 
-void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths)
+void write_handle_road_xml(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset)
 {
     Road& sel_road = odr_map.id_to_road.at(road_id);
     // no need to change the actual road object, just change the xml because we're gonna write it
@@ -1143,6 +1157,22 @@ void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::ve
         else if (lane_id>0){
             add_lane_xml(left, lane_id, lane_width);
         }
+    }
+
+    pugi::xml_node lanes = sel_road.xml_node.child("lanes");
+    size_t laneOffset_n = std::distance(lanes.children("laneOffset").begin(), lanes.children("laneOffset").end());
+
+    for (int i=0;i<laneOffset_n;i++){
+        sel_road.xml_node.child("lanes").remove_child("laneOffset");
+    }
+    
+    for (int i = 0; i*5<lane_offset.size(); i++){
+        pugi::xml_node laneOffset = sel_road.xml_node.child("lanes").append_child("laneOffset");
+        laneOffset.append_attribute("s").set_value(lane_offset[i*5+0]);
+        laneOffset.append_attribute("a").set_value(lane_offset[i*5+1]);
+        laneOffset.append_attribute("b").set_value(lane_offset[i*5+2]);
+        laneOffset.append_attribute("c").set_value(lane_offset[i*5+3]);
+        laneOffset.append_attribute("d").set_value(lane_offset[i*5+4]);
     }
 }
 

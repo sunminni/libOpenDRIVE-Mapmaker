@@ -462,6 +462,14 @@ function getStdMapKeys(std_map, delete_map = false)
     return map_keys;
 }
 
+function arrToStdVecDouble(arr){
+    let vectorDouble = new ModuleOpenDrive.vectorDouble();
+    for (const a of arr){
+        vectorDouble.push_back(a);
+    }
+    return vectorDouble;
+}
+
 function dictToStdMapIntVecDouble(dict){
     let mapIntVecDouble = new ModuleOpenDrive.mapIntVecDouble();
     for (const [key, value] of Object.entries(dict)) {

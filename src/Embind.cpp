@@ -120,7 +120,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("calc_end", &calc_end);
     emscripten::function("add_link", &add_link);
     emscripten::function("get_junction_bboxes", &get_junction_bboxes);
-    emscripten::function("edit_road", &edit_road);
+    emscripten::function("write_handle_road_xml", &write_handle_road_xml);
     emscripten::function("get_lane_offset", &get_lane_offset);
     emscripten::function("get_lane_widths", &get_lane_widths);
     emscripten::function("merge_to_next_road", &merge_to_next_road);
