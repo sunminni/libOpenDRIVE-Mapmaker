@@ -150,7 +150,7 @@ function onKeyDown(e){
         }
         if ('7890-='.includes(e.key)){
             if (e.key=='7'){
-                lane_widths[(getMinLane()-1).toString()] = 3.5;
+                lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
             }
             if (e.key=='8'){
                 if(getMinLane()<-1){
@@ -163,7 +163,7 @@ function onKeyDown(e){
                 }
             }
             if (e.key=='0'){
-                lane_widths[(getMaxLane()+1).toString()] = 3.5;
+                lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
             }
             if (e.key=='-' && hover_lane_id!==null){
                 lane_widths[hover_lane_id.toString()] = Math.max(3,Math.min(lane_widths[hover_lane_id.toString()]-0.1,5));
