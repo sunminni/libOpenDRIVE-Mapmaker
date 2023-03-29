@@ -630,6 +630,18 @@ function drawPreviewMesh(){
 }
 
 function drawHandleMesh(){
+    scene.remove(handle_reflines);
+    const reflines_geom = new THREE.BufferGeometry();
+    const odr_refline_segments = ModuleOpenDrive.create_handle_reflines(OpenDriveMap, parseFloat(PARAMS.resolution),sel_road_id);
+    reflines_geom.setAttribute('position', new THREE.Float32BufferAttribute(getStdVecEntries(odr_refline_segments.vertices).flat(), 3));
+    reflines_geom.setIndex(getStdVecEntries(odr_refline_segments.indices, true));
+    handle_reflines = new THREE.LineSegments(reflines_geom, refline_material);
+    handle_reflines.renderOrder = 10;
+    handle_reflines.visible = PARAMS.ref_line;
+    handle_reflines.matrixAutoUpdate = false;
+    disposable_objs.push(reflines_geom);
+    scene.add(handle_reflines);
+
     scene.remove(handle_mesh);
     const odr_road_network_mesh = ModuleOpenDrive.create_handle_mesh(OpenDriveMap, parseFloat(PARAMS.resolution),sel_road_id);
     const odr_lanes_mesh_new = odr_road_network_mesh.lanes_mesh;
@@ -654,6 +666,15 @@ function drawHandleMesh(){
     handle_mesh.visible = !(PARAMS.view_mode == 'Outlines');
     scene.add(handle_mesh);
     
+    scene.remove(handle_lanelines);
+    const lane_outlines_geom = new THREE.BufferGeometry();
+    lane_outlines_geom.setAttribute('position', road_network_geom_new.attributes.position);
+    lane_outlines_geom.setIndex(getStdVecEntries(odr_lanes_mesh_new.get_lane_outline_indices(), true));
+    handle_lanelines = new THREE.LineSegments(lane_outlines_geom, lane_outlines_material);
+    handle_lanelines.renderOrder = 9;
+    disposable_objs.push(lane_outlines_geom);
+    scene.add(handle_lanelines);
+
     odr_lanes_mesh_new.delete();
 }
 
@@ -671,14 +692,7 @@ function afterModuleLoad(){
     road_gui.domElement.getElementsByClassName('close-button')[0].remove();
     road_gui.domElement.style.display = 'none';
     road_idC = road_gui.add(ROAD_DATA, 'road_id');
-    road_laneOffsetF = road_gui.addFolder('LaneOffset');
-    road_laneOffsetF.open();
-    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_a').name('a'));
-    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_b').name('b'));
-    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_c').name('c'));
-    road_laneOffsetCs.push(road_laneOffsetF.add(ROAD_DATA, 'lane_offset_d').name('d'));
-    road_lanesF = road_gui.addFolder('Lanes');
-    road_lanesF.open();
+
     setMode(DEFAULT);
 
     // Load screenshot of map
@@ -1062,14 +1076,77 @@ function getMaxLane(){
 }
 
 function getLaneWidths(){
-    lane_widths = stdMapToDict(ModuleOpenDrive.get_lane_widths(OpenDriveMap,sel_road_id));
+    lane_widths = stdMapIntVecDoubleToDict(ModuleOpenDrive.get_lane_widths(OpenDriveMap,sel_road_id));
+    for (const folder of road_laneFs){
+        road_gui.removeFolder(folder);
+    }
+    road_laneFs = [];
+    for(let lane_id = getMinLane();lane_id<=getMaxLane();lane_id++){
+        if (lane_id==0) continue;
+        let laneFolder = road_gui.addFolder('Lane '+lane_id.toString());
+        laneFolder.open();
+        road_laneFs.push(laneFolder);
+        let lane_width = lane_widths[lane_id];
+        let lane_width_dict = {};
+        for (let i = 0; i*5<lane_width.length; i++){
+            lane_width_dict[i.toString()+'_s'] = lane_width[i*5+0];
+            lane_width_dict[i.toString()+'_a'] = lane_width[i*5+1];
+            lane_width_dict[i.toString()+'_b'] = lane_width[i*5+2];
+            lane_width_dict[i.toString()+'_c'] = lane_width[i*5+3];
+            lane_width_dict[i.toString()+'_d'] = lane_width[i*5+4];
+        }
+        for (const [key, value] of Object.entries(lane_width_dict)) {
+            let tempC = laneFolder.add(lane_width_dict, key);
+            tempC.name = lane_id.toString()+"_"+key;
+            tempC.setValue(value);
+            tempC.step(0.01);
+            tempC.onChange(function(e){
+                let [lane_id,idx,param] = this.name.split("_");
+                lane_widths[lane_id][parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
+                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths));
+                selectRoad();
+            });
+            road_laneCs.push(tempC);
+        }
+    }
+}
+
+function getLaneOffset(){
+    lane_offset = getStdVecEntries(ModuleOpenDrive.get_lane_offset(OpenDriveMap,sel_road_id),true);
+    if (road_laneOffsetF!==null)
+        road_gui.removeFolder(road_laneOffsetF);
+    road_laneOffsetF = road_gui.addFolder('LaneOffset');
+    road_laneOffsetF.open();
+    lane_offset_dict = {};
+    for (let i = 0; i*5<lane_offset.length; i++){
+        lane_offset_dict[i.toString()+'_s'] = lane_offset[i*5+0];
+        lane_offset_dict[i.toString()+'_a'] = lane_offset[i*5+1];
+        lane_offset_dict[i.toString()+'_b'] = lane_offset[i*5+2];
+        lane_offset_dict[i.toString()+'_c'] = lane_offset[i*5+3];
+        lane_offset_dict[i.toString()+'_d'] = lane_offset[i*5+4];
+    }
+
+    for (const [key, value] of Object.entries(lane_offset_dict)) {
+        let tempC = road_laneOffsetF.add(lane_offset_dict, key);
+        tempC.name = key;
+        tempC.setValue(value);
+        tempC.step(0.01);
+        tempC.onChange(function(e){
+            let [idx,param] = this.name.split("_");
+            lane_offset[parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
+            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMap(lane_offset));
+            selectRoad();
+        });
+        road_laneOffsetCs.push(tempC);
+    }
 }
 
 function resetLaneWidths(){
-    lane_widths = {"-1":3.5, "0":0};
+    lane_widths = {"-1":[0,3.5,0,0,0], "0":[0,3.5,0,0,0]};
 }
 
 function selectRoad(){
     drawHandleMesh();
     getLaneWidths();
+    getLaneOffset();
 }

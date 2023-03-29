@@ -150,11 +150,13 @@ std::string save_map(const OpenDriveMap& odr_map)
     return output;
 }
 
-RoadNetworkMesh create_preview_mesh(double eps){
+RoadNetworkMesh create_preview_mesh(double eps)
+{
     return create_road_mesh(eps, preview_road);
 }
 
-RoadNetworkMesh create_handle_mesh(OpenDriveMap& odr_map, double eps, std::string id){
+RoadNetworkMesh create_handle_mesh(OpenDriveMap& odr_map, double eps, std::string id)
+{
     return create_road_mesh(eps, odr_map.id_to_road.at(id));
 }
 
@@ -182,8 +184,14 @@ RoadNetworkMesh create_road_mesh(double eps, Road& road)
     return out_mesh;
 }
 
-Mesh3D create_preview_reflines(double eps){
+Mesh3D create_preview_reflines(double eps)
+{
     return create_road_reflines(eps, preview_road);
+}
+
+Mesh3D create_handle_reflines(OpenDriveMap& odr_map, double eps, std::string id)
+{
+    return create_road_reflines(eps, odr_map.id_to_road.at(id));
 }
 
 Mesh3D create_road_reflines(double eps, Road& road)
@@ -234,19 +242,27 @@ Mesh3D create_road_reflines(double eps, Road& road)
 // }
 
 
-void insert_lanes(Road& road, std::map<int, double> lane_widths){
+void insert_lanes(Road& road, std::map<int, std::vector<double>> lane_widths)
+{
     LaneSection& lanesection = road.s_to_lanesection.insert({0, LaneSection(road.id, 0)}).first->second;
-
+    lanesection.id_to_lane.insert({0, Lane(road.id, 0, 0, false, "none")});
     for (auto const& x : lane_widths)
     {   
         int lane_id = x.first;
-        double lane_width = x.second;
+        if (lane_id==0) continue;
+        std::vector<double> lane_width = x.second;
 
-        Lane& lane = lanesection.id_to_lane.insert({lane_id,
-                                 Lane(road.id, 0, lane_id, false, lane_id==0?"none":"driving")})
-                        .first->second;
+        for (int i = 0; i*5<lane_width.size(); i++){
+            Lane& lane = lanesection.id_to_lane.insert({lane_id,
+                                    Lane(road.id, 0, lane_id, false, lane_id==0?"none":"driving")})
+                            .first->second;
 
-        lane.lane_width.s0_to_poly[0] = Poly3(0, lane_width, 0, 0, 0);
+            lane.lane_width.s0_to_poly[lane_width[i*5+0]] = Poly3(  lane_width[i*5+0],
+                                                                    lane_width[i*5+1],
+                                                                    lane_width[i*5+2],
+                                                                    lane_width[i*5+3],
+                                                                    lane_width[i*5+4]);
+        }
     }
 
     /* derive lane borders from lane widths */
@@ -297,7 +313,7 @@ void create_preview_road(OpenDriveMap& odr_map)
 {
     odr_map.id_to_road.insert({"-1",preview_road});
     preview_road.ref_line.s0_to_geometry[0] = std::make_unique<Line>(0, 0, 0, 0, 10);
-    insert_lanes(preview_road, {{-1, 3.5}, {0, 0}, {1, 3.5}});
+    insert_lanes(preview_road, {{-1, {0,3.5,0,0,0}}, {0, {0,0,0,0,0}}, {1, {0,3.5,0,0,0}}});
 }
 
 void delete_road(OpenDriveMap& odr_map, std::string id)
@@ -384,7 +400,7 @@ void delete_road(OpenDriveMap& odr_map, std::string id)
     odr_map.id_to_road.erase(id);
 }
 
-void update_preview_road(std::vector<std::vector<double>> geometries, std::map<int, double> lane_widths)
+void update_preview_road(std::vector<std::vector<double>> geometries, std::map<int, std::vector<double>> lane_widths)
 {   
     preview_road.s_to_lanesection.clear();
     insert_lanes(preview_road, lane_widths);
@@ -416,7 +432,14 @@ void update_preview_road(std::vector<std::vector<double>> geometries, std::map<i
     preview_road.length = s;
 }
 
-void add_lane_xml(pugi::xml_node& laneSectionChild, int lane_id, double lane_width){
+void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths)
+{   
+    Road& road = odr_map.id_to_road.at(road_id);
+    road.s_to_lanesection.clear();
+    insert_lanes(road, lane_widths);
+}
+
+void add_lane_xml(pugi::xml_node& laneSectionChild, int lane_id, std::vector<double> lane_width){
     pugi::xml_node lane_r = laneSectionChild.append_child("lane");
     lane_r.append_attribute("id").set_value(lane_id);
     lane_r.append_attribute("type").set_value("driving");
@@ -424,15 +447,23 @@ void add_lane_xml(pugi::xml_node& laneSectionChild, int lane_id, double lane_wid
     pugi::xml_node link_r = lane_r.append_child("link");
     link_r.append_child("predecessor").append_attribute("id").set_value(lane_id);
     link_r.append_child("successor").append_attribute("id").set_value(lane_id);
-    pugi::xml_node width_r = lane_r.append_child("width");
-    width_r.append_attribute("sOffset").set_value("0");
-    width_r.append_attribute("a").set_value(lane_width);
-    width_r.append_attribute("b").set_value("0");
-    width_r.append_attribute("c").set_value("0");
-    width_r.append_attribute("d").set_value("0");
+    for (int i = 0; i*5<lane_width.size(); i++){
+        double s0 = lane_width[i*5+0];
+        double a = lane_width[i*5+1];
+        double b = lane_width[i*5+2];
+        double c = lane_width[i*5+3];
+        double d = lane_width[i*5+4];
+        
+        pugi::xml_node width_r = lane_r.append_child("width");
+        width_r.append_attribute("sOffset").set_value(s0);
+        width_r.append_attribute("a").set_value(a);
+        width_r.append_attribute("b").set_value(b);
+        width_r.append_attribute("c").set_value(c);
+        width_r.append_attribute("d").set_value(d);
+    }
 }
 
-void add_link_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, double> lane_widths, std::string junc_id, std::string pred_road_id, int pred_lane_id, std::string succ_road_id, int succ_lane_id){
+void add_link_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, std::vector<double>> lane_widths, std::string junc_id, std::string pred_road_id, int pred_lane_id, std::string succ_road_id, int succ_lane_id){
     std::vector<Lane> lanes = preview_road.s_to_lanesection.at(0).get_lanes();
     int min_lane_id = 0;
     int max_lane_id = 0;
@@ -478,7 +509,7 @@ void add_link_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geome
     }
 }
 
-void add_link(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, double> lane_widths, std::string junc_id, std::string in_road_id, int in_lane_id, std::string out_road_id, int out_lane_id)
+void add_link(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, std::vector<double>> lane_widths, std::string junc_id, std::string in_road_id, int in_lane_id, std::string out_road_id, int out_lane_id)
 {
     Junction& junc = odr_map.id_to_junction.at(junc_id);
     int max_con_id = 0;
@@ -573,7 +604,7 @@ void add_link(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries
 
 }
 
-pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_lane_id, int max_lane_id, std::map<int, double> lane_widths, std::vector<std::vector<double>> geometries)
+pugi::xml_node create_road_xml(OpenDriveMap& odr_map, std::string id, int min_lane_id, int max_lane_id, std::map<int, std::vector<double>> lane_widths, std::vector<std::vector<double>> geometries)
 {
     pugi::xml_node new_road_node = odr_map.xml_doc.append_child("road");
     new_road_node.append_attribute("id").set_value(id.c_str());
@@ -723,34 +754,59 @@ std::vector<double> calc_end(std::string line_type, double x, double y, double h
     return x_y_hdg;
 }
 
-double get_lane_width(Road& road, int lane_id)
+std::vector<double> get_lane_offset(OpenDriveMap& odr_map, std::string id)
 {
-    assert(road.get_lanesection(0).id_to_lane.find(lane_id) != road.get_lanesection(0).id_to_lane.end());
-    return road.get_lanesection(0).id_to_lane.at(lane_id).lane_width.get_poly(0).a;
+    std::vector<double> lane_offset;
+    Road& road = odr_map.id_to_road.at(id);
+    for (const auto& s_poly : road.lane_offset.s0_to_poly)
+    {
+        lane_offset.push_back(s_poly.first);
+        lane_offset.push_back(s_poly.second.a);
+        lane_offset.push_back(s_poly.second.b);
+        lane_offset.push_back(s_poly.second.c);
+        lane_offset.push_back(s_poly.second.d);
+    }
+    return lane_offset;
 }
 
-std::map<int, double> get_lane_widths(OpenDriveMap& odr_map, std::string id)
+std::map<int, std::vector<double>> get_lane_widths(OpenDriveMap& odr_map, std::string id)
 {
-    std::map<int, double> lane_widths;
+    std::map<int, std::vector<double>> lane_widths;
     Road& road = odr_map.id_to_road.at(id);
     const LaneSection& lanesec = road.get_lanesection(0);
     for (const auto& id_lane : lanesec.id_to_lane)
     {
-        lane_widths[id_lane.first] = get_lane_width(road,id_lane.first);
+        std::vector<double> lane_width;
+        for (const auto &ele : id_lane.second.lane_width.s0_to_poly) {
+            double s0 = ele.first;
+            odr::Poly3 poly3 = ele.second;
+            double d = poly3.d;
+            double c = poly3.c+ 3 * d * s0;
+            double b = poly3.b+ 2 * c * s0 - 3 * d * s0 * s0;
+            double a = poly3.a+ b * s0 - c * s0 * s0 + d * s0 * s0 * s0;
+            lane_width.push_back(s0);
+            lane_width.push_back(a);
+            lane_width.push_back(b);
+            lane_width.push_back(c);
+            lane_width.push_back(d);
+        }
+        lane_widths[id_lane.first] = lane_width;
     }
     return lane_widths;
 }
 
-double calc_t(Road& road, int lane_id){
+double calc_t(Road& road, int lane_id, double s)
+{
+    const LaneSection& lanesec = road.get_lanesection(0);
     double t = 0;
     if (lane_id<0){
         for (int i=-1;i>=lane_id;i--){
-            t += get_lane_width(road,i);
+            t += lanesec.id_to_lane.at(i).lane_width.get(s);
         }
     }
     else{
         for (int i=1;i<=lane_id;i++){
-            t += get_lane_width(road,i);
+            t += lanesec.id_to_lane.at(i).lane_width.get(s);
         } 
     }
     return t;
@@ -764,7 +820,7 @@ std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane
     if (lane_id>0) lane_id-=1;
     if (lane_id<0) lane_id+=1;
     
-    Vec3D xyz = road.get_xyz(road.length,calc_t(road,lane_id),0);
+    Vec3D xyz = road.get_xyz(road.length,calc_t(road,lane_id,road.length),0);
 
     double hdg = RG.hdg0;
 
@@ -804,7 +860,7 @@ std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int la
     if (lane_id>0) lane_id-=1;
     if (lane_id<0) lane_id+=1;
 
-    Vec3D xyz = road.get_xyz(0,calc_t(road,lane_id),0);
+    Vec3D xyz = road.get_xyz(0,calc_t(road,lane_id,0),0);
 
     return {xyz[0],xyz[1],RG.hdg0};
 }
@@ -823,12 +879,12 @@ std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map)
         Vec3D xyz;
         for (auto& id_conn : junc.id_to_connection){
             Road& road = odr_map.id_to_road.at(id_conn.second.connecting_road);
-            xyz = road.get_xyz(0,calc_t(road,-1),0);
+            xyz = road.get_xyz(0,calc_t(road,-1,0),0);
             if (xyz[0]>maxx) maxx = xyz[0];
             if (xyz[0]<minx) minx = xyz[0];
             if (xyz[1]>maxy) maxy = xyz[1];
             if (xyz[1]<miny) miny = xyz[1];
-            xyz = road.get_xyz(road.length,calc_t(road,-1),0);
+            xyz = road.get_xyz(road.length,calc_t(road,-1,road.length),0);
             if (xyz[0]>maxx) maxx = xyz[0];
             if (xyz[0]<minx) minx = xyz[0];
             if (xyz[1]>maxy) maxy = xyz[1];
@@ -868,8 +924,8 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
         for (auto& ls : road.get_lanesections()){
             type = road.junction=="-1"?0:1; 
             for (auto& lane : ls.get_lanes()){
-                double lane_w = get_lane_width(road,lane.id)/2;
-                double lane_t = -calc_t(road,lane.id);
+                double lane_w = lane.lane_width.get(0)/2;
+                double lane_t = -calc_t(road,lane.id,0);
                 if (lane.id<0) {
                     tmp_vec.clear();
                     tmp_vec.push_back(type);
@@ -938,11 +994,11 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                     if (pred_junc_road.successor.id==road.id){
                         tmp_vec.clear();
                         tmp_vec.push_back(4);
-                        double pred_junc_road_lw = calc_t(pred_junc_road,-1);
+                        double pred_junc_road_lw = calc_t(pred_junc_road,-1,pred_junc_road.length);
                         xyz = pred_junc_road.get_xyz(pred_junc_road.length,-pred_junc_road_lw/2,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
-                        double road_lw = calc_t(road,-1);
+                        double road_lw = calc_t(road,-1,0);
                         int to_lane_id = pred_junc_road.get_lanesection(0).id_to_lane.at(-1).successor;
                         double t = to_lane_id>0?to_lane_id*road_lw-road_lw/2:to_lane_id*road_lw+road_lw/2;
                         xyz = road.get_xyz(1,t,0);
@@ -953,13 +1009,13 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                     if (pred_junc_road.predecessor.id==road.id){
                         tmp_vec.clear();
                         tmp_vec.push_back(4);
-                        double road_lw = calc_t(road,-1);
+                        double road_lw = calc_t(road,-1,0);
                         int from_lane_id = pred_junc_road.get_lanesection(0).id_to_lane.at(-1).predecessor;
                         double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
                         xyz = road.get_xyz(1,t,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
-                        double pred_junc_road_lw = calc_t(pred_junc_road,-1);
+                        double pred_junc_road_lw = calc_t(pred_junc_road,-1,pred_junc_road.length);
                         xyz = pred_junc_road.get_xyz(0,-pred_junc_road_lw/2,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
@@ -989,13 +1045,13 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                     if (succ_junc_road.predecessor.id==road.id){
                         tmp_vec.clear();
                         tmp_vec.push_back(4);
-                        double road_lw = calc_t(road,-1);
+                        double road_lw = calc_t(road,-1,road.length);
                         int from_lane_id = succ_junc_road.get_lanesection(0).id_to_lane.at(-1).predecessor;
                         double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
                         xyz = road.get_xyz(from_lane_id>0?1:road.length-1,t,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
-                        double succ_junc_road_lw = calc_t(succ_junc_road,-1);
+                        double succ_junc_road_lw = calc_t(succ_junc_road,-1,0);
                         xyz = succ_junc_road.get_xyz(0,-succ_junc_road_lw/2,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
@@ -1004,11 +1060,11 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                     if (succ_junc_road.successor.id==road.id){
                         tmp_vec.clear();
                         tmp_vec.push_back(4);
-                        double succ_junc_road_lw = calc_t(succ_junc_road,-1);
+                        double succ_junc_road_lw = calc_t(succ_junc_road,-1,0);
                         xyz = succ_junc_road.get_xyz(succ_junc_road.length,-succ_junc_road_lw/2,0);
                         tmp_vec.push_back(xyz.at(0));
                         tmp_vec.push_back(xyz.at(1));
-                        double road_lw = calc_t(road,-1);
+                        double road_lw = calc_t(road,-1,road.length);
                         int from_lane_id = succ_junc_road.get_lanesection(0).id_to_lane.at(-1).successor;
                         double t = from_lane_id>0?from_lane_id*road_lw-road_lw/2:from_lane_id*road_lw+road_lw/2;
                         xyz = road.get_xyz(from_lane_id>0?road.length-1:1,t,0);
@@ -1026,12 +1082,12 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 tmp_vec.push_back(3);
                 int from_lane_id = road.get_lanesection(0).id_to_lane.at(-1).predecessor;
                 Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
-                double pred_road_lw = calc_t(pred_road,-1);
+                double pred_road_lw = calc_t(pred_road,-1,pred_road.length);
                 double t = from_lane_id>0?from_lane_id*pred_road_lw-pred_road_lw/2:from_lane_id*pred_road_lw+pred_road_lw/2;
                 xyz = pred_road.get_xyz(from_lane_id>0?0:pred_road.length,t,0);
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
-                double road_lw = calc_t(road,-1);
+                double road_lw = calc_t(road,-1,0);
                 Vec3D xyz = road.get_xyz(1,-road_lw/2,0);
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
@@ -1046,12 +1102,12 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 tmp_vec.clear();
                 tmp_vec.push_back(3);
                 int to_lane_id = road.get_lanesection(0).id_to_lane.at(-1).successor;
-                double road_lw = calc_t(road,-1);
+                double road_lw = calc_t(road,-1,road.length);
                 Vec3D xyz = road.get_xyz(road.length-1,-road_lw/2,0);
                 tmp_vec.push_back(xyz.at(0));
                 tmp_vec.push_back(xyz.at(1));
                 Road& succ_road = odr_map.id_to_road.at(road.successor.id);
-                double succ_road_lw = calc_t(succ_road,-1);
+                double succ_road_lw = calc_t(succ_road,-1,0);
                 double t = to_lane_id>0?to_lane_id*succ_road_lw-succ_road_lw/2:to_lane_id*succ_road_lw+succ_road_lw/2;
                 xyz = succ_road.get_xyz(to_lane_id>0?succ_road.length:0,t,0);
                 tmp_vec.push_back(xyz.at(0));
@@ -1067,7 +1123,7 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
     return road_arrows;
 }
 
-void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, double> lane_widths)
+void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths)
 {
     Road& sel_road = odr_map.id_to_road.at(road_id);
     // no need to change the actual road object, just change the xml because we're gonna write it
@@ -1079,7 +1135,7 @@ void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, double>
     for (auto const& x : lane_widths)
     {   
         int lane_id = x.first;
-        double lane_width = x.second;
+        std::vector<double> lane_width = x.second;
 
         if (lane_id<0){
             add_lane_xml(right, lane_id, lane_width);
@@ -1090,7 +1146,7 @@ void edit_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, double>
     }
 }
 
-void add_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, double> lane_widths, std::string pred_road_id, std::string succ_road_id)
+void add_road(OpenDriveMap& odr_map, std::vector<std::vector<double>> geometries, std::map<int, std::vector<double>> lane_widths, std::string pred_road_id, std::string succ_road_id)
 {
     std::vector<Lane> lanes = preview_road.s_to_lanesection.at(0).get_lanes();
     int min_lane_id = 0;

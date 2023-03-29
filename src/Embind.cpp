@@ -40,6 +40,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::register_map<std::size_t, double>("map<std::size_t, double>");
     emscripten::register_map<std::size_t, int>("map<std::size_t, int>");
     emscripten::register_map<int, double>("mapIntDouble");
+    emscripten::register_map<int, std::vector<double>>("mapIntVecDouble");
     emscripten::register_map<double, std::shared_ptr<RoadGeometry>>("map<double, shared_ptr<RoadGeometry>>");
     emscripten::register_map<std::string, std::shared_ptr<Road>>("map<string, shared_ptr<Road>>");
     emscripten::register_map<int, std::shared_ptr<Lane>>("map<int, shared_ptr<Lane>>");
@@ -103,7 +104,9 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("create_preview_mesh", &create_preview_mesh);
     emscripten::function("create_preview_reflines", &create_preview_reflines);
     emscripten::function("update_preview_road", &update_preview_road);
+    emscripten::function("update_handle_road", &update_handle_road);
     emscripten::function("create_handle_mesh", &create_handle_mesh);
+    emscripten::function("create_handle_reflines", &create_handle_reflines);
     // emscripten::function("write_road_xml", &write_road_xml);
     emscripten::function("delete_road", &delete_road);
     emscripten::function("get_end", &get_end);
@@ -118,6 +121,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("add_link", &add_link);
     emscripten::function("get_junction_bboxes", &get_junction_bboxes);
     emscripten::function("edit_road", &edit_road);
+    emscripten::function("get_lane_offset", &get_lane_offset);
     emscripten::function("get_lane_widths", &get_lane_widths);
     emscripten::function("merge_to_next_road", &merge_to_next_road);
 }

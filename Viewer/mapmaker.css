@@ -16,7 +16,19 @@
     padding: 5px;
     background-color: black;
     margin-top: 5px;
+    width: 565px !important;
 }
+
+.dg.a.road_controls .cr.number{
+    width: 100px;
+    display: inline-block;
+}
+
+.dg.a.road_controls .property-name {
+    width: 30px !important;
+    margin-left: 5px !important;
+}
+
 
 .file{
     width: 230px;

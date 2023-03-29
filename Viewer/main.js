@@ -462,6 +462,18 @@ function getStdMapKeys(std_map, delete_map = false)
     return map_keys;
 }
 
+function dictToStdMapIntVecDouble(dict){
+    let mapIntVecDouble = new ModuleOpenDrive.mapIntVecDouble();
+    for (const [key, value] of Object.entries(dict)) {
+        let vectorDouble = new ModuleOpenDrive.vectorDouble();
+        for (const v of value){
+            vectorDouble.push_back(v);
+        }
+        mapIntVecDouble.set(parseInt(key), vectorDouble);
+    }
+    return mapIntVecDouble;
+}
+
 function dictToStdMap(dict){
     let stdMap = new ModuleOpenDrive.mapIntDouble();
     for (const [key, value] of Object.entries(dict)) {
@@ -470,10 +482,10 @@ function dictToStdMap(dict){
     return stdMap;
 }
 
-function stdMapToDict(stdMap){
+function stdMapIntVecDoubleToDict(stdMap){
     let dict = {};
     for (let key of getStdMapKeys(stdMap))
-        dict[key.toString()] = stdMap.get(key);
+        dict[key.toString()] = getStdVecEntries(stdMap.get(key));
     stdMap.delete();
     return dict;
 }
