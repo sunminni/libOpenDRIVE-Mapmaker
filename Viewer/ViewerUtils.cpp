@@ -432,9 +432,14 @@ void update_preview_road(std::vector<std::vector<double>> geometries, std::map<i
     preview_road.length = s;
 }
 
-void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset)
+void update_handle_road(OpenDriveMap& odr_map, std::string road_id, std::vector<int> road_data, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset)
 {   
     Road& road = odr_map.id_to_road.at(road_id);
+    road.predecessor.type = odr::RoadLink::Type(road_data[0]);
+    road.predecessor.id = std::to_string(road_data[1]);
+    road.successor.type = odr::RoadLink::Type(road_data[2]);
+    road.successor.id = std::to_string(road_data[3]);
+
     road.s_to_lanesection.clear();
     insert_lanes(road, lane_widths);
     road.lane_offset.s0_to_poly.clear();
@@ -781,6 +786,19 @@ std::vector<double> get_lane_offset(OpenDriveMap& odr_map, std::string id)
         lane_offset.push_back(d);
     }
     return lane_offset;
+}
+
+std::vector<int> get_road_data(OpenDriveMap& odr_map, std::string id)
+{
+    std::vector<int> road_data;
+    Road& road = odr_map.id_to_road.at(id);
+
+    road_data.push_back(road.predecessor.type);
+    road_data.push_back(std::stoi(road.predecessor.id));
+    road_data.push_back(road.successor.type);
+    road_data.push_back(std::stoi(road.successor.id));
+
+    return road_data;
 }
 
 std::map<int, std::vector<double>> get_lane_widths(OpenDriveMap& odr_map, std::string id)
@@ -1140,6 +1158,12 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
 void write_handle_road_xml(OpenDriveMap& odr_map, std::string road_id, std::map<int, std::vector<double>> lane_widths, std::vector<double> lane_offset)
 {
     Road& sel_road = odr_map.id_to_road.at(road_id);
+
+    sel_road.xml_node.child("link").child("predecessor").attribute("elementType").set_value(sel_road.predecessor.type==odr::RoadLink::Type_Road?"road":"junction");
+    sel_road.xml_node.child("link").child("predecessor").attribute("elementId").set_value(sel_road.predecessor.id.c_str());
+    sel_road.xml_node.child("link").child("successor").attribute("elementType").set_value(sel_road.successor.type==odr::RoadLink::Type_Road?"road":"junction");
+    sel_road.xml_node.child("link").child("successor").attribute("elementId").set_value(sel_road.successor.id.c_str());
+    
     // no need to change the actual road object, just change the xml because we're gonna write it
     sel_road.xml_node.child("lanes").child("laneSection").remove_child("left");
     sel_road.xml_node.child("lanes").child("laneSection").remove_child("right");

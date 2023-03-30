@@ -61,13 +61,14 @@
     margin-right: 5px;
 }
 
-.road_title{
+.string_c{
     width: 180px !important;
 }
 
-.road_id_input{
+.string_input{
     width: 30% !important;
     float: left !important;
+    text-align: center !important;
 }
 
 .lane_button{

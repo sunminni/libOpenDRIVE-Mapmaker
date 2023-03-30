@@ -40,9 +40,10 @@ var junc_idC = null;
 var junc_link_start_rid = null;
 var junc_link_start_lid = null;
 
-var ROAD_DATA = { 'ID':"-1" };
 var road_gui = null;
-var road_idC = null;
+var roadCs = {};
+var road_predLaneLinksF = null;
+var road_succLaneLinksF = null;
 var road_laneOffsetF = null;
 var road_laneOffsetCs = [];
 var road_laneFs = [];
@@ -69,7 +70,6 @@ var validPreview = false;
 
 var lane_widths = {"-1":[0,3.5,0,0,0], "0":[0,3.5,0,0,0]};
 var lane_offset = [];
-var lane_offset_dict = {};
 var map_offset_x = null;
 var map_offset_y = null;
 var mode_info = document.getElementById('mode_info');

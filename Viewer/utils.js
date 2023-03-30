@@ -678,10 +678,7 @@ function drawHandleMesh(){
     odr_lanes_mesh_new.delete();
 }
 
-
-function afterModuleLoad(){
-    getMapList();
-
+function init_dat_gui(){
     junc_gui = new dat.GUI();
     junc_gui.domElement.classList.add('junc_controls');
     junc_gui.domElement.getElementsByClassName('close-button')[0].remove();
@@ -691,54 +688,135 @@ function afterModuleLoad(){
     road_gui.domElement.classList.add('road_controls');
     road_gui.domElement.getElementsByClassName('close-button')[0].remove();
     road_gui.domElement.style.display = 'none';
-    road_idC = road_gui.add(ROAD_DATA, 'ID');
-    road_idC.domElement.classList.add('road_title');
-    road_idC.domElement.getElementsByTagName('input')[0].classList.add("road_id_input");
+    roadCs["ID"] = road_gui.add({"ID":"-1"}, 'ID');
+    roadCs["ID"].domElement.classList.add('string_c');
+    roadCs["ID"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
 
     for (let i=0;i<4;i++){
         let button = document.createElement("div");
         button.classList.add("button");
         button.classList.add("lane_button");
         button.innerHTML = i==0||i==3?"+":"-";
-        road_idC.domElement.append(button);
-        if (i==0){
-            button.onclick = function(e){
-                e.stopPropagation();
+        roadCs["ID"].domElement.append(button);
+        button.onclick = function(e){
+            e.stopPropagation();
+            let idx = Array.from(this.parentNode.children).indexOf(this)-1;
+            if (idx==0){
                 lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
-                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                writeXMLFile();
-            };
-        }
-        else if(i==1){
-            button.onclick = function(e){
-                e.stopPropagation();
+            }
+            else if (idx==1){
                 delete lane_widths[getMinLane().toString()];
-                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                writeXMLFile();
-            };
-        }
-        else if(i==2){
-            button.onclick = function(e){
-                e.stopPropagation();
+            }
+            else if (idx==2){
                 delete lane_widths[getMaxLane().toString()];
-                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                writeXMLFile();
-            };
-        }
-        else if(i==3){
-            button.onclick = function(e){
-                e.stopPropagation();
+            }
+            else if (idx==3){
                 lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
-                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                writeXMLFile();
-            };
-        }
+            }
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+            writeXMLFile();
+        };
     }
 
-    setMode(DEFAULT);
+    let road_predecessorF = road_gui.addFolder('Predecessor');
+    road_predecessorF.open();
+    let pred_dict = {"type":"road","id":"-1"};
+    roadCs["pred_type"] = road_predecessorF.add(pred_dict,"type").onChange(updateHandleRoad);
+    roadCs["pred_type"].domElement.classList.add('string_c');
+    roadCs["pred_type"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["pred_id"] = road_predecessorF.add(pred_dict,"id").onChange(updateHandleRoad);
+    roadCs["pred_id"].domElement.classList.add('string_c');
+    roadCs["pred_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    road_predLaneLinksF = road_predecessorF.addFolder('lanelinks');
+    road_predLaneLinksF.open();
+    let road_successorF = road_gui.addFolder('Successor');
+    road_successorF.open();
+    let succ_dict = {"type":"road","id":"-1"};
+    roadCs["succ_type"] = road_successorF.add(succ_dict,"type").onChange(updateHandleRoad);
+    roadCs["succ_type"].domElement.classList.add('string_c');
+    roadCs["succ_type"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["succ_id"] = road_successorF.add(succ_dict,"id").onChange(updateHandleRoad);
+    roadCs["succ_id"].domElement.classList.add('string_c');
+    roadCs["succ_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    road_succLaneLinksF = road_successorF.addFolder('lanelinks');
+    road_succLaneLinksF.open();
 
+}
+
+function load_vector_data(){
+    // Load vector lines
+    fetch("KCITY/KCITY_LINES.bin")
+    .then(response => response.arrayBuffer())
+    .then(buffer => {
+        const view = new Float32Array(buffer);
+        
+        map_offset_x = view[0];
+        map_offset_y = view[1];
+        let offset_idx = 2;
+        for (let i=0;i<view.length/5;i++){
+            let type = view[i*5+0+offset_idx];
+            let id = view[i*5+1+offset_idx];
+            let x = view[i*5+2+offset_idx];
+            let y = view[i*5+3+offset_idx];
+            let z = view[i*5+4+offset_idx];
+
+            if (id in lines_dict){
+                lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
+            }
+            else{
+                lines_dict[id] = {};
+                lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
+                lines_dict[id]['type'] = type;
+            }
+        }
+        
+        for (const [key, value] of Object.entries(lines_dict)) {
+            const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
+            let line_m = new THREE.LineBasicMaterial({
+                linewidth: 1,
+            });
+            let point_m = new THREE.PointsMaterial({
+                size: 0.2,
+            });
+            // let randomColor = Math.floor(0xff0000 + Math.random() * 0x00ffff);
+            // let randomLineMaterial = new THREE.LineBasicMaterial({
+            //     color: randomColor,
+            //     linewidth: 1,
+            // });
+            // let randomPointsMaterial = new THREE.PointsMaterial({
+            //     color: randomColor,
+            //     size: 0.2,
+            // });
+            if (value['type'] < 200){
+                line_m.setValues({"color" : 0xffff00});
+                point_m.setValues({"color" : 0xffff00});
+            }
+            else if (value['type'] < 300){
+                line_m.setValues({"color" : 0xffffff});
+                point_m.setValues({"color" : 0xffffff});
+            }
+            else if (value['type'] < 400){
+                line_m.setValues({"color" : 0x0000ff});
+                point_m.setValues({"color" : 0x0000ff});
+            }
+            let line = new THREE.Line( geometry, line_m );
+            let points = new THREE.Points( geometry, point_m );
+            line.matrixAutoUpdate = false;
+            points.matrixAutoUpdate = false;
+            scene.add( line );
+            scene.add( points );
+            
+            // for moving to lines when xodr file is empty..
+            // if (key==1){
+            //     const bbox = new THREE.Box3().setFromObject(line);
+            //     fitViewToBbox(bbox);
+            // }
+        }
+    });
+}
+
+function load_image(){
     // Load screenshot of map
-
     // let image_loader = new THREE.TextureLoader();
     // let image_material = new THREE.MeshLambertMaterial({
     //     map: image_loader.load('map_image.png')
@@ -750,77 +828,14 @@ function afterModuleLoad(){
     // let image_mesh = new THREE.Mesh(image_geometry, image_material);
     // image_mesh.position.set(0,0,-0.1);
     // scene.add(image_mesh);
+}
 
-    // Load vector lines
-    fetch("KCITY/KCITY_LINES.bin")
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-            const view = new Float32Array(buffer);
-            
-            map_offset_x = view[0];
-            map_offset_y = view[1];
-            let offset_idx = 2;
-            for (let i=0;i<view.length/5;i++){
-                let type = view[i*5+0+offset_idx];
-                let id = view[i*5+1+offset_idx];
-                let x = view[i*5+2+offset_idx];
-                let y = view[i*5+3+offset_idx];
-                let z = view[i*5+4+offset_idx];
 
-                if (id in lines_dict){
-                    lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
-                }
-                else{
-                    lines_dict[id] = {};
-                    lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
-                    lines_dict[id]['type'] = type;
-                }
-            }
-            
-            for (const [key, value] of Object.entries(lines_dict)) {
-                const geometry = new THREE.BufferGeometry().setFromPoints( value['points'] );
-                let line_m = new THREE.LineBasicMaterial({
-                    linewidth: 1,
-                });
-                let point_m = new THREE.PointsMaterial({
-                    size: 0.2,
-                });
-                // let randomColor = Math.floor(0xff0000 + Math.random() * 0x00ffff);
-                // let randomLineMaterial = new THREE.LineBasicMaterial({
-                //     color: randomColor,
-                //     linewidth: 1,
-                // });
-                // let randomPointsMaterial = new THREE.PointsMaterial({
-                //     color: randomColor,
-                //     size: 0.2,
-                // });
-                if (value['type'] < 200){
-                    line_m.setValues({"color" : 0xffff00});
-                    point_m.setValues({"color" : 0xffff00});
-                }
-                else if (value['type'] < 300){
-                    line_m.setValues({"color" : 0xffffff});
-                    point_m.setValues({"color" : 0xffffff});
-                }
-                else if (value['type'] < 400){
-                    line_m.setValues({"color" : 0x0000ff});
-                    point_m.setValues({"color" : 0x0000ff});
-                }
-                let line = new THREE.Line( geometry, line_m );
-                let points = new THREE.Points( geometry, point_m );
-                line.matrixAutoUpdate = false;
-                points.matrixAutoUpdate = false;
-                scene.add( line );
-                scene.add( points );
-                
-                // for moving to lines when xodr file is empty..
-                // if (key==1){
-                //     const bbox = new THREE.Box3().setFromObject(line);
-                //     fitViewToBbox(bbox);
-                // }
-            }
-        });
-
+function afterModuleLoad(){
+    getMapList();
+    init_dat_gui();
+    setMode(DEFAULT);
+    load_vector_data();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
 
@@ -1146,8 +1161,7 @@ function getLaneWidths(){
             tempC.onChange(function(e){
                 let [lane_id,idx,param] = this.name.split("_");
                 lane_widths[lane_id][parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
-                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                selectRoad();
+                updateHandleRoad();
             });
             road_laneCs.push(tempC);
         }
@@ -1164,8 +1178,7 @@ function getLaneWidths(){
             lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+2]);
             lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+3]);
             lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+4]);
-            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-            selectRoad();
+            updateHandleRoad();
         };
         laneFolder.domElement.getElementsByClassName("title")[0].append(button);
         let lis = laneFolder.domElement.getElementsByTagName("li");
@@ -1179,8 +1192,7 @@ function getLaneWidths(){
                 let lane_id = parseInt(str.substr(0,str.length-1));
                 let idx = (Array.from(this.parentNode.children).indexOf(this)-3)/4;
                 lane_widths[lane_id].splice(idx*5,5);
-                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-                selectRoad();
+                updateHandleRoad();
             };
             lis[6+3*i].after(button);
         }
@@ -1193,7 +1205,7 @@ function getLaneOffset(){
         road_gui.removeFolder(road_laneOffsetF);
     road_laneOffsetF = road_gui.addFolder('LaneOffset');
     road_laneOffsetF.open();
-    lane_offset_dict = {};
+    let lane_offset_dict = {};
     for (let i = 0; i*5<lane_offset.length; i++){
         lane_offset_dict[i.toString()+'_s'] = lane_offset[i*5+0];
         lane_offset_dict[i.toString()+'_a'] = lane_offset[i*5+1];
@@ -1211,8 +1223,7 @@ function getLaneOffset(){
         tempC.onChange(function(e){
             let [idx,param] = this.name.split("_");
             lane_offset[parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
-            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-            selectRoad();
+            updateHandleRoad();
         });
         road_laneOffsetCs.push(tempC);
     }
@@ -1227,8 +1238,7 @@ function getLaneOffset(){
         lane_offset.push(lane_offset[(new_idx-1)*5+2]);
         lane_offset.push(lane_offset[(new_idx-1)*5+3]);
         lane_offset.push(lane_offset[(new_idx-1)*5+4]);
-        ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-        selectRoad();
+        updateHandleRoad();
     };
     road_laneOffsetF.domElement.getElementsByClassName("title")[0].append(button);
     let lis = road_laneOffsetF.domElement.getElementsByTagName("li");
@@ -1240,10 +1250,40 @@ function getLaneOffset(){
             e.stopPropagation();
             let idx = (Array.from(this.parentNode.children).indexOf(this)-3)/4;
             lane_offset.splice(idx*5,5);
-            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-            selectRoad();
+            updateHandleRoad();
         };
         lis[6+3*i].after(button);
+    }
+}
+
+function collect_road_data(){
+    let arr = [];
+    arr.push(['none','road','junction'].indexOf(roadCs["pred_type"].getValue()));
+    arr.push(parseInt(roadCs["pred_id"].getValue()));
+    arr.push(['none','road','junction'].indexOf(roadCs["succ_type"].getValue()));
+    arr.push(parseInt(roadCs["succ_id"].getValue()));
+    return arrToStdVecInt(arr);
+}
+
+function getRoadInfo(){
+    roadCs["ID"].setValue(sel_road_id);
+
+    let road_data_arr = getStdVecEntries(ModuleOpenDrive.get_road_data(OpenDriveMap,sel_road_id),true);
+    roadCs["pred_type"].onChange(()=>{});
+    roadCs["pred_id"].onChange(()=>{});
+    roadCs["succ_type"].onChange(()=>{});
+    roadCs["succ_id"].onChange(()=>{});
+    roadCs["pred_type"].setValue(['none','road','junction'][road_data_arr[0]]);
+    roadCs["pred_id"].setValue(road_data_arr[1]);
+    roadCs["succ_type"].setValue(['none','road','junction'][road_data_arr[2]]);
+    roadCs["succ_id"].setValue(road_data_arr[3]);
+    roadCs["pred_type"].onChange(updateHandleRoad);
+    roadCs["pred_id"].onChange(updateHandleRoad);
+    roadCs["succ_type"].onChange(updateHandleRoad);
+    roadCs["succ_id"].onChange(updateHandleRoad);
+    for (const [lane_id, value] of Object.entries(lane_widths)) {
+        if (parseInt(lane_id) == 0) continue;
+        console.log(lane_id);
     }
 }
 
@@ -1251,8 +1291,14 @@ function resetLaneWidths(){
     lane_widths = {"-1":[0,3.5,0,0,0], "0":[0,3.5,0,0,0]};
 }
 
+function updateHandleRoad(){
+    ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, collect_road_data(), dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+    selectRoad();
+}
+
 function selectRoad(){
     drawHandleMesh();
     getLaneOffset();
     getLaneWidths();
+    getRoadInfo();
 }

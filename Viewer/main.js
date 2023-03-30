@@ -471,6 +471,14 @@ function arrToStdVecDouble(arr){
     return vectorDouble;
 }
 
+function arrToStdVecInt(arr){
+    let vectorInt = new ModuleOpenDrive.vectorInt();
+    for (const a of arr){
+        vectorInt.push_back(a);
+    }
+    return vectorInt;
+}
+
 function dictToStdMapIntVecDouble(dict){
     let mapIntVecDouble = new ModuleOpenDrive.mapIntVecDouble();
     for (const [key, value] of Object.entries(dict)) {

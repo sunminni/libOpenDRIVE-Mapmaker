@@ -25,7 +25,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     /* vectors */
     emscripten::register_vector<std::size_t>("vector<std::size_t>");
     emscripten::register_vector<std::uint32_t>("vector<std::uint32_t>");
-    emscripten::register_vector<int>("vector<int>");
+    emscripten::register_vector<int>("vectorInt");
     emscripten::register_vector<double>("vectorDouble");
     emscripten::register_vector<std::vector<double>>("vectorVectorDouble");
     emscripten::register_vector<Vec2D>("vector<Vec2D>");
@@ -123,6 +123,7 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("write_handle_road_xml", &write_handle_road_xml);
     emscripten::function("get_lane_offset", &get_lane_offset);
     emscripten::function("get_lane_widths", &get_lane_widths);
+    emscripten::function("get_road_data", &get_road_data);
     emscripten::function("merge_to_next_road", &merge_to_next_road);
 }
 

@@ -11,7 +11,6 @@ function showJuncControls(bool){
 function showRoadControls(bool){
     if (bool){
         road_gui.domElement.style.display = 'block';
-        road_idC.setValue(sel_road_id);
     }
     else{
         road_gui.domElement.style.display = 'none';
@@ -103,6 +102,7 @@ function setMode(mode){
                 arrow.visible = false;
             }
         }
+        roadCs["ID"].setValue(sel_road_id);
         showJuncControls(false);
         showRoadControls(true);
         scene.remove(preview_mesh);
