@@ -1109,6 +1109,39 @@ function getLaneWidths(){
             });
             road_laneCs.push(tempC);
         }
+        let button = document.createElement("div");
+        button.classList.add("button");
+        button.innerHTML = "+";
+        button.onclick = function(e){
+            e.stopPropagation();
+            let str = this.parentElement.textContent.split(' ')[1];
+            let lane_id = parseInt(str.substr(0,str.length-1));
+            let new_idx = lane_widths[lane_id].length/5;
+            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+0]+1);
+            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+1]);
+            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+2]);
+            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+3]);
+            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+4]);
+            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+            selectRoad();
+        };
+        laneFolder.domElement.getElementsByClassName("title")[0].append(button);
+        let lis = laneFolder.domElement.getElementsByTagName("li");
+        for (let i=0;i<(lis.length-4)/3;i++){
+            let button = document.createElement("div");
+            button.classList.add("button");
+            button.innerHTML = "-";
+            button.onclick = function(e){
+                e.stopPropagation();
+                let str = this.parentElement.getElementsByClassName("title")[0].textContent.split(' ')[1];
+                let lane_id = parseInt(str.substr(0,str.length-1));
+                let idx = (Array.from(this.parentNode.children).indexOf(this)-3)/4;
+                lane_widths[lane_id].splice(idx*5,5);
+                ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+                selectRoad();
+            };
+            lis[6+3*i].after(button);
+        }
     }
 }
 
@@ -1140,6 +1173,35 @@ function getLaneOffset(){
             selectRoad();
         });
         road_laneOffsetCs.push(tempC);
+    }
+    let button = document.createElement("div");
+    button.classList.add("button");
+    button.innerHTML = "+";
+    button.onclick = function(e){
+        e.stopPropagation();
+        let new_idx = lane_offset.length/5;
+        lane_offset.push(lane_offset[(new_idx-1)*5+0]+1);
+        lane_offset.push(lane_offset[(new_idx-1)*5+1]);
+        lane_offset.push(lane_offset[(new_idx-1)*5+2]);
+        lane_offset.push(lane_offset[(new_idx-1)*5+3]);
+        lane_offset.push(lane_offset[(new_idx-1)*5+4]);
+        ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+        selectRoad();
+    };
+    road_laneOffsetF.domElement.getElementsByClassName("title")[0].append(button);
+    let lis = road_laneOffsetF.domElement.getElementsByTagName("li");
+    for (let i=0;i<(lis.length-4)/3;i++){
+        let button = document.createElement("div");
+        button.classList.add("button");
+        button.innerHTML = "-";
+        button.onclick = function(e){
+            e.stopPropagation();
+            let idx = (Array.from(this.parentNode.children).indexOf(this)-3)/4;
+            lane_offset.splice(idx*5,5);
+            ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+            selectRoad();
+        };
+        lis[6+3*i].after(button);
     }
 }
 
