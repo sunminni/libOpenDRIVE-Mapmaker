@@ -148,26 +148,6 @@ function onKeyDown(e){
             setMode(DEFAULT);
             writeXMLFile();
         }
-        if ('7890'.includes(e.key)){
-            if (e.key=='7'){
-                lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
-            }
-            if (e.key=='8'){
-                if(getMinLane()<-1){
-                    delete lane_widths[getMinLane().toString()];
-                }
-            }
-            if (e.key=='9'){
-                if(getMaxLane()>0){
-                    delete lane_widths[getMaxLane().toString()];
-                }
-            }
-            if (e.key=='0'){
-                lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
-            }
-            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
-            writeXMLFile();
-        }
         if (e.key=='m'){
             ModuleOpenDrive.merge_to_next_road(OpenDriveMap, sel_road_id);
             writeXMLFile();

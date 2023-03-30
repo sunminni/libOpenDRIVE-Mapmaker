@@ -61,6 +61,20 @@
     margin-right: 5px;
 }
 
+.road_title{
+    width: 180px !important;
+}
+
+.road_id_input{
+    width: 30% !important;
+    float: left !important;
+}
+
+.lane_button{
+    position: relative;
+    float: left;
+}
+
 .dg .c{
     text-align: center;
 }

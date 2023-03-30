@@ -40,7 +40,7 @@ var junc_idC = null;
 var junc_link_start_rid = null;
 var junc_link_start_lid = null;
 
-var ROAD_DATA = { 'road_id':"-1" };
+var ROAD_DATA = { 'ID':"-1" };
 var road_gui = null;
 var road_idC = null;
 var road_laneOffsetF = null;

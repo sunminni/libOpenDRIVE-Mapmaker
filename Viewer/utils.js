@@ -691,7 +691,49 @@ function afterModuleLoad(){
     road_gui.domElement.classList.add('road_controls');
     road_gui.domElement.getElementsByClassName('close-button')[0].remove();
     road_gui.domElement.style.display = 'none';
-    road_idC = road_gui.add(ROAD_DATA, 'road_id');
+    road_idC = road_gui.add(ROAD_DATA, 'ID');
+    road_idC.domElement.classList.add('road_title');
+    road_idC.domElement.getElementsByTagName('input')[0].classList.add("road_id_input");
+
+    for (let i=0;i<4;i++){
+        let button = document.createElement("div");
+        button.classList.add("button");
+        button.classList.add("lane_button");
+        button.innerHTML = i==0||i==3?"+":"-";
+        road_idC.domElement.append(button);
+        if (i==0){
+            button.onclick = function(e){
+                e.stopPropagation();
+                lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
+                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+                writeXMLFile();
+            };
+        }
+        else if(i==1){
+            button.onclick = function(e){
+                e.stopPropagation();
+                delete lane_widths[getMinLane().toString()];
+                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+                writeXMLFile();
+            };
+        }
+        else if(i==2){
+            button.onclick = function(e){
+                e.stopPropagation();
+                delete lane_widths[getMaxLane().toString()];
+                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+                writeXMLFile();
+            };
+        }
+        else if(i==3){
+            button.onclick = function(e){
+                e.stopPropagation();
+                lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
+                ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+                writeXMLFile();
+            };
+        }
+    }
 
     setMode(DEFAULT);
 

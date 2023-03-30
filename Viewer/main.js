@@ -130,6 +130,7 @@ function fetch_map(){
             loadFile(file_text, fetched_dict[map_filepath]);
             fetched_dict[map_filepath] = true;
             if (MapmakerMode === SELECTED){
+                setMode(SELECTED);
                 selectRoad();
             }
         });
