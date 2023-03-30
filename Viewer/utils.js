@@ -724,6 +724,12 @@ function init_dat_gui(){
     roadCs["pred_type"] = road_predecessorF.add(pred_dict,"type").onChange(updateHandleRoad);
     roadCs["pred_type"].domElement.classList.add('string_c');
     roadCs["pred_type"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["pred_type"].domElement.getElementsByTagName('input')[0].onclick = function(e){
+        let val = this.value!="road"?"road":"junction";
+        this.value = val;
+        roadCs["pred_type"].setValue(val);
+        this.blur();
+    };
     roadCs["pred_id"] = road_predecessorF.add(pred_dict,"id").onChange(updateHandleRoad);
     roadCs["pred_id"].domElement.classList.add('string_c');
     roadCs["pred_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
@@ -735,6 +741,12 @@ function init_dat_gui(){
     roadCs["succ_type"] = road_successorF.add(succ_dict,"type").onChange(updateHandleRoad);
     roadCs["succ_type"].domElement.classList.add('string_c');
     roadCs["succ_type"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["succ_type"].domElement.getElementsByTagName('input')[0].onclick = function(e){
+        let val = this.value!="road"?"road":"junction";
+        this.value = val;
+        roadCs["succ_type"].setValue(val);
+        this.blur();
+    };
     roadCs["succ_id"] = road_successorF.add(succ_dict,"id").onChange(updateHandleRoad);
     roadCs["succ_id"].domElement.classList.add('string_c');
     roadCs["succ_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
