@@ -733,6 +733,10 @@ function init_dat_gui(){
     roadCs["pred_id"] = road_predecessorF.add(pred_dict,"id").onChange(updateHandleRoad);
     roadCs["pred_id"].domElement.classList.add('string_c');
     roadCs["pred_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["pred_id"].domElement.getElementsByTagName('input')[0].onclick = function(e){
+        setMode(LINK_ROAD_PRED);
+        this.blur();
+    };
     road_predLaneLinksF = road_predecessorF.addFolder('lanelinks');
     road_predLaneLinksF.open();
     let road_successorF = road_gui.addFolder('Successor');
@@ -750,6 +754,10 @@ function init_dat_gui(){
     roadCs["succ_id"] = road_successorF.add(succ_dict,"id").onChange(updateHandleRoad);
     roadCs["succ_id"].domElement.classList.add('string_c');
     roadCs["succ_id"].domElement.getElementsByTagName('input')[0].classList.add("string_input");
+    roadCs["succ_id"].domElement.getElementsByTagName('input')[0].onclick = function(e){
+        setMode(LINK_ROAD_SUCC);
+        this.blur();
+    };
     road_succLaneLinksF = road_successorF.addFolder('lanelinks');
     road_succLaneLinksF.open();
 

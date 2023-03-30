@@ -118,6 +118,16 @@ function setMode(mode){
     else if (mode == EXTEND_LINE){
         writeExtend(0);
     }
+    else if ([LINK_ROAD_PRED,LINK_ROAD_SUCC].includes(mode)){
+        handle_mesh.visible = true;
+        handle_lanelines.visible = true;
+        handle_reflines.visible = true;
+        road_network_mesh.visible = true;
+        lane_outline_lines.visible = true;
+        for (let arrow of link_arrows){
+            arrow.visible = true;
+        }
+    }
     // console.log("mode "+mode);
     MapmakerMode = mode;
     mode_info.innerHTML = mode;
@@ -218,6 +228,11 @@ function onKeyDown(e){
             writeXMLFile();
         }
     }
+    else if ([LINK_ROAD_PRED,LINK_ROAD_SUCC].includes(MapmakerMode)){
+        if (e.key=='Escape'){
+            setMode(SELECTED);
+        }
+    }
 }
 
 function onMouseClick(event){
@@ -315,5 +330,19 @@ function onMouseClick(event){
         }
         setMode(REFLINE);
         writeXMLFile();
+    }
+    else if (MapmakerMode === LINK_ROAD_PRED){
+        if (hover_road_id!==null){
+            roadCs["pred_id"].domElement.getElementsByTagName('input')[0].value = hover_road_id;
+            roadCs["pred_id"].setValue(hover_road_id);
+            setMode(SELECTED);
+        }
+    }
+    else if (MapmakerMode === LINK_ROAD_SUCC){
+        if (hover_road_id!==null){
+            roadCs["succ_id"].domElement.getElementsByTagName('input')[0].value = hover_road_id;
+            roadCs["succ_id"].setValue(hover_road_id);
+            setMode(SELECTED);
+        }
     }
 }
