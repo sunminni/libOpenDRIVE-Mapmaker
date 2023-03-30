@@ -407,23 +407,23 @@ void update_preview_road(std::vector<std::vector<double>> geometries, std::map<i
     preview_road.ref_line.s0_to_geometry.clear();
     // std::cout<<"geometries.size() "<<geometries.size()<<std::endl;
     double s = 0;
-    std::cout<<"update_preview_road ";
+    // std::cout<<"update_preview_road ";
     
     for (std::vector<double>& vd : geometries){
         if (vd.at(0)==0){
-            std::cout<<"Line"<<std::endl;
+            // std::cout<<"Line"<<std::endl;
             preview_road.ref_line.s0_to_geometry[s] = std::make_unique<Line>(s, vd.at(1), vd.at(2), vd.at(3), vd.at(4));
         }
         else if (vd.at(0)==1){
-            std::cout<<"Arc"<<std::endl;
+            // std::cout<<"Arc"<<std::endl;
             preview_road.ref_line.s0_to_geometry[s] = std::make_unique<Arc>(s, vd.at(1), vd.at(2), vd.at(3), vd.at(4), vd.at(5));
         }
         else if (vd.at(0)==2){
-            std::cout<<"ParamPoly3"<<std::endl;
+            // std::cout<<"ParamPoly3"<<std::endl;
             preview_road.ref_line.s0_to_geometry[s] = std::make_unique<ParamPoly3>(s, vd.at(1), vd.at(2), vd.at(3), vd.at(4), 0, 1, 0, 0, vd.at(5), vd.at(6), vd.at(7), vd.at(8), false);
         }
         else if (vd.at(0)==3){
-            std::cout<<"ParamPoly2"<<std::endl;
+            // std::cout<<"ParamPoly2"<<std::endl;
             preview_road.ref_line.s0_to_geometry[s] = std::make_unique<ParamPoly3>(s, vd.at(1), vd.at(2), vd.at(3), vd.at(4), 0, 1, 0, 0, vd.at(5), vd.at(6), vd.at(7), 0, false);
         }
         s+=vd.at(4);
@@ -1165,7 +1165,7 @@ void write_handle_road_xml(OpenDriveMap& odr_map, std::string road_id, std::map<
     for (int i=0;i<laneOffset_n;i++){
         sel_road.xml_node.child("lanes").remove_child("laneOffset");
     }
-    
+
     for (int i = 0; i*5<lane_offset.size(); i++){
         pugi::xml_node laneOffset = sel_road.xml_node.child("lanes").append_child("laneOffset");
         laneOffset.append_attribute("s").set_value(lane_offset[i*5+0]);

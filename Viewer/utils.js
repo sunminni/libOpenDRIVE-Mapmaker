@@ -1253,6 +1253,6 @@ function resetLaneWidths(){
 
 function selectRoad(){
     drawHandleMesh();
-    getLaneWidths();
     getLaneOffset();
+    getLaneWidths();
 }
