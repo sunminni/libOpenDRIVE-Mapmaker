@@ -761,6 +761,8 @@ function init_dat_gui(){
     road_succLaneLinksF = road_successorF.addFolder('lanelinks');
     road_succLaneLinksF.open();
 
+    roadCs["pred_lanelinks"] = [];
+    roadCs["succ_lanelinks"] = [];
 }
 
 function load_vector_data(){
@@ -1286,6 +1288,7 @@ function collect_road_data(){
 }
 
 function getRoadInfo(){
+    console.log("getRoadInfo");
     roadCs["ID"].setValue(sel_road_id);
 
     let road_data_arr = getStdVecEntries(ModuleOpenDrive.get_road_data(OpenDriveMap,sel_road_id),true);
@@ -1301,10 +1304,51 @@ function getRoadInfo(){
     roadCs["pred_id"].onChange(updateHandleRoad);
     roadCs["succ_type"].onChange(updateHandleRoad);
     roadCs["succ_id"].onChange(updateHandleRoad);
-    for (const [lane_id, value] of Object.entries(lane_widths)) {
-        if (parseInt(lane_id) == 0) continue;
-        console.log(lane_id);
+
+    for (let controller of roadCs["pred_lanelinks"]){
+        controller.remove();
     }
+    roadCs["pred_lanelinks"] = [];
+    if (roadCs["pred_type"].getValue()==="road"){
+        road_predLaneLinksF.show();
+        let arr = getStdVecEntries(ModuleOpenDrive.get_road_pred(OpenDriveMap,sel_road_id),true);
+        for (let i=0;i*2<arr.length;i++){
+            let lane_id = arr[i*2+0].toString();
+            if (lane_id === "0") continue;
+            let pred = arr[i*2+1];
+            let temp_dict = {};
+            temp_dict[lane_id]=pred;
+            let temp_C = road_predLaneLinksF.add(temp_dict,lane_id);
+            roadCs["pred_lanelinks"].push(temp_C);
+        }
+    }
+    else{
+        road_predLaneLinksF.hide();
+    }
+
+    for (let controller of roadCs["succ_lanelinks"]){
+        controller.remove();
+    }
+    roadCs["succ_lanelinks"] = [];
+    if (roadCs["succ_type"].getValue()==="road"){
+        road_succLaneLinksF.show();
+        console.log(sel_road_id);
+        let arr = getStdVecEntries(ModuleOpenDrive.get_road_succ(OpenDriveMap,sel_road_id),true);
+        console.log(arr);
+        for (let i=0;i*2<arr.length;i++){
+            let lane_id = arr[i*2+0].toString();
+            if (lane_id === "0") continue;
+            let succ = arr[i*2+1];
+            let temp_dict = {};
+            temp_dict[lane_id]=succ;
+            let temp_C = road_succLaneLinksF.add(temp_dict,lane_id);
+            roadCs["succ_lanelinks"].push(temp_C);
+        }
+    }
+    else{
+        road_succLaneLinksF.hide();
+    }
+    
 }
 
 function resetLaneWidths(){

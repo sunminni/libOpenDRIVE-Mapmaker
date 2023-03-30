@@ -801,6 +801,33 @@ std::vector<int> get_road_data(OpenDriveMap& odr_map, std::string id)
     return road_data;
 }
 
+std::vector<int> get_road_pred(OpenDriveMap& odr_map, std::string id)
+{
+    std::vector<int> road_pred;
+    Road& road = odr_map.id_to_road.at(id);
+    const LaneSection& lanesec = road.get_lanesection(0);
+    for (const auto& id_lane : lanesec.id_to_lane)
+    {
+        road_pred.push_back(id_lane.first);
+        road_pred.push_back(id_lane.second.predecessor);
+    }
+    return road_pred;
+}
+
+std::vector<int> get_road_succ(OpenDriveMap& odr_map, std::string id)
+{
+    std::vector<int> road_succ;
+    Road& road = odr_map.id_to_road.at(id);
+    const LaneSection& lanesec = road.get_lanesection(0);
+    for (const auto& id_lane : lanesec.id_to_lane)
+    {
+        road_succ.push_back(id_lane.first);
+        road_succ.push_back(id_lane.second.successor);
+    }
+    return road_succ;
+}
+
+
 std::map<int, std::vector<double>> get_lane_widths(OpenDriveMap& odr_map, std::string id)
 {
     std::map<int, std::vector<double>> lane_widths;

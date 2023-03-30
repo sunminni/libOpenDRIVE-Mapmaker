@@ -41,5 +41,7 @@ std::vector<double> get_lane_offset(OpenDriveMap& odr_map, std::string id);
 std::map<int, std::vector<double>> get_lane_widths(OpenDriveMap& odr_map, std::string id);
 std::vector<int> get_road_data(OpenDriveMap& odr_map, std::string id);
 void merge_to_next_road(OpenDriveMap& odr_map, std::string road_id);
+std::vector<int> get_road_pred(OpenDriveMap& odr_map, std::string id);
+std::vector<int> get_road_succ(OpenDriveMap& odr_map, std::string id);
 
 } // namespace odr

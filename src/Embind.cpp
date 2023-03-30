@@ -125,6 +125,8 @@ EMSCRIPTEN_BINDINGS(OpenDriveMap)
     emscripten::function("get_lane_widths", &get_lane_widths);
     emscripten::function("get_road_data", &get_road_data);
     emscripten::function("merge_to_next_road", &merge_to_next_road);
+    emscripten::function("get_road_pred", &get_road_pred);
+    emscripten::function("get_road_succ", &get_road_succ);
 }
 
 } // namespace odr
