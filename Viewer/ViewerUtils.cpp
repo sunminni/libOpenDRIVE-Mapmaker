@@ -971,35 +971,39 @@ std::vector<std::vector<double>>get_junction_bboxes(OpenDriveMap& odr_map)
     return junction_bboxes;
 }
 
+void insert_xy(std::vector<double>& tmp_vec, Road& road, double s, double t)
+{
+    Vec3D xyz = road.get_xyz(s,t,0);
+    tmp_vec.push_back(xyz.at(0));
+    tmp_vec.push_back(xyz.at(1));
+}
+
 std::vector<double> make_tmp_vec(Road& road, double ss, double se, double type, double t)
 {
     std::vector<double> tmp_vec;
-    Vec3D xyz;
     tmp_vec.push_back(type);
-    xyz = road.get_xyz(ss,t,0);
-    tmp_vec.push_back(xyz.at(0));
-    tmp_vec.push_back(xyz.at(1));
-    xyz = road.get_xyz(se,t,0);
-    tmp_vec.push_back(xyz.at(0));
-    tmp_vec.push_back(xyz.at(1));
+    insert_xy(tmp_vec,road,ss,t);
+    insert_xy(tmp_vec,road,se,t);
     return tmp_vec;
+}
+
+double get_mid_t(Road& road, Lane& lane, double s){
+    double lane_w = lane.lane_width.get(s)/2;
+    std::cout<<road.id<<" "<<lane.id<<" "<<s<<" "<<lane.lane_width.get(s)<<std::endl;
+    double lane_t = -calc_t(road,lane.id,s);
+    double lane_offset = road.lane_offset.get(s);
+    if (lane.id<0){
+        return lane_offset+lane_t+lane_w;
+    }
+    else{
+        return -lane_offset-lane_t-lane_w;
+    }
 }
 
 std::vector<double> make_lane_arrow(Road& road, Lane& lane, double s, double type)
 {
-    double lane_w,lane_t,lane_offset,new_t;
-    lane_w = lane.lane_width.get(s)/2;
-    lane_t = -calc_t(road,lane.id,s);
-    lane_offset = road.lane_offset.get(s);
-    if (lane.id<0){
-        new_t = lane_offset+lane_t+lane_w;
-    }
-    else{
-        new_t = -lane_offset-lane_t-lane_w;
-    }
-    return make_tmp_vec(road, s-0.5, s+0.5, type, new_t);
+    return  make_tmp_vec(road, s-0.5, s+0.5, type, get_mid_t(road,lane,s));
 }
-
 
 std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
 {
@@ -1014,12 +1018,12 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
             for (auto& lane : ls.get_lanes()){
                 if (lane.id==0) continue;
                 if (lane.id<0) {
-                    road_arrows.push_back(make_lane_arrow(road, lane, 1.5, type));
-                    road_arrows.push_back(make_lane_arrow(road, lane, road.length-1.5, type));
+                    road_arrows.push_back(make_tmp_vec(road, 1, 2, type, get_mid_t(road,lane,1.5)));
+                    road_arrows.push_back(make_tmp_vec(road, road.length-2, road.length-1, type, get_mid_t(road,lane,road.length-1.5)));
                 }
                 else{
-                    road_arrows.push_back(make_lane_arrow(road, lane, road.length-1.5, type));
-                    road_arrows.push_back(make_lane_arrow(road, lane, 1.5, type));
+                    road_arrows.push_back(make_tmp_vec(road, road.length-2, road.length-1, type, get_mid_t(road,lane,road.length-1.5)));
+                    road_arrows.push_back(make_tmp_vec(road, 1, 2, type, get_mid_t(road,lane,1.5)));
                 }
             }
         }
@@ -1028,7 +1032,6 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
             if (road.predecessor.type==RoadLink::Type_Road && road.predecessor.id!="-1"){
                 //pred_road->road
                 std::vector<double> tmp_vec;
-                Vec3D xyz;
                 tmp_vec.push_back(2);
                 Road& pred_road = odr_map.id_to_road.at(road.predecessor.id);
                 Vec3D road_s,pred_road_s,pred_road_e;
@@ -1036,11 +1039,26 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 pred_road_s = pred_road.get_xyz(0,0,0);
                 pred_road_e = pred_road.get_xyz(pred_road.length,0,0);
                 bool opposite_dir = euclDistance(road_s,pred_road_s)<euclDistance(road_s,pred_road_e);
-                xyz = pred_road.get_xyz(opposite_dir?0:pred_road.length,0,0);
-                tmp_vec.push_back(xyz.at(0)); tmp_vec.push_back(xyz.at(1));
-                xyz = road.get_xyz(1,0,0);
-                tmp_vec.push_back(xyz.at(0)); tmp_vec.push_back(xyz.at(1));
+                insert_xy(tmp_vec,pred_road,opposite_dir?0:pred_road.length,0);
+                insert_xy(tmp_vec,road,1,0);
                 road_arrows.push_back(tmp_vec);
+
+                //lanelinks
+                for (auto& ls : road.get_lanesections()){
+                    for (auto& lane : ls.get_lanes()){
+                        int pred_lane_id = lane.predecessor;
+                        if (lane.id==0 || pred_lane_id==0) continue;
+                        std::vector<double> tmp_vec2;
+                        tmp_vec2.push_back(4);
+                        for (auto& pls : pred_road.get_lanesections()){
+                            Lane& pred_lane = pls.id_to_lane.at(pred_lane_id);
+                            double pred_lane_s = opposite_dir?0:pred_road.length;
+                            insert_xy(tmp_vec2,pred_road,pred_lane_s,get_mid_t(pred_road,pred_lane,pred_lane_s));
+                            insert_xy(tmp_vec2,road,1,get_mid_t(road,lane,1));
+                            road_arrows.push_back(tmp_vec2);
+                        }
+                    }
+                }
             }
             else if (road.predecessor.type==RoadLink::Type_Junction && road.predecessor.id!="-1"){
                 //pred_junc->road
@@ -1078,7 +1096,6 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
             if (road.successor.type==RoadLink::Type_Road && road.successor.id!="-1"){
                 //road->succ_road
                 std::vector<double> tmp_vec;
-                Vec3D xyz;
                 tmp_vec.push_back(2);
                 Road& succ_road = odr_map.id_to_road.at(road.successor.id);
                 Vec3D road_e,succ_road_s,succ_road_e;
@@ -1086,11 +1103,27 @@ std::vector<std::vector<double>> get_road_arrows(OpenDriveMap& odr_map)
                 succ_road_s = succ_road.get_xyz(0,0,0);
                 succ_road_e = succ_road.get_xyz(succ_road.length,0,0);
                 bool opposite_dir = euclDistance(road_e,succ_road_e)<euclDistance(road_e,succ_road_s);
-                xyz = road.get_xyz(road.length-1,0,0);
-                tmp_vec.push_back(xyz.at(0)); tmp_vec.push_back(xyz.at(1));
-                xyz = succ_road.get_xyz(opposite_dir?succ_road.length:0,0,0);
-                tmp_vec.push_back(xyz.at(0)); tmp_vec.push_back(xyz.at(1));
+
+                insert_xy(tmp_vec,road,road.length-1,0);
+                insert_xy(tmp_vec,succ_road,opposite_dir?succ_road.length:0,0);
                 road_arrows.push_back(tmp_vec);
+
+                //lanelinks
+                for (auto& ls : road.get_lanesections()){
+                    for (auto& lane : ls.get_lanes()){
+                        int succ_lane_id = lane.successor;
+                        if (lane.id==0 || succ_lane_id==0) continue;
+                        std::vector<double> tmp_vec2;
+                        tmp_vec2.push_back(4);
+                        for (auto& sls : succ_road.get_lanesections()){
+                            Lane& succ_lane = sls.id_to_lane.at(succ_lane_id);
+                            double succ_lane_s = opposite_dir?succ_road.length:0;
+                            insert_xy(tmp_vec2,road,road.length-1,get_mid_t(road,lane,road.length-1));
+                            insert_xy(tmp_vec2,succ_road,succ_lane_s,get_mid_t(succ_road,succ_lane,succ_lane_s));
+                            road_arrows.push_back(tmp_vec2);
+                        }
+                    }
+                }
             }
             else if (road.successor.type==RoadLink::Type_Junction && road.successor.id!="-1"){
                 //road->succ_junc
