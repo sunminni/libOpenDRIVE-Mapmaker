@@ -70,7 +70,7 @@ var preview_reflines = null;
 var preview_lanelines = null;
 var validPreview = false;
 
-var lane_widths = {"-1":[0,3.5,0,0,0], "0":[0,3.5,0,0,0]};
+var lane_datas = {"-1":[0,0,0,3.5,0,0,0], "0":[0,0,0,3.5,0,0,0]};
 var lane_offset = [];
 var map_offset_x = null;
 var map_offset_y = null;

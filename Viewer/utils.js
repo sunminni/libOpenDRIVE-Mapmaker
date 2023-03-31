@@ -702,18 +702,18 @@ function init_dat_gui(){
             e.stopPropagation();
             let idx = Array.from(this.parentNode.children).indexOf(this)-1;
             if (idx==0){
-                lane_widths[(getMinLane()-1).toString()] = [0,3.5,0,0,0];
+                lane_datas[(getMinLane()-1).toString()] = [0,0,0,3.5,0,0,0];
             }
             else if (idx==1){
-                delete lane_widths[getMinLane().toString()];
+                delete lane_datas[getMinLane().toString()];
             }
             else if (idx==2){
-                delete lane_widths[getMaxLane().toString()];
+                delete lane_datas[getMaxLane().toString()];
             }
             else if (idx==3){
-                lane_widths[(getMaxLane()+1).toString()] = [0,3.5,0,0,0];
+                lane_datas[(getMaxLane()+1).toString()] = [0,0,0,3.5,0,0,0];
             }
-            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_datas), arrToStdVecDouble(lane_offset));
             writeXMLFile();
         };
     }
@@ -1140,7 +1140,7 @@ function getTimestring(){
 
 function getMinLane(){
     let minLane = 0;
-    for (const key of Object.keys(lane_widths)) {
+    for (const key of Object.keys(lane_datas)) {
         minLane = Math.min(parseInt(key),minLane);
     }
     return minLane;
@@ -1148,14 +1148,14 @@ function getMinLane(){
 
 function getMaxLane(){
     let maxLane = 0;
-    for (const key of Object.keys(lane_widths)) {
+    for (const key of Object.keys(lane_datas)) {
         maxLane = Math.max(parseInt(key),maxLane);
     }
     return maxLane;
 }
 
 function getLaneWidths(){
-    lane_widths = stdMapIntVecDoubleToDict(ModuleOpenDrive.get_lane_widths(OpenDriveMap,sel_road_id));
+    lane_datas = stdMapIntVecDoubleToDict(ModuleOpenDrive.get_lane_datas(OpenDriveMap,sel_road_id));
     for (const folder of road_laneFs){
         road_gui.removeFolder(folder);
     }
@@ -1165,24 +1165,24 @@ function getLaneWidths(){
         let laneFolder = road_gui.addFolder('Lane '+lane_id.toString());
         laneFolder.open();
         road_laneFs.push(laneFolder);
-        let lane_width = lane_widths[lane_id];
-        let lane_width_dict = {};
-        for (let i = 0; i*5<lane_width.length; i++){
-            lane_width_dict[i.toString()+'_s'] = lane_width[i*5+0];
-            lane_width_dict[i.toString()+'_a'] = lane_width[i*5+1];
-            lane_width_dict[i.toString()+'_b'] = lane_width[i*5+2];
-            lane_width_dict[i.toString()+'_c'] = lane_width[i*5+3];
-            lane_width_dict[i.toString()+'_d'] = lane_width[i*5+4];
+        let lane_data = lane_datas[lane_id];
+        let lane_data_dict = {};
+        for (let i = 0; i*5<lane_data.length-2; i++){
+            lane_data_dict[i.toString()+'_s'] = lane_data[2+i*5+0];
+            lane_data_dict[i.toString()+'_a'] = lane_data[2+i*5+1];
+            lane_data_dict[i.toString()+'_b'] = lane_data[2+i*5+2];
+            lane_data_dict[i.toString()+'_c'] = lane_data[2+i*5+3];
+            lane_data_dict[i.toString()+'_d'] = lane_data[2+i*5+4];
         }
-        for (const [key, value] of Object.entries(lane_width_dict)) {
+        for (const [key, value] of Object.entries(lane_data_dict)) {
             if (key.endsWith('_c') || key.endsWith('_d')) continue;
-            let tempC = laneFolder.add(lane_width_dict, key);
+            let tempC = laneFolder.add(lane_data_dict, key);
             tempC.name = lane_id.toString()+"_"+key;
             tempC.setValue(value);
             tempC.step(key.endsWith('_b')?0.001:0.01);
             tempC.onChange(function(e){
                 let [lane_id,idx,param] = this.name.split("_");
-                lane_widths[lane_id][parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
+                lane_datas[lane_id][2+parseInt(idx)*5+'sabcd'.indexOf(param)] = e;
                 updateHandleRoad();
             });
             road_laneCs.push(tempC);
@@ -1194,12 +1194,12 @@ function getLaneWidths(){
             e.stopPropagation();
             let str = this.parentElement.textContent.split(' ')[1];
             let lane_id = parseInt(str.substr(0,str.length-1));
-            let new_idx = lane_widths[lane_id].length/5;
-            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+0]+1);
-            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+1]);
-            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+2]);
-            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+3]);
-            lane_widths[lane_id].push(lane_widths[lane_id][(new_idx-1)*5+4]);
+            let new_idx = (lane_datas[lane_id].length-2)/5;
+            lane_datas[lane_id].push(lane_datas[lane_id][2+(new_idx-1)*5+0]+1);
+            lane_datas[lane_id].push(lane_datas[lane_id][2+(new_idx-1)*5+1]);
+            lane_datas[lane_id].push(lane_datas[lane_id][2+(new_idx-1)*5+2]);
+            lane_datas[lane_id].push(lane_datas[lane_id][2+(new_idx-1)*5+3]);
+            lane_datas[lane_id].push(lane_datas[lane_id][2+(new_idx-1)*5+4]);
             updateHandleRoad();
         };
         laneFolder.domElement.getElementsByClassName("title")[0].append(button);
@@ -1213,7 +1213,7 @@ function getLaneWidths(){
                 let str = this.parentElement.getElementsByClassName("title")[0].textContent.split(' ')[1];
                 let lane_id = parseInt(str.substr(0,str.length-1));
                 let idx = (Array.from(this.parentNode.children).indexOf(this)-3)/4;
-                lane_widths[lane_id].splice(idx*5,5);
+                lane_datas[lane_id].splice(2+idx*5,5);
                 updateHandleRoad();
             };
             lis[6+3*i].after(button);
@@ -1332,9 +1332,7 @@ function getRoadInfo(){
     roadCs["succ_lanelinks"] = [];
     if (roadCs["succ_type"].getValue()==="road"){
         road_succLaneLinksF.show();
-        console.log(sel_road_id);
         let arr = getStdVecEntries(ModuleOpenDrive.get_road_succ(OpenDriveMap,sel_road_id),true);
-        console.log(arr);
         for (let i=0;i*2<arr.length;i++){
             let lane_id = arr[i*2+0].toString();
             if (lane_id === "0") continue;
@@ -1352,11 +1350,11 @@ function getRoadInfo(){
 }
 
 function resetLaneWidths(){
-    lane_widths = {"-1":[0,3.5,0,0,0], "0":[0,3.5,0,0,0]};
+    lane_datas = {"-1":[0,0,0,3.5,0,0,0], "0":[0,0,0,3.5,0,0,0]};
 }
 
 function updateHandleRoad(){
-    ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, collect_road_data(), dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+    ModuleOpenDrive.update_handle_road(OpenDriveMap, sel_road_id, collect_road_data(), dictToStdMapIntVecDouble(lane_datas), arrToStdVecDouble(lane_offset));
     selectRoad();
 }
 

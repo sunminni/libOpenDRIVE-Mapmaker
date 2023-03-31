@@ -43,7 +43,7 @@ function showPreview(){
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             previewJuncLink();
-            // TODO: need to set lane_widths to contain only one lane
+            // TODO: need to set lane_datas to contain only one lane
         }
     }
     else if (MapmakerMode === CREATE_LINE_2){
@@ -67,7 +67,7 @@ function showPreview(){
         selectLine();
     }
     if(validPreview){
-        ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMapIntVecDouble(lane_widths));
+        ModuleOpenDrive.update_preview_road(preview_geometries, dictToStdMapIntVecDouble(lane_datas));
         drawPreviewMesh();
     }
 }
@@ -149,7 +149,7 @@ function onKeyDown(e){
     }
     if (MapmakerMode === SELECTED){
         if (e.key=='Escape'){
-            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_widths), arrToStdVecDouble(lane_offset));
+            ModuleOpenDrive.write_handle_road_xml(OpenDriveMap, sel_road_id, dictToStdMapIntVecDouble(lane_datas), arrToStdVecDouble(lane_offset));
             writeXMLFile();
             setMode(DEFAULT);
         }
@@ -247,7 +247,7 @@ function onMouseClick(event){
         setMode(CREATE_LINE_2);
     }
     else if (MapmakerMode === CREATE_LINE_2){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), "-1", "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), "-1", "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
@@ -269,7 +269,7 @@ function onMouseClick(event){
         }
     }
     else if (MapmakerMode === EXTEND_LINE){
-        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), sel_road_id, "-1");
+        ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), sel_road_id, "-1");
         sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
         setMode(SELECTED);
         writeXMLFile();
@@ -284,7 +284,7 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         if (validPreview){
-            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), MapmakerMode === EXTEND_ARC ? sel_road_id : "-1", "-1");
             sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
             setMode(SELECTED);
             writeXMLFile();
@@ -302,7 +302,7 @@ function onMouseClick(event){
     else if (MapmakerMode === CONNECT_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), sel_road_id, hover_road_id);
+                ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), sel_road_id, hover_road_id);
             }
             setMode(DEFAULT);
             writeXMLFile();
@@ -318,7 +318,7 @@ function onMouseClick(event){
     else if (MapmakerMode === JUNCTION_2){
         if (hover_road_id!==null){
             if (validPreview){
-                ModuleOpenDrive.add_link(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
+                ModuleOpenDrive.add_link(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), JUNCTION_DATA['junction_id'], junc_link_start_rid, junc_link_start_lid, hover_road_id, hover_lane_id);
                 setMode(JUNCTION);
                 writeXMLFile();
             }
@@ -326,7 +326,7 @@ function onMouseClick(event){
     }
     else if (MapmakerMode === REFLINE){
         if (validPreview){
-            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_widths), "-1", "-1");
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), "-1", "-1");
         }
         setMode(REFLINE);
         writeXMLFile();
