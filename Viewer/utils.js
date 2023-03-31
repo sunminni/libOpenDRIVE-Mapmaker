@@ -1319,6 +1319,13 @@ function getRoadInfo(){
             let temp_dict = {};
             temp_dict[lane_id]=pred;
             let temp_C = road_predLaneLinksF.add(temp_dict,lane_id);
+            temp_C.name = lane_id.toString();
+            temp_C.step(1);
+            temp_C.onChange(function(e){
+                let lane_id = this.name;
+                lane_datas[lane_id][0] = e;
+                updateHandleRoad();
+            });
             roadCs["pred_lanelinks"].push(temp_C);
         }
     }
@@ -1340,6 +1347,13 @@ function getRoadInfo(){
             let temp_dict = {};
             temp_dict[lane_id]=succ;
             let temp_C = road_succLaneLinksF.add(temp_dict,lane_id);
+            temp_C.name = lane_id.toString();
+            temp_C.step(1);
+            temp_C.onChange(function(e){
+                let lane_id = this.name;
+                lane_datas[lane_id][1] = e;
+                updateHandleRoad();
+            });
             roadCs["succ_lanelinks"].push(temp_C);
         }
     }
