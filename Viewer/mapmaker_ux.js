@@ -49,7 +49,7 @@ function showPreview(){
     else if (MapmakerMode === CREATE_LINE_2){
         previewCreateLine();
     }
-    else if (MapmakerMode === EXTEND_LINE){
+    else if (MapmakerMode === EXTEND_LINE || MapmakerMode === JUNCTION_EXTEND_LINE){
         previewExtendLine();
     }
     else if (MapmakerMode === CREATE_ARC_2){
@@ -58,9 +58,29 @@ function showPreview(){
     else if (MapmakerMode === CREATE_ARC_3 || MapmakerMode === EXTEND_ARC){
         previewCreateArc2();
     }
+    else if (MapmakerMode === JUNCTION_EXTEND_ARC){
+        if (hover_road_id==null){
+            previewCreateArc2();
+        }
+        else{
+            if (hover_road_id!=sel_road_id && junc_link_end_rid==null && junc_link_end_lid==null){
+                junc_link_end_rid = hover_road_id;
+                junc_link_end_lid = hover_lane_id;
+                previewJuncLink2();
+            }
+            else{
+                validPreview = true;
+            }
+        }
+    }
     else if (MapmakerMode === EXTEND){
         if (hover_road_id!==null){
             previewRoadEnd();
+        }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND){
+        if (hover_road_id!==null){
+            previewJunctionExtend();
         }
     }
     else if (MapmakerMode === REFLINE){
@@ -117,6 +137,16 @@ function setMode(mode){
     }
     else if (mode == EXTEND_LINE){
         writeExtend(0);
+    }
+    else if (mode == JUNCTION_EXTEND_ARC){
+        junc_link_end_rid = null;
+        junc_link_end_lid = null;
+        writeJuncExtend(1);
+    }
+    else if (mode == JUNCTION_EXTEND_LINE){
+        junc_link_end_rid = null;
+        junc_link_end_lid = null;
+        writeJuncExtend(0);
     }
     else if ([LINK_ROAD_PRED,LINK_ROAD_SUCC].includes(mode)){
         handle_mesh.visible = true;
@@ -219,6 +249,9 @@ function onKeyDown(e){
         if (e.key=='l'){
             setMode(JUNCTION_1);
         }
+        if (e.key=='e'){
+            setMode(JUNCTION_EXTEND);
+        }
         if (e.key=='Escape'){
             setMode(DEFAULT);
         }
@@ -226,6 +259,33 @@ function onKeyDown(e){
             ModuleOpenDrive.delete_junction(OpenDriveMap, JUNCTION_DATA['junction_id']);
             setMode(JUNCTION);
             writeXMLFile();
+        }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND){
+        if (e.key=='Escape'){
+            setMode(JUNCTION);
+        }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND_ARC){
+        if (e.key=='Escape'){
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), sel_road_id, "-1");
+            sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
+            setMode(SELECTED);
+            writeXMLFile();
+        }
+        if (e.key=='l'){
+            setMode(JUNCTION_EXTEND_LINE);
+        }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND_LINE){
+        if (e.key=='Escape'){
+            ModuleOpenDrive.add_road(OpenDriveMap, preview_geometries, dictToStdMapIntVecDouble(lane_datas), sel_road_id, "-1");
+            sel_road_id = (ModuleOpenDrive.get_new_road_id(OpenDriveMap)-1).toString();
+            setMode(SELECTED);
+            writeXMLFile();
+        }
+        if (e.key=='a'){
+            setMode(JUNCTION_EXTEND_ARC);
         }
     }
     else if ([LINK_ROAD_PRED,LINK_ROAD_SUCC].includes(MapmakerMode)){
@@ -344,5 +404,19 @@ function onMouseClick(event){
             roadCs["succ_id"].setValue(hover_road_id);
             setMode(SELECTED);
         }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND){
+        if (hover_road_id!==null){
+            sel_road_id = hover_road_id;
+            sel_lanesec_s0 = hover_lanesec_s0;
+            sel_lane_id = hover_lane_id;
+            setMode(JUNCTION_EXTEND_ARC);
+        }
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND_ARC){
+        extendJuncExtend(1);
+    }
+    else if (MapmakerMode === JUNCTION_EXTEND_LINE){
+        extendJuncExtend(0);
     }
 }

@@ -874,15 +874,23 @@ double calc_t(Road& road, int lane_id, double s)
     return t;
 }
 
+double get_inner_t(Road& road, int lane_id, double s){
+    double lane_t = -calc_t(road,lane_id<0?lane_id+1:lane_id-1,s);
+    double lane_offset = road.lane_offset.get(s);
+    if (lane_id<0){
+        return lane_offset+lane_t;
+    }
+    else{
+        return -lane_offset-lane_t;
+    }
+}
+
 std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane_id)
 {
-    Road& road = odr_map.id_to_road.at(road_id);
+    Road& road = road_id=="-1"?preview_road:odr_map.id_to_road.at(road_id);
     RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);
 
-    if (lane_id>0) lane_id-=1;
-    if (lane_id<0) lane_id+=1;
-    
-    Vec3D xyz = road.get_xyz(road.length,calc_t(road,lane_id,road.length),0);
+    Vec3D xyz = road.get_xyz(road.length,get_inner_t(road, lane_id, road.length),0);
 
     double hdg = RG.hdg0;
 
@@ -917,12 +925,10 @@ std::vector<double> get_end(OpenDriveMap& odr_map, std::string road_id, int lane
 
 std::vector<double> get_start(OpenDriveMap& odr_map, std::string road_id, int lane_id)
 {
-    Road& road = odr_map.id_to_road.at(road_id);
+    Road& road = road_id=="-1"?preview_road:odr_map.id_to_road.at(road_id);
     RoadGeometry& RG = *road.ref_line.s0_to_geometry.at(0);
-    if (lane_id>0) lane_id-=1;
-    if (lane_id<0) lane_id+=1;
 
-    Vec3D xyz = road.get_xyz(0,calc_t(road,lane_id,0),0);
+    Vec3D xyz = road.get_xyz(0,get_inner_t(road, lane_id, 0),0);
 
     return {xyz[0],xyz[1],RG.hdg0};
 }
@@ -987,9 +993,10 @@ std::vector<double> make_tmp_vec(Road& road, double ss, double se, double type, 
     return tmp_vec;
 }
 
+
+
 double get_mid_t(Road& road, Lane& lane, double s){
     double lane_w = lane.lane_width.get(s)/2;
-    std::cout<<road.id<<" "<<lane.id<<" "<<s<<" "<<lane.lane_width.get(s)<<std::endl;
     double lane_t = -calc_t(road,lane.id,s);
     double lane_offset = road.lane_offset.get(s);
     if (lane.id<0){

@@ -17,6 +17,9 @@ const JUNCTION_2 = "create junction link: select out lane";
 const REFLINE = "select refline";
 const LINK_ROAD_PRED = "select road for predecessor";
 const LINK_ROAD_SUCC = "select road for successor";
+const JUNCTION_EXTEND = "junction extend: select lane end";
+const JUNCTION_EXTEND_LINE = "junction extend: line";
+const JUNCTION_EXTEND_ARC = "junction extend: arc";
 
 var arrow1 = null;
 var link_arrows = [];
@@ -41,6 +44,8 @@ var junc_gui = null;
 var junc_idC = null;
 var junc_link_start_rid = null;
 var junc_link_start_lid = null;
+var junc_link_end_rid = null;
+var junc_link_end_lid = null;
 
 var road_gui = null;
 var roadCs = {};

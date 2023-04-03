@@ -421,11 +421,16 @@ function get_geometry(odr_meshunion)
 function fitViewToBbox(bbox, restrict_zoom = false)
 {
     let center_pt = new THREE.Vector3();
-    bbox.getCenter(center_pt);
-
-    const l2xy = 0.5 * Math.sqrt(Math.pow(bbox.max.x - bbox.min.x, 2.0) + Math.pow(bbox.max.y - bbox.min.y, 2));
-    const fov2r = (camera.fov * 0.5) * (Math.PI / 180.0);
-    const dz = l2xy / Math.tan(fov2r);
+    //bbox.getCenter(center_pt);
+    
+    // const l2xy = 0.5 * Math.sqrt(Math.pow(bbox.max.x - bbox.min.x, 2.0) + Math.pow(bbox.max.y - bbox.min.y, 2));
+    // const fov2r = (camera.fov * 0.5) * (Math.PI / 180.0);
+    // const dz = l2xy / Math.tan(fov2r);
+    
+    center_pt.x = 650;
+    center_pt.y = 1740;
+    center_pt.z = 0;
+    const dz = 50;
 
     camera.position.set(center_pt.x, center_pt.y, bbox.max.z + dz);
     controls.target.set(center_pt.x, center_pt.y, center_pt.z);

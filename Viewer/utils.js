@@ -194,6 +194,28 @@ function writeExtend(isarc){
     preview_geometries.push_back(vd);
 }
 
+function writeJuncExtend(isarc){
+    preview_geometries.delete();
+    preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
+    let vd = new ModuleOpenDrive.vectorDouble();
+    vd.push_back(isarc);
+    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
+    vd.push_back(std_vec.get(0));
+    vd.push_back(std_vec.get(1));
+    vd.push_back(fixHdg(std_vec.get(2)));
+    preview_geometries.push_back(vd);
+}
+
+function extendJuncExtend(isarc){
+    let vd = new ModuleOpenDrive.vectorDouble();
+    vd.push_back(isarc);
+    let std_vec = ModuleOpenDrive.get_end(OpenDriveMap,"-1",-1);
+    vd.push_back(std_vec.get(0));
+    vd.push_back(std_vec.get(1));
+    vd.push_back(fixHdg(std_vec.get(2)));
+    preview_geometries.push_back(vd);
+}
+
 function writeStart(isarc){
     preview_geometries.delete();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
@@ -229,7 +251,8 @@ function writeHdgLen(hdg,len){
 }
 
 function writeLenCur(len,cur){
-    let vd = preview_geometries.get(0);
+    let idx = preview_geometries.size()-1;
+    let vd = preview_geometries.get(idx);
     if (vd.size()==4){
         vd.push_back(len);
         vd.push_back(cur);
@@ -238,7 +261,7 @@ function writeLenCur(len,cur){
         vd.set(4,len);
         vd.set(5,cur);
     }
-    preview_geometries.set(0,vd);
+    preview_geometries.set(idx,vd);
 }
 
 function writeLen(len){
@@ -267,9 +290,11 @@ function writeABCD(abcd){
     preview_geometries.set(0,vd);
 }
 
-
 function previewCreateArc2(){
-    let [len,cur] = calcArc(preview_geometries.get(0).get(1),preview_geometries.get(0).get(2),mouse_pos.x,mouse_pos.y,preview_geometries.get(0).get(3));
+    console.log('previewCreateArc2');
+    let idx = preview_geometries.size()-1;
+    let last_geometry = preview_geometries.get(idx);
+    let [len,cur] = calcArc(last_geometry.get(1),last_geometry.get(2),mouse_pos.x,mouse_pos.y,last_geometry.get(3));
     validPreview = len>0.2 && cur!=0;
     writeLenCur(len,cur);
 }
@@ -332,9 +357,23 @@ function previewJuncStart(){
     scene.add(arrow1);
 }
 
+function previewJunctionExtend()
+{
+    let end_vec = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,hover_lane_id);
+    let e_x = end_vec.get(0);
+    let e_y = end_vec.get(1);
+    let e_hdg = end_vec.get(2);
+
+    let from = new THREE.Vector3(e_x, e_y, 0);
+    let direction = new THREE.Vector3(Math.cos(e_hdg),Math.sin(e_hdg),0);
+    arrow1 = new THREE.ArrowHelper(direction.normalize(), from, 10, 0xff0000, 3, 3);
+    arrow1.line.material.linewidth = 5;
+    scene.add(arrow1);
+}
+
 function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
     let g_len1,g_cur1,g_x2,g_y2,g_hdg2,g_len2,g_cur2;
-    if (preview_geometries.size()>3){
+    if (preview_geometries.size()>20){
         preview_geometries.delete();
         preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
         validPreview = false;
@@ -360,7 +399,7 @@ function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
 
     if (m1==m2 && b1==b2){
         //line only
-        // console.log("line only");
+        console.log("line only");
         g_len1 = Math.hypot(x2-g_x1, y2-g_y1);
         validPreview = g_len1>0.2;
         vd1.push_back(0);
@@ -373,11 +412,11 @@ function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
     }
 
     let intersection = getIntersection(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
-    // console.log(intersection);
+    console.log(intersection);
     if (intersection===null){
 
         // arc + combo
-        // console.log("arc + combo");
+        console.log("arc + combo");
 
         g_x2 = (g_x1+x2)/2;
         g_y2 = (g_y1+y2)/2;
@@ -410,7 +449,7 @@ function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
 
     if (d2<d1){
         //line + arc
-        // console.log("line + arc");
+        console.log("line + arc");
 
         g_len1 = d1-d2;
         let tmp_vec = ModuleOpenDrive.calc_end("line",g_x1,g_y1,g_hdg1,g_len1,0);
@@ -444,7 +483,7 @@ function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
     }
     else if (d1<d2){
         //arc + line
-        // console.log("arc + line");
+        console.log("arc + line");
 
         g_hdg2 = hdg2;
         g_len2 = d2-d1;
@@ -479,7 +518,7 @@ function calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,clear=true){
     }
     else{
         //arc only
-        // console.log("arc only");
+        console.log("arc only");
         let c = Math.hypot(x2-g_x1, y2-g_y1);
         let theta = hdg2-g_hdg1;
         theta = fixHdg(theta);
@@ -570,6 +609,42 @@ function previewJuncLink(){
     hdg2 = fixHdg(hdg2);
 
     calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2);
+}
+
+function previewJuncLink2(){
+    console.log("previewJuncLink2");
+    let std_vec;
+    console.log("preview_geometries.size(): ",preview_geometries.size());
+
+    if (preview_geometries.size()==1){
+        std_vec = ModuleOpenDrive.get_end(OpenDriveMap,sel_road_id,sel_lane_id);
+        g_x1 = std_vec.get(0);
+        g_y1 = std_vec.get(1);
+        g_hdg1 = std_vec.get(2);
+    }
+    else{
+        let last_geometry = preview_geometries.get(preview_geometries.size()-1);
+        g_x1 = last_geometry.get(1);
+        g_y1 = last_geometry.get(2);
+        g_hdg1 = last_geometry.get(3);
+    }
+    
+    g_hdg1 = fixHdg(g_hdg1);
+
+    let std_vec2;
+
+    if (hover_lane_id<0){
+        std_vec2 = ModuleOpenDrive.get_start(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
+    else{
+        std_vec2 = ModuleOpenDrive.get_end(OpenDriveMap,hover_road_id,hover_lane_id);
+    }
+    let x2 = std_vec2.get(0);
+    let y2 = std_vec2.get(1);
+    let hdg2 = std_vec2.get(2);
+    hdg2 = hover_lane_id<0?hdg2:hdg2-Math.PI;
+    hdg2 = fixHdg(hdg2);
+    calcLink(g_x1,g_y1,g_hdg1,x2,y2,hdg2,false);
 }
 
 function calcMouseWorldPos(event){
