@@ -912,19 +912,45 @@ function load_vector_data(){
     });
 }
 
-function load_image(){
+async function load_image(){
     // Load screenshot of map
-    // let image_loader = new THREE.TextureLoader();
-    // let image_material = new THREE.MeshLambertMaterial({
-    //     map: image_loader.load('map_image.png')
-    // });
-    // image_material.transparent = true;
-    // image_material.opacity = 0.5;
+    let texture_loader = new THREE.TextureLoader();
+    texture_loader.load('map_screenshots/katech1.png', function ( image_texture ) {
+        let image_material = new THREE.MeshLambertMaterial({
+            map: image_texture
+        });
+        image_material.transparent = true;
+        image_material.opacity = 0.5;
+        
+        let scale = 0.095;
+        let w = image_texture.image.width * scale;
+        let h = image_texture.image.height * scale;
+        let dx = -240 * scale;
+        let dy = -210 * scale;
+        let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+        let image_mesh = new THREE.Mesh(image_geometry, image_material);
+        image_mesh.position.set(dx,dy,-0.1);
+        scene.add(image_mesh);
 
-    // let image_geometry = new THREE.PlaneGeometry(400, 400*.75);
-    // let image_mesh = new THREE.Mesh(image_geometry, image_material);
-    // image_mesh.position.set(0,0,-0.1);
-    // scene.add(image_mesh);
+        texture_loader.load('map_screenshots/katech2.png', function ( image_texture ) {
+            let image_material = new THREE.MeshLambertMaterial({
+                map: image_texture
+            });
+            image_material.transparent = true;
+            image_material.opacity = 0.5;
+            
+            let scale = 0.095;
+            let w = image_texture.image.width * scale;
+            let h = image_texture.image.height * scale;
+            let dx = 7455 * scale;
+            let dy = -3635 * scale;
+            let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+            let image_mesh = new THREE.Mesh(image_geometry, image_material);
+            image_mesh.position.set(dx,dy,-0.1);
+            scene.add(image_mesh);
+        });
+        
+    });
 }
 
 
@@ -933,6 +959,7 @@ function afterModuleLoad(){
     init_dat_gui();
     setMode(DEFAULT);
     load_vector_data();
+    load_image();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
 
