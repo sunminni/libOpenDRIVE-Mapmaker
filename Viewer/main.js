@@ -431,8 +431,10 @@ function fitViewToBbox(bbox, restrict_zoom = false)
     center_pt.x = 650;
     center_pt.y = 1740;
     //KATECH
-    center_pt.x = 700;
-    center_pt.y = -340;
+    // center_pt.x = 700;
+    center_pt.x = 0;
+    // center_pt.y = -340;
+    center_pt.y = 0;
     center_pt.z = 0;
     const dz = 50;
 
