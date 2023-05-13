@@ -917,57 +917,70 @@ function load_vector_data(){
 function load_image(){
     // Load screenshot of map
     let texture_loader = new THREE.TextureLoader();
-    // texture_loader.load('map_screenshots/katech_small.png', function ( image_texture ) {
     texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
-        // image_texture.rotation = -0.018;
         let image_material = new THREE.MeshLambertMaterial({
             map: image_texture
         });
         image_material.transparent = true;
         image_material.opacity = 0.5;
         
-        // let scale = 0.492;
-        let scale = 0.125;
+        let scale = 0.1250;
         let w = image_texture.image.width * scale;
         let h = image_texture.image.height * scale;
-        let dx = 2490 * scale;
-        let dy = -1235 * scale;
+        let dx = 312;
+        let dy = -153.5;
         let image_geometry = new THREE.PlaneGeometry(w, h); // width height
         let image_mesh = new THREE.Mesh(image_geometry, image_material);
-        image_mesh.position.set(dx,dy,-0.1);
+        image_mesh.position.set(dx,dy,-0.0000001);
         scene.add(image_mesh);
-
-        // texture_loader.load('map_screenshots/katech2.png', function ( image_texture ) {
-        //     image_texture.rotation = -0.018;
-        //     let image_material = new THREE.MeshLambertMaterial({
-        //         map: image_texture
-        //     });
-        //     image_material.transparent = true;
-        //     image_material.opacity = 0.5;
-            
-        //     let scale = 0.095;
-        //     let w = image_texture.image.width * scale;
-        //     let h = image_texture.image.height * scale;
-        //     let dx = 7335 * scale;
-        //     let dy = -3645 * scale;
-        //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
-        //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
-        //     image_mesh.position.set(dx,dy,-0.1);
-        //     scene.add(image_mesh);
-        // });
-        
     });
+
+    // texture_loader.load('map_screenshots/katech_small.png', function ( image_texture ) {
+    //     let image_material = new THREE.MeshLambertMaterial({
+    //         map: image_texture
+    //     });
+    //     image_material.transparent = true;
+    //     image_material.opacity = 0.5;
+        
+    //     let scale = 0.625;
+    //     let w = image_texture.image.width * scale;
+    //     let h = image_texture.image.height * scale;
+    //     let dx = 380;
+    //     let dy = -194;
+    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    //     image_mesh.position.set(dx,dy,-0.1);
+    //     scene.add(image_mesh);
+    // });
+
+    // texture_loader.load('map_screenshots/katech2.png', function ( image_texture ) {
+    //     image_texture.rotation = -0.018;
+    //     let image_material = new THREE.MeshLambertMaterial({
+    //         map: image_texture
+    //     });
+    //     image_material.transparent = true;
+    //     image_material.opacity = 0.5;
+        
+    //     let scale = 0.095;
+    //     let w = image_texture.image.width * scale;
+    //     let h = image_texture.image.height * scale;
+    //     let dx = 7335 * scale;
+    //     let dy = -3645 * scale;
+    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    //     image_mesh.position.set(dx,dy,-0.1);
+    //     scene.add(image_mesh);
+    // });
 }
 
 function line2axy(line){
-    let data = line.split('/');
+    let data = line.split(',');
     let azi = parseFloat(data[1])*Math.PI/180;
     let lat = parseFloat(data[2]);
     let lon = parseFloat(data[3]);
-    let [x,y] = proj4("+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs",[lon,lat]);
-    // let [x,y] = proj4("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs",[lon,lat]);
+    let [x,y] = proj4(PROJ_STR,[lon,lat]);
     
-    return [azi,x,y];
+    return [azi,x-REF_X,y-REF_Y];
 }
 
 function load_gps(){
@@ -976,23 +989,34 @@ function load_gps(){
     .then(response => response.text())
     .then(function(text){
         let lines = text.split('\r\n');
-        let [start_azi,start_x,start_y] = line2axy(lines[0]);
-        let [end_azi,end_x,end_y] = line2axy(lines[lines.length-1]);
-
         for (let i=0;i<lines.length;i+=10){
             let [azi,x,y] = line2axy(lines[i]);
-            x-=start_x;
-            y-=start_y;
             let from = new THREE.Vector3(x, y, 0);
             let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
             let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
             arrow.line.material.linewidth = 5;
             scene.add(arrow);
         }
+    });
 
-        console.log(end_y,start_y,end_x,start_x);
-        console.log(Math.atan2(end_y-start_y,end_x-start_x));
-        console.log(((end_y-start_y)**2+(end_x-start_x)**2)**0.5);
+
+    fetch('gps_data/GPS_CALIBRATION.txt')
+    .then(response => response.text())
+    .then(function(text){
+        const vertices = [];
+        let lines = text.split('\r\n');
+        console.log(lines.length);
+        for (let i=0;i<lines.length;i++){
+            let [azi,x,y] = line2axy(lines[i]);
+            vertices.push( x, y, 0 );
+            console.log(x,y);
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+        const material = new THREE.PointsMaterial( { color: 0xff0000 } );
+        const points = new THREE.Points( geometry, material );
+        scene.add( points );
             
     });
 }
@@ -1004,7 +1028,7 @@ function afterModuleLoad(){
     init_dat_gui();
     setMode(DEFAULT);
     load_vector_data();
-    // load_image();
+    load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
