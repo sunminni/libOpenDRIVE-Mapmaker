@@ -51,7 +51,7 @@ document.getElementById('ThreeJS').appendChild(renderer.domElement);
 /* THREEJS globals */
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
-camera.up.set(0, 0, 1); /* Coordinate system with Z pointing up */
+camera.up.set(0.5, 1, 0); /* Coordinate system with Z pointing up */
 const controls = new THREE.MapControls(camera, renderer.domElement);
 controls.zoomSpeed = 5;
 // controls.addEventListener('start', () => { spotlight_paused = true; controls.autoRotate = false; });
@@ -93,7 +93,7 @@ const road_network_material = new THREE.MeshPhongMaterial({
     wireframe : PARAMS.wireframe,
     shininess : 20.0,
     transparent : true,
-    opacity : 0.4
+    opacity : 0.1
 });
 const lane_outlines_material = new THREE.LineBasicMaterial({
     color : COLORS.lane_outline,
@@ -319,6 +319,12 @@ function loadOdrMap(clear_map = true)
     // odr_roadmarks_mesh.delete();
     odr_lanes_mesh.delete();
     spotlight_info.style.display = "none";
+
+    let vehicle_geometry = new THREE.BoxGeometry( VEHICLE_L, VEHICLE_W, VEHICLE_H); 
+    let vehicle_material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+    vehicle_box = new THREE.Mesh( vehicle_geometry, vehicle_material ); 
+    scene.add( vehicle_box );
+    
     animate();
 }
 
@@ -326,7 +332,7 @@ function animate()
 {
     setTimeout(function() {
         requestAnimationFrame(animate);
-    }, 1000 / 30);
+    }, 1000 / 60);
 
     controls.update();
 
@@ -402,6 +408,17 @@ function animate()
     }
 
     showPreview();
+
+    [VEHICLE_X, VEHICLE_Y, VEHICLE_YAW] = VEHICLE_LOG[log_idx++];
+    if (log_idx==VEHICLE_LOG.length){
+        log_idx=0;
+    }
+    vehicle_box.position.set(VEHICLE_X, VEHICLE_Y, VEHICLE_H/2);
+    vehicle_box.rotation.set(0,0,VEHICLE_YAW);
+    camera.position.set(VEHICLE_X, VEHICLE_Y, 50);
+    camera.up.set(Math.cos(VEHICLE_YAW),Math.sin(VEHICLE_YAW), 0);
+    // camera.up.set(0.5, 1, 0);
+    camera.lookAt(VEHICLE_X, VEHICLE_Y, 0);
 
     renderer.render(scene, camera);
 }

@@ -100,3 +100,11 @@ const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
 
 var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [36.7434901,127.1151129];
 var [REF_X,REF_Y ]= proj4(PROJ_STR,[GPS_REFERENCE_LON,GPS_REFERENCE_LAT]);
+
+var [VEHICLE_W,VEHICLE_L,VEHICLE_H] = [1.890,4.635,1.647];
+var vehicle_box;
+var VEHICLE_X = 0;
+var VEHICLE_Y = 0;
+var VEHICLE_YAW = 0;
+var VEHICLE_LOG = [];
+var log_idx = 0;

@@ -975,13 +975,16 @@ function load_gps(){
     .then(response => response.text())
     .then(function(text){
         let lines = text.split('\r\n');
-        for (let i=0;i<lines.length;i+=10){
+        for (let i=0;i<lines.length;i++){
             let [azi,x,y] = line2axy(lines[i]);
             let from = new THREE.Vector3(x, y, 0);
             let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
             let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
             arrow.line.material.linewidth = 5;
-            scene.add(arrow);
+            if (i%10==0){
+                scene.add(arrow);
+            }
+            VEHICLE_LOG.push([x,y,azi]);
         }
     });
 
