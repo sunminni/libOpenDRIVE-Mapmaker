@@ -90,13 +90,13 @@ var flip = false;
 
 
 // UTM 52
-// const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
+const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
 
 // Google Maps
 // const PROJ_STR = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs";
 
 // Kakao Map
-const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
+// const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
 
 var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [36.7434901,127.1151129];
 var [REF_X,REF_Y ]= proj4(PROJ_STR,[GPS_REFERENCE_LON,GPS_REFERENCE_LAT]);

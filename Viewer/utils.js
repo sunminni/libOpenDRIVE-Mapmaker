@@ -917,60 +917,46 @@ function load_vector_data(){
 function load_image(){
     // Load screenshot of map
     let texture_loader = new THREE.TextureLoader();
+
+    // EPSG:5181
+    // texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
+    //     let image_material = new THREE.MeshLambertMaterial({
+    //         map: image_texture
+    //     });
+    //     image_material.transparent = true;
+    //     image_material.opacity = 0.5;
+        
+    //     let scale = 0.1250;
+    //     let w = image_texture.image.width * scale;
+    //     let h = image_texture.image.height * scale;
+    //     let dx = 312;
+    //     let dy = -153.5;
+    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    //     image_mesh.position.set(dx,dy,-0.0000001);
+    //     scene.add(image_mesh);
+    // });
+
+    // UTM 52
     texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
+        image_texture.rotation = -0.026;
         let image_material = new THREE.MeshLambertMaterial({
             map: image_texture
         });
         image_material.transparent = true;
         image_material.opacity = 0.5;
         
-        let scale = 0.1250;
+        let scale = 0.1270;
         let w = image_texture.image.width * scale;
         let h = image_texture.image.height * scale;
-        let dx = 312;
-        let dy = -153.5;
+        let dx = 297;
+        let dy = -154.5;
         let image_geometry = new THREE.PlaneGeometry(w, h); // width height
         let image_mesh = new THREE.Mesh(image_geometry, image_material);
         image_mesh.position.set(dx,dy,-0.0000001);
         scene.add(image_mesh);
     });
 
-    // texture_loader.load('map_screenshots/katech_small.png', function ( image_texture ) {
-    //     let image_material = new THREE.MeshLambertMaterial({
-    //         map: image_texture
-    //     });
-    //     image_material.transparent = true;
-    //     image_material.opacity = 0.5;
-        
-    //     let scale = 0.625;
-    //     let w = image_texture.image.width * scale;
-    //     let h = image_texture.image.height * scale;
-    //     let dx = 380;
-    //     let dy = -194;
-    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
-    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
-    //     image_mesh.position.set(dx,dy,-0.1);
-    //     scene.add(image_mesh);
-    // });
-
-    // texture_loader.load('map_screenshots/katech2.png', function ( image_texture ) {
-    //     image_texture.rotation = -0.018;
-    //     let image_material = new THREE.MeshLambertMaterial({
-    //         map: image_texture
-    //     });
-    //     image_material.transparent = true;
-    //     image_material.opacity = 0.5;
-        
-    //     let scale = 0.095;
-    //     let w = image_texture.image.width * scale;
-    //     let h = image_texture.image.height * scale;
-    //     let dx = 7335 * scale;
-    //     let dy = -3645 * scale;
-    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
-    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
-    //     image_mesh.position.set(dx,dy,-0.1);
-    //     scene.add(image_mesh);
-    // });
 }
 
 function line2axy(line){
@@ -1027,7 +1013,7 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    load_vector_data();
+    // load_vector_data();
     load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
