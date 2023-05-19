@@ -944,7 +944,7 @@ function load_image(){
             map: image_texture
         });
         image_material.transparent = true;
-        image_material.opacity = 0.5;
+        image_material.opacity = 0.9;
         
         let scale = 0.1270;
         let w = image_texture.image.width * scale;
@@ -953,7 +953,7 @@ function load_image(){
         let dy = -154.5;
         let image_geometry = new THREE.PlaneGeometry(w, h); // width height
         let image_mesh = new THREE.Mesh(image_geometry, image_material);
-        image_mesh.position.set(dx,dy,-0.0000001);
+        image_mesh.position.set(dx,dy,-0.01);
         scene.add(image_mesh);
     });
 
@@ -971,22 +971,22 @@ function line2axy(line){
 
 function load_gps(){
 
-    fetch('gps_data/221017-PG1.txt')
-    .then(response => response.text())
-    .then(function(text){
-        let lines = text.split('\r\n');
-        for (let i=0;i<lines.length;i++){
-            let [azi,x,y] = line2axy(lines[i]);
-            let from = new THREE.Vector3(x, y, 0);
-            let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
-            let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
-            arrow.line.material.linewidth = 5;
-            if (i%10==0){
-                scene.add(arrow);
-            }
-            VEHICLE_LOG.push([x,y,azi]);
-        }
-    });
+    // fetch('gps_data/221017-PG1.txt')
+    // .then(response => response.text())
+    // .then(function(text){
+    //     let lines = text.split('\r\n');
+    //     for (let i=0;i<lines.length;i++){
+    //         let [azi,x,y] = line2axy(lines[i]);
+    //         let from = new THREE.Vector3(x, y, 0);
+    //         let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
+    //         let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
+    //         arrow.line.material.linewidth = 5;
+    //         if (i%10==0){
+    //             scene.add(arrow);
+    //         }
+    //         VEHICLE_LOG.push([x,y,azi]);
+    //     }
+    // });
 
 
     fetch('gps_data/GPS_CALIBRATION.txt')
@@ -1221,6 +1221,10 @@ function getMapList(){
             }
         }
         folderC.domElement.innerHTML = html_string;
+
+        if (VIEW_MODE){
+            files_gui.hide();
+        }
         // console.log(map_filepath,map_filename);
         fetch_map();
     });

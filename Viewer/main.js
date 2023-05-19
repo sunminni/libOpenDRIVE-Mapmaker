@@ -51,7 +51,7 @@ document.getElementById('ThreeJS').appendChild(renderer.domElement);
 /* THREEJS globals */
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
-camera.up.set(0.5, 1, 0); /* Coordinate system with Z pointing up */
+camera.up.set(0,0,1); /* Coordinate system with Z pointing up */
 const controls = new THREE.MapControls(camera, renderer.domElement);
 controls.zoomSpeed = 5;
 // controls.addEventListener('start', () => { spotlight_paused = true; controls.autoRotate = false; });
@@ -321,9 +321,18 @@ function loadOdrMap(clear_map = true)
     spotlight_info.style.display = "none";
 
     let vehicle_geometry = new THREE.BoxGeometry( VEHICLE_L, VEHICLE_W, VEHICLE_H); 
-    let vehicle_material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+    let vehicle_material = new THREE.MeshBasicMaterial( {color: 0xffff00} ); 
     vehicle_box = new THREE.Mesh( vehicle_geometry, vehicle_material ); 
     scene.add( vehicle_box );
+
+    let target_geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2); 
+    let target_material = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+    
+    for (let i=0;i<80;i++){
+        target_box = new THREE.Mesh( target_geometry, target_material ); 
+        scene.add( target_box );
+        target_boxes.push(target_box);
+    }
     
     animate();
 }
@@ -332,7 +341,7 @@ function animate()
 {
     setTimeout(function() {
         requestAnimationFrame(animate);
-    }, 1000 / 60);
+    }, 1000 / 50);
 
     controls.update();
 
@@ -407,20 +416,49 @@ function animate()
         hover_lane_id = null;
     }
 
-    showPreview();
 
-    [VEHICLE_X, VEHICLE_Y, VEHICLE_YAW] = VEHICLE_LOG[log_idx++];
-    if (log_idx==VEHICLE_LOG.length){
-        log_idx=0;
+    if (VIEW_MODE){
+        fetch('http://localhost:5000/get_alatlon', {
+            method: 'GET',
+        }).then(function (response) {
+            return response.json();
+        }).then(function (json) {
+            // VEHICLE_YAW = json['a']*-Math.PI/180+Math.PI/2;
+            let send_lonlats = json['send_lonlats'];
+            for (let i=0;i<send_lonlats.length;i++){
+                let lon = send_lonlats[i][0];
+                let lat = send_lonlats[i][1];
+                let [TARGET_X,TARGET_Y] = proj4(PROJ_STR,[lon,lat]);
+                TARGET_X -= REF_X;
+                TARGET_Y -= REF_Y;
+                // console.log(TARGET_X,TARGET_X);
+                target_boxes[i].position.set(TARGET_X, TARGET_Y, 2);
+            }
+            let datas = json['data_history'];
+            let data = datas[10];
+            VEHICLE_YAW = (data['a'])*Math.PI/180;
+            let lat = data['lat'];
+            let lon = data['lon'];
+            // let [TARGET_X,TARGET_Y] = proj4(PROJ_STR,[data['target_lon'],data['target_lat']]);
+            let [VEHICLE_X,VEHICLE_Y] = proj4(PROJ_STR,[lon,lat]);
+            VEHICLE_X -= REF_X;
+            VEHICLE_Y -= REF_Y;
+            // TARGET_X -= REF_X;
+            // TARGET_Y -= REF_Y;
+            // console.log(VEHICLE_X,VEHICLE_Y,TARGET_X,TARGET_Y);
+            vehicle_box.position.set(VEHICLE_X, VEHICLE_Y, VEHICLE_H/2);
+            vehicle_box.rotation.set(0,0,VEHICLE_YAW);
+            // target_box.position.set(TARGET_X, TARGET_Y, 0.5);
+            camera.position.set(VEHICLE_X, VEHICLE_Y, 30);
+            camera.up.set(-Math.sin(VEHICLE_YAW),Math.cos(VEHICLE_YAW), 0);
+            camera.lookAt(VEHICLE_X, VEHICLE_Y, 0);
+            renderer.render(scene, camera);
+        });
     }
-    vehicle_box.position.set(VEHICLE_X, VEHICLE_Y, VEHICLE_H/2);
-    vehicle_box.rotation.set(0,0,VEHICLE_YAW);
-    camera.position.set(VEHICLE_X, VEHICLE_Y, 50);
-    camera.up.set(Math.cos(VEHICLE_YAW),Math.sin(VEHICLE_YAW), 0);
-    // camera.up.set(0.5, 1, 0);
-    camera.lookAt(VEHICLE_X, VEHICLE_Y, 0);
-
-    renderer.render(scene, camera);
+    else{
+        showPreview();
+        renderer.render(scene, camera);
+    }
 }
 
 function get_geometry(odr_meshunion)

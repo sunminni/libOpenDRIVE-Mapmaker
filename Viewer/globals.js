@@ -103,8 +103,11 @@ var [REF_X,REF_Y ]= proj4(PROJ_STR,[GPS_REFERENCE_LON,GPS_REFERENCE_LAT]);
 
 var [VEHICLE_W,VEHICLE_L,VEHICLE_H] = [1.890,4.635,1.647];
 var vehicle_box;
+var target_boxes = [];
 var VEHICLE_X = 0;
 var VEHICLE_Y = 0;
 var VEHICLE_YAW = 0;
-var VEHICLE_LOG = [];
+// var VEHICLE_LOG = [];
 var log_idx = 0;
+
+var VIEW_MODE = true;
