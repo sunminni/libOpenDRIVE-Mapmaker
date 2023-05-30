@@ -938,25 +938,24 @@ function load_image(){
     // });
 
     // UTM 52
-    texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
-        image_texture.rotation = -0.026;
-        let image_material = new THREE.MeshLambertMaterial({
-            map: image_texture
-        });
-        image_material.transparent = true;
-        image_material.opacity = 0.9;
+    // texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
+    //     image_texture.rotation = -0.026;
+    //     let image_material = new THREE.MeshLambertMaterial({
+    //         map: image_texture
+    //     });
+    //     image_material.transparent = true;
+    //     image_material.opacity = 0.9;
         
-        let scale = 0.1270;
-        let w = image_texture.image.width * scale;
-        let h = image_texture.image.height * scale;
-        let dx = 297;
-        let dy = -154.5;
-        let image_geometry = new THREE.PlaneGeometry(w, h); // width height
-        let image_mesh = new THREE.Mesh(image_geometry, image_material);
-        image_mesh.position.set(dx,dy,-0.01);
-        scene.add(image_mesh);
-    });
-
+    //     let scale = 0.1270;
+    //     let w = image_texture.image.width * scale;
+    //     let h = image_texture.image.height * scale;
+    //     let dx = 297;
+    //     let dy = -154.5;
+    //     let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+    //     let image_mesh = new THREE.Mesh(image_geometry, image_material);
+    //     image_mesh.position.set(dx,dy,-0.01);
+    //     scene.add(image_mesh);
+    // });
 }
 
 function line2axy(line){
@@ -974,44 +973,44 @@ function load_gps(){
     // fetch('gps_data/221017-PG1.txt')
     
 
-    fetch('mt_log_data/MT_00800034C5_004.beyless')
-    .then(response => response.text())
-    .then(function(text){
-        let lines = text.split('\r\n');
-        for (let i=0;i<lines.length;i++){
-            if (lines[i].length == 0) continue;
-            let [azi,x,y] = line2axy(lines[i]);
-            let from = new THREE.Vector3(x, y, 0);
-            let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
-            let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
-            arrow.line.material.linewidth = 5;
-            if (i%10==0){
-                scene.add(arrow);
-            }
-            // VEHICLE_LOG.push([x,y,azi]);
-        }
-    });
+    // fetch('mt_log_data/MT_00800034C5_004.beyless')
+    // .then(response => response.text())
+    // .then(function(text){
+    //     let lines = text.split('\r\n');
+    //     for (let i=0;i<lines.length;i++){
+    //         if (lines[i].length == 0) continue;
+    //         let [azi,x,y] = line2axy(lines[i]);
+    //         let from = new THREE.Vector3(x, y, 0);
+    //         let direction = new THREE.Vector3(Math.cos(azi),Math.sin(azi), 0);
+    //         let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
+    //         arrow.line.material.linewidth = 5;
+    //         if (i%10==0){
+    //             scene.add(arrow);
+    //         }
+    //         // VEHICLE_LOG.push([x,y,azi]);
+    //     }
+    // });
 
 
-    fetch('gps_data/GPS_CALIBRATION.txt')
-    .then(response => response.text())
-    .then(function(text){
-        const vertices = [];
-        let lines = text.split('\r\n');
-        console.log(lines.length);
-        for (let i=0;i<lines.length;i++){
-            let [azi,x,y] = line2axy(lines[i]);
-            vertices.push( x, y, 0 );
-            console.log(x,y);
-        }
+    // fetch('gps_data/GPS_CALIBRATION.txt')
+    // .then(response => response.text())
+    // .then(function(text){
+    //     const vertices = [];
+    //     let lines = text.split('\r\n');
+    //     console.log(lines.length);
+    //     for (let i=0;i<lines.length;i++){
+    //         let [azi,x,y] = line2axy(lines[i]);
+    //         vertices.push( x, y, 0 );
+    //         console.log(x,y);
+    //     }
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-        const material = new THREE.PointsMaterial( { color: 0xff0000 } );
-        const points = new THREE.Points( geometry, material );
-        scene.add( points );
+    //     const geometry = new THREE.BufferGeometry();
+    //     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+    //     const material = new THREE.PointsMaterial( { color: 0xff0000 } );
+    //     const points = new THREE.Points( geometry, material );
+    //     scene.add( points );
             
-    });
+    // });
 }
 
 
