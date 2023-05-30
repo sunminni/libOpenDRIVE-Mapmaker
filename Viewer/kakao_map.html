@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d2f977782f04dde71d4e7656f833bf56"></script>
+    </head>
+    <body>
+        <!-- <div id="point" style="width:10px;height:10px;border-radius:10px;border:3px solid red;position:fixed;left:992px;top:592px;z-index:10"></div> -->
+        <div id="map" style="width:2000px;height:1200px;"></div>
+    </body>
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+        var options = { //지도를 생성할 때 필요한 기본 옵션
+            center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
+            level: 0, //지도의 레벨(확대, 축소 정도)
+            mapTypeId: kakao.maps.MapTypeId.SKYVIEW
+        };
+
+        var startlatlng = [37.247323,126.767880];
+        var endlatlng = [37.229899,126.776339];
+
+        var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+        var count = 0;
+
+        async function move(){
+            for (let lat=startlatlng[0];lat>endlatlng[0];lat-=0.0005){
+                var lon_cnt = 0;
+                for (let lon=startlatlng[1];lon<endlatlng[1];lon+=0.001){
+                    console.log(count++,parseFloat(lat.toFixed(6)),parseFloat(lon.toFixed(6)));
+                    lon_cnt++;
+                    //var moveLatLon = new kakao.maps.LatLng(lat, lon);
+                    //map.setCenter(moveLatLon);
+                    //await sleep(2000);
+                }
+                //console.log(lon_cnt++);
+            }
+        }
+        move();
+        /*
+
+        fetch('mt_log_data/MT_00800034C5_006.beyless')
+            .then(response => response.text())
+            .then(async function(text){
+                let lines = text.split('\r\n');
+                for (let i=0;i<lines.length;i++){
+                    if (lines[i].length == 0) continue;
+                    if (i%1!=0) continue;
+                    let [_,yaw,lat,lon] = lines[i].split(',');
+                    [yaw,lat,lon] = [parseFloat(yaw),parseFloat(lat),parseFloat(lon)];
+                    var moveLatLon = new kakao.maps.LatLng(lat, lon);
+                    map.setCenter(moveLatLon);
+                    return;
+                    await sleep(1);
+                }
+        });
+        */
+    </script>
+</html>
