@@ -1945,7 +1945,7 @@
 <road id="28" junction="-1" length="29.011322281517987">
 	<link>
 		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
+		<successor elementType="junction" elementId="1" />
 	</link>
 	<planView>
 		<geometry s="0" x="648.4375" y="1681.5" hdg="1.5707963267948966" length="2.375">
@@ -6135,6 +6135,103 @@
 		<laneOffset s="0" a="0" b="0" c="0" d="0" />
 	</lanes>
 </road>
+<road id="74" junction="1" length="57.173414766781733">
+	<link>
+		<predecessor elementType="road" elementId="28" contactPoint="start" />
+		<successor elementType="road" elementId="4" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="647.91437058171948" y="1710.43346127678" hdg="1.5877012357589013" length="57.173414766781733">
+			<line />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-2" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="75" junction="1" length="57.267635648485253">
+	<link>
+		<predecessor elementType="road" elementId="28" contactPoint="start" />
+		<successor elementType="road" elementId="4" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="651.49665651937187" y="1710.4409516345097" hdg="1.5866208764361116" length="57.267635648485253">
+			<line />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-3" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="76" junction="1" length="33.452450559225689">
+	<link>
+		<predecessor elementType="road" elementId="28" contactPoint="start" />
+		<successor elementType="road" elementId="10" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="651.55421595322809" y="1710.3833841342141" hdg="1.541101748227055" length="11.633027864988449">
+			<line />
+		</geometry>
+		<geometry s="11.633027864988449" x="651.89960304937676" y="1722.0112835602245" hdg="1.541101748227055" length="11.103906228459662">
+			<arc curvature="-0.064072693836425748" />
+		</geometry>
+		<geometry s="22.736934093448113" x="655.98664361711769" y="1732.0849631780452" hdg="0.82964456406257825" length="4.1716963291973288">
+			<line />
+		</geometry>
+		<geometry s="26.908630422645441" x="658.8031143532944" y="1735.1623878896016" hdg="0.82964456406257825" length="6.5438201365802451">
+			<arc curvature="-0.12670922407916138" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-3" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+					<width sOffset="23" a="3.5300000000000002" b="0.050000000000000003" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
 <road id="8" junction="-1" length="27.255857469167474">
 	<link>
 		<predecessor elementType="junction" elementId="-1" />
@@ -6273,6 +6370,15 @@
 	</connection>
 	<connection id="5" incomingRoad="9" connectingRoad="73" contactPoint="end">
 		<laneLink from="-1" to="-1" />
+	</connection>
+	<connection id="6" incomingRoad="28" connectingRoad="74" contactPoint="end">
+		<laneLink from="-2" to="-1" />
+	</connection>
+	<connection id="7" incomingRoad="28" connectingRoad="75" contactPoint="end">
+		<laneLink from="-3" to="-2" />
+	</connection>
+	<connection id="8" incomingRoad="28" connectingRoad="76" contactPoint="end">
+		<laneLink from="-3" to="-2" />
 	</connection>
 </junction>
 </OpenDRIVE>
