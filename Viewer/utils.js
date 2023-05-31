@@ -1019,7 +1019,7 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    // load_vector_data();
+    load_vector_data();
     load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
@@ -1185,7 +1185,7 @@ function afterMapLoad(){
 }
 
 function getMapList(){
-    fetch('http://localhost:8000/getMapList', {
+    fetch('/getMapList', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -1252,7 +1252,7 @@ function onFileRightClick(dom){
     map_filepath = 'maps'+'/'+map_folder+'/'+map_filename;
     let body_dict = {};
     body_dict['filepath'] = map_filepath;
-    fetch('http://localhost:8000/delete', {
+    fetch('/delete', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -1268,7 +1268,7 @@ function writeXMLFile(new_file=false){
     let body_dict = {};
     body_dict['filepath'] = map_filepath;
     body_dict['data'] = ModuleOpenDrive.save_map(OpenDriveMap);
-    fetch('http://localhost:8000/save', {
+    fetch('/save', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',

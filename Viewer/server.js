@@ -2,6 +2,8 @@ const http = require("http");
 const url = require("url");
 const path = require("path");
 const fs = require("fs");
+// const host = "0.0.0.0";
+const host = "localhost";
 const port = 8000;
 http.createServer((request, response) => {
 
@@ -67,5 +69,5 @@ http.createServer((request, response) => {
         response.end();
     });
 
-}).listen(port);
-console.log('serving at http://localhost:'+port.toString())
+}).listen(port,host);
+console.log('serving at '+host+':'+port.toString())
