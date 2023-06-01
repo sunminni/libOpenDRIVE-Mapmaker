@@ -484,13 +484,13 @@ function fitViewToBbox(bbox, restrict_zoom = false)
     
     //K-CITY
     center_pt.x = 650;
-    center_pt.y = 1740;
+    center_pt.y = 1870;
     //KATECH
     // center_pt.x = 700;
     // center_pt.y = -340;
     
     center_pt.z = 0;
-    const dz = 50;
+    const dz = 40;
 
     camera.position.set(center_pt.x, center_pt.y, bbox.max.z + dz);
     controls.target.set(center_pt.x, center_pt.y, center_pt.z);

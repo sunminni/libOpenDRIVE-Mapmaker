@@ -1,7 +1,7 @@
 <OpenDRIVE><road id="10" junction="-1" length="17.385460731299887">
 	<link>
 		<predecessor elementType="junction" elementId="1" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
+		<successor elementType="junction" elementId="2" />
 	</link>
 	<planView>
 		<geometry s="0" x="664.3125" y="1741.25" hdg="0.042527534619784202" length="2.940158371584769">
@@ -37,15 +37,9 @@
 			<left />
 			<right>
 				<lane id="-2" type="driving" level="false">
-					<link>
-						<successor id="-2" />
-					</link>
 					<width sOffset="0" a="4.1500000000000004" b="0" c="0" d="0" />
 				</lane>
 				<lane id="-1" type="driving" level="false">
-					<link>
-						<successor id="-1" />
-					</link>
 					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
 				</lane>
 			</right>
@@ -1122,12 +1116,15 @@
 			<right>
 				<lane id="-2" type="driving" level="false">
 					<link>
+						<predecessor id="0" />
 						<successor id="-2" />
 					</link>
-					<width sOffset="0" a="3.8500000000000001" b="0" c="0" d="0" />
+					<width sOffset="0" a="4.4900000000000002" b="-0.29499999999999998" c="0" d="0" />
+					<width sOffset="2.54" a="3.8500000000000001" b="0" c="0" d="0" />
 				</lane>
 				<lane id="-1" type="driving" level="false">
 					<link>
+						<predecessor id="0" />
 						<successor id="-1" />
 					</link>
 					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
@@ -2112,13 +2109,19 @@
 		</geometry>
 	</planView>
 	<lanes>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
 		<laneSection s="0">
 			<center>
 				<lane id="0" type="none" level="false" />
 			</center>
 			<left />
 			<right>
+				<lane id="-2" type="driving" level="false">
+					<link>
+						<predecessor id="0" />
+						<successor id="0" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
 				<lane id="-1" type="driving" level="false">
 					<link>
 						<predecessor id="-1" />
@@ -2128,6 +2131,7 @@
 				</lane>
 			</right>
 		</laneSection>
+		<laneOffset s="0" a="3.46" b="0" c="0" d="0" />
 	</lanes>
 </road>
 <road id="3" junction="-1" length="21.761395954065406">
@@ -2185,907 +2189,10 @@
 		</laneSection>
 	</lanes>
 </road>
-<road id="30" junction="-1" length="39.561902612204676">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="664" y="1621" hdg="0" length="1.375">
-			<line />
-		</geometry>
-		<geometry s="1.375" x="665.375" y="1621" hdg="0.041642579098588421" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="4.3776030373660788" x="668.375" y="1621.125" hdg="0" length="0.25">
-			<line />
-		</geometry>
-		<geometry s="4.6276030373660788" x="668.625" y="1621.125" hdg="0" length="3">
-			<line />
-		</geometry>
-		<geometry s="7.6276030373660788" x="671.625" y="1621.125" hdg="0.041642579098588421" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="10.630206074732158" x="674.625" y="1621.25" hdg="0.041642579098588421" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="13.632809112098236" x="677.625" y="1621.375" hdg="0.055498505245716832" length="2.2534695471649933">
-			<line />
-		</geometry>
-		<geometry s="15.88627865926323" x="679.875" y="1621.5" hdg="0.07130746478529032" length="1.7544586059522749">
-			<line />
-		</geometry>
-		<geometry s="17.640737265215506" x="681.625" y="1621.625" hdg="0.18822150530477075" length="1.3360973954019968">
-			<line />
-		</geometry>
-		<geometry s="18.976834660617502" x="682.9375" y="1621.875" hdg="0.30587887140485215" length="1.2453036778232047">
-			<line />
-		</geometry>
-		<geometry s="20.222138338440708" x="684.125" y="1622.25" hdg="0.32175055439664219" length="1.1858541225631423">
-			<line />
-		</geometry>
-		<geometry s="21.40799246100385" x="685.25" y="1622.625" hdg="0.35877067027057219" length="1.0680004681646913">
-			<line />
-		</geometry>
-		<geometry s="22.475992929168541" x="686.25" y="1623" hdg="0.50709850439233695" length="1.2869537676233751">
-			<line />
-		</geometry>
-		<geometry s="23.762946696791914" x="687.375" y="1623.625" hdg="0.53172406725880561" length="1.2326926827072513">
-			<line />
-		</geometry>
-		<geometry s="24.995639379499167" x="688.4375" y="1624.25" hdg="0.67474094222355274" length="1.6007810593582121">
-			<line />
-		</geometry>
-		<geometry s="26.596420438857379" x="689.6875" y="1625.25" hdg="0.8139618212362083" length="1.5474273003924934">
-			<line />
-		</geometry>
-		<geometry s="28.143847739249871" x="690.75" y="1626.375" hdg="0.89605538457134393" length="1.6007810593582121">
-			<line />
-		</geometry>
-		<geometry s="29.744628798608083" x="691.75" y="1627.625" hdg="0.99442110620371293" length="1.4908575552345704">
-			<line />
-		</geometry>
-		<geometry s="31.235486353842653" x="692.5625" y="1628.875" hdg="1.1071487177940904" length="1.5372967345311055">
-			<line />
-		</geometry>
-		<geometry s="32.772783088373757" x="693.25" y="1630.25" hdg="1.2220253232109897" length="1.4630874888399532">
-			<line />
-		</geometry>
-		<geometry s="34.23587057721371" x="693.75" y="1631.625" hdg="1.3439974787410107" length="1.6677080080157918">
-			<line />
-		</geometry>
-		<geometry s="35.903578585229504" x="694.125" y="1633.25" hdg="1.3909428270024184" length="1.3975424859373686">
-			<line />
-		</geometry>
-		<geometry s="37.301121071166875" x="694.375" y="1634.625" hdg="1.4559197213779975" length="1.6357815410378">
-			<line />
-		</geometry>
-		<geometry s="38.936902612204676" x="694.5625" y="1636.25" hdg="1.5707963267948966" length="0.625">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-	</lanes>
-</road>
-<road id="31" junction="-1" length="116.16807468234704">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="694.5625" y="1636.875" hdg="1.5253730473733196" length="1.3764197215965774">
-			<line />
-		</geometry>
-		<geometry s="1.3764197215965774" x="694.625" y="1638.25" hdg="1.604117322673144" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="3.2524610990720317" x="694.5625" y="1640.125" hdg="1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="4.0024610990720317" x="694.5625" y="1640.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="7.0031120701114826" x="694.5" y="1643.875" hdg="1.5707963267948966" length="2.75">
-			<line />
-		</geometry>
-		<geometry s="9.7531120701114826" x="694.5" y="1646.625" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="11.254413588794522" x="694.4375" y="1648.125" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="12.755715107477561" x="694.375" y="1649.625" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="14.255715107477561" x="694.375" y="1651.125" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="15.757016626160601" x="694.3125" y="1652.625" hdg="1.5707963267948966" length="1.375">
-			<line />
-		</geometry>
-		<geometry s="17.132016626160599" x="694.3125" y="1654" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="18.633318144843638" x="694.25" y="1655.5" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="20.133318144843638" x="694.25" y="1657" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="21.634619663526678" x="694.1875" y="1658.5" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="24.63527063456613" x="694.125" y="1661.5" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="27.635921605605581" x="694.0625" y="1664.5" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="30.636572576645033" x="694" y="1667.5" hdg="1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="31.386572576645033" x="694" y="1668.25" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="32.887874095328073" x="693.9375" y="1669.75" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="34.387874095328073" x="693.9375" y="1671.25" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="35.889175614011108" x="693.875" y="1672.75" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="37.389175614011108" x="693.875" y="1674.25" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="38.890477132694144" x="693.8125" y="1675.75" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="40.390477132694144" x="693.8125" y="1677.25" hdg="1.6124389058934852" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="43.393080170060223" x="693.6875" y="1680.25" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="44.893080170060223" x="693.6875" y="1681.75" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="46.394381688743259" x="693.625" y="1683.25" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="47.894381688743259" x="693.625" y="1684.75" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="49.395683207426295" x="693.5625" y="1686.25" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="50.895683207426295" x="693.5625" y="1687.75" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="52.396984726109331" x="693.5" y="1689.25" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="53.896984726109331" x="693.5" y="1690.75" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="55.398286244792367" x="693.4375" y="1692.25" hdg="1.604117322673144" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="57.274327622267819" x="693.375" y="1694.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="60.274978593307267" x="693.3125" y="1697.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="63.275629564346715" x="693.25" y="1700.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="66.276280535386164" x="693.1875" y="1703.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="69.276931506425612" x="693.125" y="1706.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="72.27758247746506" x="693.0625" y="1709.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="75.278233448504508" x="693" y="1712.125" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="76.779534967187544" x="692.9375" y="1713.625" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="78.279534967187544" x="692.9375" y="1715.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="81.280185938226992" x="692.875" y="1718.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="84.280836909266441" x="692.8125" y="1721.125" hdg="1.6124389058934852" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="87.283439946632512" x="692.6875" y="1724.125" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="88.783439946632512" x="692.6875" y="1725.625" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="90.284741465315548" x="692.625" y="1727.125" hdg="1.5707963267948966" length="2.125">
-			<line />
-		</geometry>
-		<geometry s="92.409741465315548" x="692.625" y="1729.25" hdg="1.6001996149989017" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="94.535660384277421" x="692.5625" y="1731.375" hdg="1.6001996149989017" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="96.661579303239293" x="692.5" y="1733.5" hdg="1.5935196876365378" length="2.7507101355831733">
-			<line />
-		</geometry>
-		<geometry s="99.412289438822469" x="692.4375" y="1736.25" hdg="1.5985669633883177" length="2.2508678881711384">
-			<line />
-		</geometry>
-		<geometry s="101.66315732699361" x="692.375" y="1738.5" hdg="1.5971060440478189" length="2.3758222260935264">
-			<line />
-		</geometry>
-		<geometry s="104.03897955308715" x="692.3125" y="1740.875" hdg="1.6001996149989017" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="106.16489847204902" x="692.25" y="1743" hdg="1.6001996149989017" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="108.29081739101089" x="692.1875" y="1745.125" hdg="1.5985669633883177" length="2.2508678881711384">
-			<line />
-		</geometry>
-		<geometry s="110.54168527918203" x="692.125" y="1747.375" hdg="1.5935196876365378" length="2.7507101355831733">
-			<line />
-		</geometry>
-		<geometry s="113.29239541476521" x="692.0625" y="1750.125" hdg="1.5925320336366895" length="2.8756792675818352">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-	</lanes>
-</road>
-<road id="32" junction="-1" length="116.16807468234698">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="692" y="1753" hdg="-1.5490606199531038" length="2.8756792675818352">
-			<line />
-		</geometry>
-		<geometry s="2.8756792675818352" x="692.0625" y="1750.125" hdg="-1.5480729659532555" length="2.7507101355831733">
-			<line />
-		</geometry>
-		<geometry s="5.6263894031650086" x="692.125" y="1747.375" hdg="-1.5430256902014756" length="2.2508678881711384">
-			<line />
-		</geometry>
-		<geometry s="7.8772572913361465" x="692.1875" y="1745.125" hdg="-1.5413930385908916" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="10.003176210298015" x="692.25" y="1743" hdg="-1.5413930385908916" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="12.129095129259884" x="692.3125" y="1740.875" hdg="-1.5444866095419745" length="2.3758222260935264">
-			<line />
-		</geometry>
-		<geometry s="14.50491735535341" x="692.375" y="1738.5" hdg="-1.5430256902014756" length="2.2508678881711384">
-			<line />
-		</geometry>
-		<geometry s="16.755785243524549" x="692.4375" y="1736.25" hdg="-1.5480729659532555" length="2.7507101355831733">
-			<line />
-		</geometry>
-		<geometry s="19.506495379107722" x="692.5" y="1733.5" hdg="-1.5413930385908916" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="21.632414298069591" x="692.5625" y="1731.375" hdg="-1.5413930385908916" length="2.1259189189618688">
-			<line />
-		</geometry>
-		<geometry s="23.75833321703146" x="692.625" y="1729.25" hdg="-1.5707963267948966" length="2.125">
-			<line />
-		</geometry>
-		<geometry s="25.88333321703146" x="692.625" y="1727.125" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="27.384634735714499" x="692.6875" y="1725.625" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="28.884634735714499" x="692.6875" y="1724.125" hdg="-1.5291537476963082" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="31.887237773080578" x="692.8125" y="1721.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="34.887888744120026" x="692.875" y="1718.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="37.888539715159474" x="692.9375" y="1715.125" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="39.388539715159474" x="692.9375" y="1713.625" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="40.88984123384251" x="693" y="1712.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="43.890492204881959" x="693.0625" y="1709.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="46.891143175921407" x="693.125" y="1706.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="49.891794146960855" x="693.1875" y="1703.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="52.892445118000303" x="693.25" y="1700.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="55.893096089039751" x="693.3125" y="1697.125" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="58.8937470600792" x="693.375" y="1694.125" hdg="-1.5374753309166493" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="60.769788437554652" x="693.4375" y="1692.25" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="62.271089956237688" x="693.5" y="1690.75" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="63.771089956237688" x="693.5" y="1689.25" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="65.272391474920724" x="693.5625" y="1687.75" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="66.772391474920724" x="693.5625" y="1686.25" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="68.27369299360376" x="693.625" y="1684.75" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="69.77369299360376" x="693.625" y="1683.25" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="71.274994512286796" x="693.6875" y="1681.75" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="72.774994512286796" x="693.6875" y="1680.25" hdg="-1.5291537476963082" length="3.0026030373660784">
-			<line />
-		</geometry>
-		<geometry s="75.777597549652867" x="693.8125" y="1677.25" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="77.277597549652867" x="693.8125" y="1675.75" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="78.778899068335903" x="693.875" y="1674.25" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="80.278899068335903" x="693.875" y="1672.75" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="81.780200587018939" x="693.9375" y="1671.25" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="83.280200587018939" x="693.9375" y="1669.75" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="84.781502105701975" x="694" y="1668.25" hdg="-1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="85.531502105701975" x="694" y="1667.5" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="88.532153076741423" x="694.0625" y="1664.5" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="91.532804047780871" x="694.125" y="1661.5" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="94.53345501882032" x="694.1875" y="1658.5" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="96.034756537503355" x="694.25" y="1657" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="97.534756537503355" x="694.25" y="1655.5" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="99.036058056186391" x="694.3125" y="1654" hdg="-1.5707963267948966" length="1.375">
-			<line />
-		</geometry>
-		<geometry s="100.41105805618639" x="694.3125" y="1652.625" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="101.91235957486943" x="694.375" y="1651.125" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="103.41235957486943" x="694.375" y="1649.625" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="104.91366109355246" x="694.4375" y="1648.125" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="106.4149626122355" x="694.5" y="1646.625" hdg="-1.5707963267948966" length="2.75">
-			<line />
-		</geometry>
-		<geometry s="109.1649626122355" x="694.5" y="1643.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="112.16561358327495" x="694.5625" y="1640.875" hdg="-1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="112.91561358327495" x="694.5625" y="1640.125" hdg="-1.5374753309166493" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="114.79165496075041" x="694.625" y="1638.25" hdg="-1.6162196062164738" length="1.3764197215965774">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-	</lanes>
-</road>
-<road id="33" junction="-1" length="82.398839716431155">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="690.3125" y="1835.375" hdg="-1.5707963267948966" length="0.375">
-			<line />
-		</geometry>
-		<geometry s="0.375" x="690.3125" y="1835" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="1.8763015186830392" x="690.375" y="1833.5" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="3.3763015186830394" x="690.375" y="1832" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="6.3769524897224903" x="690.4375" y="1829" hdg="-1.5253730473733196" length="1.3764197215965774">
-			<line />
-		</geometry>
-		<geometry s="7.7533722113190677" x="690.5" y="1827.625" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="9.2533722113190677" x="690.5" y="1826.125" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="10.754673730002107" x="690.5625" y="1824.625" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="13.755324701041559" x="690.625" y="1821.625" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="16.755975672081011" x="690.6875" y="1818.625" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="19.756626643120462" x="690.75" y="1815.625" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="22.757277614159914" x="690.8125" y="1812.625" hdg="-1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="23.507277614159914" x="690.8125" y="1811.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="26.507928585199366" x="690.875" y="1808.875" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="28.007928585199366" x="690.875" y="1807.375" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="29.509230103882405" x="690.9375" y="1805.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="32.509881074921857" x="691" y="1802.875" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="34.011182593604893" x="691.0625" y="1801.375" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="35.511182593604893" x="691.0625" y="1799.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="38.511833564644341" x="691.125" y="1796.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="41.512484535683789" x="691.1875" y="1793.875" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="43.013786054366825" x="691.25" y="1792.375" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="44.513786054366825" x="691.25" y="1790.875" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="47.514437025406274" x="691.3125" y="1787.875" hdg="-1.5323537367737086" length="1.626201478907211">
-			<line />
-		</geometry>
-		<geometry s="49.140638504313486" x="691.375" y="1786.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="52.141289475352934" x="691.4375" y="1783.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="55.141940446392383" x="691.5" y="1780.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="58.142591417431831" x="691.5625" y="1777.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="61.143242388471279" x="691.625" y="1774.25" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="62.643242388471279" x="691.625" y="1772.75" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="64.144543907154315" x="691.6875" y="1771.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="67.145194878193763" x="691.75" y="1768.25" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="70.145845849233211" x="691.8125" y="1765.25" hdg="-1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="71.645845849233211" x="691.8125" y="1763.75" hdg="-1.5291537476963082" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="73.147147367916247" x="691.875" y="1762.25" hdg="-1.5374753309166493" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="75.023188745391707" x="691.9375" y="1760.375" hdg="-1.5499660067586796" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="78.023839716431155" x="692" y="1757.375" hdg="-1.5707963267948966" length="2.125">
-			<line />
-		</geometry>
-		<geometry s="80.148839716431155" x="692" y="1755.25" hdg="-1.5707963267948966" length="2.25">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-	</lanes>
-</road>
-<road id="34" junction="-1" length="82.398839716431141">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="692" y="1753" hdg="1.5707963267948966" length="2.25">
-			<line />
-		</geometry>
-		<geometry s="2.25" x="692" y="1755.25" hdg="1.5707963267948966" length="2.125">
-			<line />
-		</geometry>
-		<geometry s="4.375" x="692" y="1757.375" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="7.3756509710394509" x="691.9375" y="1760.375" hdg="1.604117322673144" length="1.8760413774754543">
-			<line />
-		</geometry>
-		<geometry s="9.2516923485149043" x="691.875" y="1762.25" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="10.752993867197944" x="691.8125" y="1763.75" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="12.252993867197944" x="691.8125" y="1765.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="15.253644838237395" x="691.75" y="1768.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="18.254295809276847" x="691.6875" y="1771.25" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="19.755597327959887" x="691.625" y="1772.75" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="21.255597327959887" x="691.625" y="1774.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="24.256248298999338" x="691.5625" y="1777.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="27.25689927003879" x="691.5" y="1780.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="30.257550241078242" x="691.4375" y="1783.25" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="33.25820121211769" x="691.375" y="1786.25" hdg="1.6092389168160848" length="1.626201478907211">
-			<line />
-		</geometry>
-		<geometry s="34.884402691024903" x="691.3125" y="1787.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="37.885053662064351" x="691.25" y="1790.875" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="39.385053662064351" x="691.25" y="1792.375" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="40.886355180747387" x="691.1875" y="1793.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="43.887006151786835" x="691.125" y="1796.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="46.887657122826283" x="691.0625" y="1799.875" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="48.387657122826283" x="691.0625" y="1801.375" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="49.888958641509319" x="691" y="1802.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="52.889609612548767" x="690.9375" y="1805.875" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="54.390911131231803" x="690.875" y="1807.375" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="55.890911131231803" x="690.875" y="1808.875" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="58.891562102271251" x="690.8125" y="1811.875" hdg="1.5707963267948966" length="0.75">
-			<line />
-		</geometry>
-		<geometry s="59.641562102271251" x="690.8125" y="1812.625" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="62.6422130733107" x="690.75" y="1815.625" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="65.642864044350148" x="690.6875" y="1818.625" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="68.643515015389596" x="690.625" y="1821.625" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="71.644165986429044" x="690.5625" y="1824.625" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="73.14546750511208" x="690.5" y="1826.125" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="74.64546750511208" x="690.5" y="1827.625" hdg="1.6162196062164738" length="1.3764197215965774">
-			<line />
-		</geometry>
-		<geometry s="76.021887226708657" x="690.4375" y="1829" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="79.022538197748105" x="690.375" y="1832" hdg="1.5707963267948966" length="1.5">
-			<line />
-		</geometry>
-		<geometry s="80.522538197748105" x="690.375" y="1833.5" hdg="1.6124389058934852" length="1.5013015186830392">
-			<line />
-		</geometry>
-		<geometry s="82.023839716431141" x="690.3125" y="1835" hdg="1.5707963267948966" length="0.375">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-	</lanes>
-</road>
-<road id="35" junction="-1" length="56.438463749420698">
-	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
-	</link>
-	<planView>
-		<geometry s="0" x="690.3125" y="1835.375" hdg="1.5925320336366895" length="2.8756792675818352">
-			<line />
-		</geometry>
-		<geometry s="2.8756792675818352" x="690.25" y="1838.25" hdg="1.5935196876365378" length="2.7507101355831733">
-			<line />
-		</geometry>
-		<geometry s="5.6263894031650086" x="690.1875" y="1841" hdg="1.5707963267948966" length="0.125">
-			<line />
-		</geometry>
-		<geometry s="5.7513894031650086" x="690.1875" y="1841.125" hdg="1.5916266468311138" length="3.0006509710394509">
-			<line />
-		</geometry>
-		<geometry s="8.7520403742044586" x="690.125" y="1844.125" hdg="1.6295521495106193" length="2.1286732957408003">
-			<line />
-		</geometry>
-		<geometry s="10.880713669945258" x="690" y="1846.25" hdg="1.6951513213416582" length="2.0155644370746373">
-			<line />
-		</geometry>
-		<geometry s="12.896278107019896" x="689.75" y="1848.25" hdg="1.7942729279355298" length="1.4100642715848097">
-			<line />
-		</geometry>
-		<geometry s="14.306342378604706" x="689.4375" y="1849.625" hdg="1.8157749899217608" length="1.5461646096066226">
-			<line />
-		</geometry>
-		<geometry s="15.852506988211328" x="689.0625" y="1851.125" hdg="1.9074711461816238" length="1.3243512562760682">
-			<line />
-		</geometry>
-		<geometry s="17.176858244487395" x="688.625" y="1852.375" hdg="2.0701430484750265" length="1.5662455107677085">
-			<line />
-		</geometry>
-		<geometry s="18.743103755255103" x="687.875" y="1853.75" hdg="2.1587989303424644" length="1.8027756377319946">
-			<line />
-		</geometry>
-		<geometry s="20.545879392987096" x="686.875" y="1855.25" hdg="2.2655346029915999" length="1.4644218142324976">
-			<line />
-		</geometry>
-		<geometry s="22.010301207219594" x="685.9375" y="1856.375" hdg="2.3239476077570909" length="1.3707320124663318">
-			<line />
-		</geometry>
-		<geometry s="23.381033219685925" x="685" y="1857.375" hdg="2.4329663814621227" length="1.1524430571616109">
-			<line />
-		</geometry>
-		<geometry s="24.533476276847537" x="684.125" y="1858.125" hdg="2.5213431676069717" length="1.0752906583803283">
-			<line />
-		</geometry>
-		<geometry s="25.608766935227866" x="683.25" y="1858.75" hdg="2.6224465393432705" length="1.0077822185373186">
-			<line />
-		</geometry>
-		<geometry s="26.616549153765185" x="682.375" y="1859.25" hdg="2.7091848780192551" length="0.89486381645477209">
-			<line />
-		</geometry>
-		<geometry s="27.511412970219958" x="681.5625" y="1859.625" hdg="2.7091848780192551" length="0.89486381645477209">
-			<line />
-		</geometry>
-		<geometry s="28.406276786674731" x="680.75" y="1860" hdg="2.8632929945846817" length="1.3650206042400972">
-			<line />
-		</geometry>
-		<geometry s="29.771297390914828" x="679.4375" y="1860.375" hdg="2.8966139904629289" length="1.5461646096066226">
-			<line />
-		</geometry>
-		<geometry s="31.317462000521452" x="677.9375" y="1860.75" hdg="2.9829373914033916" length="1.5823736126465204">
-			<line />
-		</geometry>
-		<geometry s="32.899835613167973" x="676.375" y="1861" hdg="2.9829373914033916" length="1.5823736126465204">
-			<line />
-		</geometry>
-		<geometry s="34.482209225814493" x="674.8125" y="1861.25" hdg="3.0367157148595592" length="1.1940608234089249">
-			<line />
-		</geometry>
-		<geometry s="35.676270049223419" x="673.625" y="1861.375" hdg="3.0367157148595592" length="1.1940608234089249">
-			<line />
-		</geometry>
-		<geometry s="36.870330872632344" x="672.4375" y="1861.5" hdg="3.1415926535897931" length="2.375">
-			<line />
-		</geometry>
-		<geometry s="39.245330872632344" x="670.0625" y="1861.5" hdg="3.1415926535897931" length="1.75">
-			<line />
-		</geometry>
-		<geometry s="40.995330872632344" x="668.3125" y="1861.5" hdg="3.1415926535897931" length="2.125">
-			<line />
-		</geometry>
-		<geometry s="43.120330872632344" x="666.1875" y="1861.5" hdg="-3.0990651189700089" length="2.940158371584769">
-			<line />
-		</geometry>
-		<geometry s="46.060489244217116" x="663.25" y="1861.375" hdg="3.1415926535897931" length="3">
-			<line />
-		</geometry>
-		<geometry s="49.060489244217116" x="660.25" y="1861.375" hdg="3.1415926535897931" length="3">
-			<line />
-		</geometry>
-		<geometry s="52.060489244217116" x="657.25" y="1861.375" hdg="-3.0940095503128098" length="2.6279745052035799">
-			<line />
-		</geometry>
-		<geometry s="54.688463749420698" x="654.625" y="1861.25" hdg="3.1415926535897931" length="1.75">
-			<line />
-		</geometry>
-	</planView>
-	<lanes>
-		<laneSection s="0">
-			<center>
-				<lane id="0" type="none" level="false" />
-			</center>
-			<left />
-			<right>
-				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-						<successor id="-1" />
-					</link>
-					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
-					<width sOffset="12" a="3.5" b="0.059000000000000004" c="0" d="0" />
-					<width sOffset="20" a="3.9999999999999991" b="-0.012" c="0" d="0" />
-					<width sOffset="35" a="3.7999999999999998" b="-0.014" c="0" d="0" />
-				</lane>
-			</right>
-		</laneSection>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
-	</lanes>
-</road>
 <road id="36" junction="-1" length="56.438463749420698">
 	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
+		<predecessor elementType="junction" elementId="3" />
+		<successor elementType="road" elementId="82" contactPoint="start" />
 	</link>
 	<planView>
 		<geometry s="0" x="652.875" y="1861.25" hdg="0" length="1.75">
@@ -3186,22 +2293,27 @@
 		</geometry>
 	</planView>
 	<lanes>
-		<laneOffset s="0" a="0" b="0" c="0" d="0" />
 		<laneSection s="0">
 			<center>
 				<lane id="0" type="none" level="false" />
 			</center>
 			<left />
 			<right>
+				<lane id="-2" type="driving" level="false">
+					<link>
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
 				<lane id="-1" type="driving" level="false">
 					<link>
-						<predecessor id="-1" />
 						<successor id="-1" />
 					</link>
 					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
 				</lane>
 			</right>
 		</laneSection>
+		<laneOffset s="0" a="3.5899999999999999" b="0" c="0" d="0" />
 	</lanes>
 </road>
 <road id="37" junction="-1" length="102.88044616111661">
@@ -5463,7 +4575,7 @@
 <road id="63" junction="-1" length="5.8835697724080962">
 	<link>
 		<predecessor elementType="road" elementId="5" contactPoint="start" />
-		<successor elementType="road" elementId="-1" contactPoint="start" />
+		<successor elementType="junction" elementId="3" />
 	</link>
 	<planView>
 		<geometry s="0" x="643.875" y="1848" hdg="1.6332151367908541" length="3.0058536641027622">
@@ -5483,7 +4595,6 @@
 				<lane id="-1" type="driving" level="false">
 					<link>
 						<predecessor id="-1" />
-						<successor id="0" />
 					</link>
 					<width sOffset="0" a="4.21" b="0" c="0" d="0" />
 					<width sOffset="3.1400000000000001" a="4.21" b="0.16300000000000001" c="0" d="0" />
@@ -6479,9 +5590,224 @@
 		<laneOffset s="0" a="0" b="0" c="0" d="0" />
 	</lanes>
 </road>
+<road id="82" junction="-1" length="78.214538515373562">
+	<link>
+		<predecessor elementType="road" elementId="36" contactPoint="start" />
+		<successor elementType="junction" elementId="2" />
+	</link>
+	<planView>
+		<geometry s="0" x="690.293029007261" y="1835.3217053449055" hdg="-1.5497068302865582" length="78.214538515373562">
+			<line />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-2" type="driving" level="false">
+					<link>
+						<predecessor id="-2" />
+						<successor id="0" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-1" />
+						<successor id="0" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="3.6000000000000001" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="84" junction="2" length="16.099788169748177">
+	<link>
+		<predecessor elementType="road" elementId="82" contactPoint="start" />
+		<successor elementType="road" elementId="9" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="692.01612357589397" y="1757.0819187271954" hdg="-1.5621762801140684" length="16.099788169748177">
+			<arc curvature="-0.091769357582940594" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-2" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="3.5" b="0.049000000000000002" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="85" junction="2" length="21.640916666206262">
+	<link>
+		<predecessor elementType="road" elementId="82" contactPoint="start" />
+		<successor elementType="road" elementId="9" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="695.51288769188977" y="1757.104013802609" hdg="-1.5502658068988908" length="21.640916666206262">
+			<arc curvature="-0.070304215084908264" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-1" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="86" junction="-1" length="91.842086304765814">
+	<link>
+		<predecessor elementType="junction" elementId="2" />
+		<successor elementType="road" elementId="-1" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="696.07730065021428" y="1728.7264233523724" hdg="-1.5488607625891206" length="91.842086304765814">
+			<line />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-2" type="driving" level="false">
+					<link>
+						<successor id="0" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<successor id="0" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="87" junction="2" length="28.423211243490886">
+	<link>
+		<predecessor elementType="road" elementId="82" contactPoint="start" />
+		<successor elementType="road" elementId="86" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="695.51676561275724" y="1757.1626705756662" hdg="-1.5507991034673823" length="28.423211243490886">
+			<line />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-1" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="88" junction="2" length="21.211131105091582">
+	<link>
+		<predecessor elementType="road" elementId="10" contactPoint="start" />
+		<successor elementType="road" elementId="86" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="681.72408002640987" y="1741.6414095786208" hdg="0.026964424486179812" length="21.211131105091582">
+			<arc curvature="-0.071285023922909141" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-1" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
+<road id="89" junction="2" length="15.759498672145948">
+	<link>
+		<predecessor elementType="road" elementId="10" contactPoint="start" />
+		<successor elementType="road" elementId="86" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="681.71771721008497" y="1738.0716088469087" hdg="0.022417768374251443" length="15.759498672145948">
+			<arc curvature="-0.093878553154813624" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-2" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="4.0600000000000005" b="-0.025000000000000001" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
+	</lanes>
+</road>
 <road id="9" junction="-1" length="14.632802359715116">
 	<link>
-		<predecessor elementType="road" elementId="-1" contactPoint="start" />
+		<predecessor elementType="junction" elementId="2" />
 		<successor elementType="junction" elementId="1" />
 	</link>
 	<planView>
@@ -6516,19 +5842,47 @@
 			<left />
 			<right>
 				<lane id="-2" type="driving" level="false">
-					<link>
-						<predecessor id="-2" />
-					</link>
 					<width sOffset="0" a="4.0800000000000001" b="0" c="0" d="0" />
 				</lane>
 				<lane id="-1" type="driving" level="false">
-					<link>
-						<predecessor id="-1" />
-					</link>
 					<width sOffset="0" a="3.5" b="0" c="0" d="0" />
 				</lane>
 			</right>
 		</laneSection>
+	</lanes>
+</road>
+<road id="90" junction="3" length="13.502295060953729">
+	<link>
+		<predecessor elementType="road" elementId="63" contactPoint="start" />
+		<successor elementType="road" elementId="36" contactPoint="start" />
+	</link>
+	<planView>
+		<geometry s="0" x="643.63196555840693" y="1853.7974996256048" hdg="1.6070585226585981" length="11.359062234633011">
+			<arc curvature="-0.1409511011743324" />
+		</geometry>
+		<geometry s="11.359062234633011" x="650.67949079030768" y="1861.1492430558678" hdg="0.0059861923793023131" length="2.1432328263207183">
+			<arc curvature="0.023225143116525078" />
+		</geometry>
+	</planView>
+	<lanes>
+		<laneSection s="0">
+			<center>
+				<lane id="0" type="none" level="false" />
+			</center>
+			<left />
+			<right>
+				<lane id="-1" type="driving" level="false">
+					<link>
+						<predecessor id="-1" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="4.6299999999999999" b="0" c="0" d="0" />
+					<width sOffset="5.04" a="4.6300000000000008" b="-0.067000000000000004" c="0" d="0" />
+					<width sOffset="9.8300000000000001" a="4.2899999999999991" b="-0.17999999999999999" c="0" d="0" />
+				</lane>
+			</right>
+		</laneSection>
+		<laneOffset s="0" a="0" b="0" c="0" d="0" />
 	</lanes>
 </road>
 <junction id="1" name="junction1">
@@ -6573,6 +5927,28 @@
 	</connection>
 	<connection id="13" incomingRoad="3" connectingRoad="81" contactPoint="end">
 		<laneLink from="-1" to="-1" />
+	</connection>
+</junction>
+<junction id="2" name="junction2">
+	<connection id="0" incomingRoad="82" connectingRoad="84" contactPoint="end">
+		<laneLink from="-2" to="-2" />
+	</connection>
+	<connection id="1" incomingRoad="82" connectingRoad="85" contactPoint="end">
+		<laneLink from="-1" to="-1" />
+	</connection>
+	<connection id="2" incomingRoad="82" connectingRoad="87" contactPoint="end">
+		<laneLink from="-1" to="-1" />
+	</connection>
+	<connection id="3" incomingRoad="10" connectingRoad="88" contactPoint="end">
+		<laneLink from="-1" to="-1" />
+	</connection>
+	<connection id="4" incomingRoad="10" connectingRoad="89" contactPoint="end">
+		<laneLink from="-2" to="-2" />
+	</connection>
+</junction>
+<junction id="3" name="junction3">
+	<connection id="0" incomingRoad="63" connectingRoad="90" contactPoint="end">
+		<laneLink from="-1" to="-2" />
 	</connection>
 </junction>
 </OpenDRIVE>
