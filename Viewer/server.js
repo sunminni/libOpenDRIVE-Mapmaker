@@ -2,8 +2,8 @@ const http = require("http");
 const url = require("url");
 const path = require("path");
 const fs = require("fs");
-// const host = "0.0.0.0";
-const host = "localhost";
+const host = "0.0.0.0";
+// const host = "localhost";
 const port = 8000;
 http.createServer((request, response) => {
 
