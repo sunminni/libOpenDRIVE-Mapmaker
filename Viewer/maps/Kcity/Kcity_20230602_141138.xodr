@@ -10623,6 +10623,14 @@
 		<laneLink from="-5" to="-1" />
 	</connection>
 </junction>
+<junction id="16" name="junction16">
+	<connection id="0" incomingRoad="235" connectingRoad="237" contactPoint="end">
+		<laneLink from="-1" to="-1" />
+	</connection>
+	<connection id="1" incomingRoad="218" connectingRoad="236" contactPoint="end">
+		<laneLink from="-2" to="-1" />
+	</connection>
+</junction>
 <junction id="2" name="junction2">
 	<connection id="0" incomingRoad="82" connectingRoad="84" contactPoint="end">
 		<laneLink from="-2" to="-2" />
@@ -10835,14 +10843,6 @@
 	</connection>
 	<connection id="3" incomingRoad="148" connectingRoad="128" contactPoint="end">
 		<laneLink from="-1" to="-1" />
-	</connection>
-</junction>
-<junction id="16" name="junction16">
-	<connection id="0" incomingRoad="235" connectingRoad="237" contactPoint="end">
-		<laneLink from="-1" to="-1" />
-	</connection>
-	<connection id="1" incomingRoad="218" connectingRoad="236" contactPoint="end">
-		<laneLink from="-2" to="-1" />
 	</connection>
 </junction>
 </OpenDRIVE>
