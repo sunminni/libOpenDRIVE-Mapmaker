@@ -9,6 +9,36 @@
 #include <vector>
 #include <fstream>
 
+
+void outfile_write(std::ofstream& outfile, odr::Road& road, double s, double t, int road_id, int lane_id, int dtype){
+    auto xyz = road.get_xyz(s,t,0);
+    outfile.write((char *) &road_id, sizeof(road_id));
+    outfile.write((char *) &lane_id, sizeof(lane_id));
+    outfile.write((char *) &dtype, sizeof(dtype));
+    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
+    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
+}
+
+double get_mt(odr::Lane& lane, double s){
+    return (lane.outer_border.get(s)+lane.inner_border.get(s))/2;
+}
+
+double get_it_near(odr::Lane& lane, double s){
+    return (lane.outer_border.get(s)+lane.inner_border.get(s)*3)/4;
+}
+
+double get_it_far(odr::Lane& lane, double s){
+    return lane.inner_border.get(s);
+}
+
+double get_ot_near(odr::Lane& lane, double s){
+    return (lane.outer_border.get(s)*3+lane.inner_border.get(s))/4;
+}
+
+double get_ot_far(odr::Lane& lane, double s){
+    return lane.outer_border.get(s);
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 2)
@@ -39,22 +69,12 @@ int main(int argc, char** argv)
                 
                 for (double s = s_start; s<=s_end; s+=eps){
                     double ot = lane.outer_border.get(s);
-                    auto xyz = road.get_xyz(s,ot,0);
-                    outfile.write((char *) &road_id, sizeof(road_id));
-                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                    outfile.write((char *) &roadline_type, sizeof(roadline_type));
-                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
+                    outfile_write(outfile,road,s,ot,road_id,lane_id,roadline_type);
 
                     if (lane_id==-1){
                         double it = lane.inner_border.get(s);
                         double mt = (ot+it)/2;
-                        auto xyz = road.get_xyz(s,mt,0);
-                        outfile.write((char *) &road_id, sizeof(road_id));
-                        outfile.write((char *) &lane_id, sizeof(lane_id));
-                        outfile.write((char *) &roadlane_type, sizeof(roadlane_type));
-                        outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                        outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
+                        outfile_write(outfile,road,s,mt,road_id,lane_id,roadlane_type);
 
                         if (((int)s*10)%1000==0){
 
@@ -69,101 +89,48 @@ int main(int argc, char** argv)
                                 ss+=eps;
                             }
                             if (ss<=s_end){
-                                ss = s;
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (int i=0;i<50;i++){
-                                    auto xyz = road.get_xyz(ss,it,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
-                                    ss+=eps;
+                                for (int nearfar=0;nearfar<1;nearfar++){
+                                    ss = s;
+                                    for (int i=0;i<50;i++){
+                                        it = (nearfar==0) ? get_it_far(lane,ss): get_it_near(lane,ss);
+                                        outfile_write(outfile,road,ss,it,road_id,lane_id,data_type);
+                                        ss+=eps;
+                                    }
+                                    mt = get_mt(lane,ss);
+                                    for (double tt = it; tt>mt; tt-=0.05){
+                                        outfile_write(outfile,road,ss,tt,road_id,lane_id,data_type);
+                                        ss+=eps;
+                                        mt = get_mt(lane,ss);
+                                    }
+                                    mt = get_mt(lane,ss);
+                                    for (int i=0;i<200;i++){
+                                        outfile_write(outfile,road,ss,mt,road_id,lane_id,data_type);
+                                        mt = get_mt(lane,ss);
+                                        ss+=eps;
+                                    }
+                                    data_type++;
                                 }
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (double tt = it; tt>mt; tt-=0.05){
-                                    auto xyz = road.get_xyz(ss,tt,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ss+=eps;
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
+                                for (int nearfar=0;nearfar<1;nearfar++){
+                                    ss = s;
+                                    for (int i=0;i<50;i++){
+                                        ot = (nearfar==0) ? get_ot_far(lane,ss): get_ot_near(lane,ss);
+                                        outfile_write(outfile,road,ss,ot,road_id,lane_id,data_type);
+                                        ss+=eps;
+                                    }
+                                    mt = get_mt(lane,ss);
+                                    for (double tt = ot; tt<mt; tt+=0.05){
+                                        outfile_write(outfile,road,ss,tt,road_id,lane_id,data_type);
+                                        mt = get_mt(lane,ss);
+                                        ss+=eps;
+                                    }
+                                    mt = get_mt(lane,ss);
+                                    for (int i=0;i<200;i++){
+                                        outfile_write(outfile,road,ss,mt,road_id,lane_id,data_type);
+                                        mt = get_mt(lane,ss);
+                                        ss+=eps;
+                                    }
+                                    data_type++;
                                 }
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (int i=0;i<200;i++){
-                                    auto xyz = road.get_xyz(ss,mt,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
-                                    ss+=eps;
-                                }
-                                data_type++;
-
-                                ss = s;
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (int i=0;i<50;i++){
-                                    auto xyz = road.get_xyz(ss,ot,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
-                                    ss+=eps;
-                                }
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (double tt = ot; tt<mt; tt+=0.05){
-                                    auto xyz = road.get_xyz(ss,tt,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
-                                    ss+=eps;
-                                }
-                                ot = lane.outer_border.get(ss);
-                                it = lane.inner_border.get(ss);
-                                mt = (ot+it)/2;
-                                for (int i=0;i<200;i++){
-                                    auto xyz = road.get_xyz(ss,mt,0);
-                                    outfile.write((char *) &road_id, sizeof(road_id));
-                                    outfile.write((char *) &lane_id, sizeof(lane_id));
-                                    outfile.write((char *) &data_type, sizeof(data_type));
-                                    outfile.write((char *) &xyz.at(0), sizeof(xyz.at(0)));
-                                    outfile.write((char *) &xyz.at(1), sizeof(xyz.at(1)));
-                                    ot = lane.outer_border.get(ss);
-                                    it = lane.inner_border.get(ss);
-                                    mt = (ot+it)/2;
-                                    ss+=eps;
-                                }
-                                data_type++;
                             }
                         }
                     }
@@ -172,7 +139,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    printf("data_type: %d\n", data_type);
+    printf("max data_type: %d\n", data_type);
 
     outfile.close();
 
