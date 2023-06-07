@@ -99,13 +99,13 @@ const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
 // const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
 
 // KATECH
-// var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [36.7434901,127.1151129];
+var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [36.7434901,127.1151129];
 
 // PANGYO
 // var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [37.417733438073405,127.10221182505174];
 
 // KCITY
-var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [37.238323,126.76788];
+// var [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [37.238323,126.76788];
 var [REF_X,REF_Y ]= proj4(PROJ_STR,[GPS_REFERENCE_LON,GPS_REFERENCE_LAT]);
 
 var [VEHICLE_W,VEHICLE_L,VEHICLE_H] = [1.890,4.635,1.647];
@@ -117,4 +117,4 @@ var VEHICLE_YAW = 0;
 // var VEHICLE_LOG = [];
 var log_idx = 0;
 
-var VIEW_MODE = false;
+var VIEW_MODE = true;
