@@ -219,6 +219,60 @@ function onKeyDown(e){
             setMode(JUNCTION);
         }
     }
+    else if (MapmakerMode === SCREENSHOT_ADJUST){
+        if (e.key=='w'){
+            SCREENSHOT_DY+=0.1;
+        }
+        if (e.key=='a'){
+            SCREENSHOT_DX-=0.1;
+        }
+        if (e.key=='s'){
+            SCREENSHOT_DY-=0.1;
+        }
+        if (e.key=='d'){
+            SCREENSHOT_DX+=0.1;
+        }
+        if (e.key=='q'){
+            SCREENSHOT_ROT-=0.001;
+        }
+        if (e.key=='e'){
+            SCREENSHOT_ROT+=0.001;
+        }
+        if (e.key=='='){
+            SCREENSHOT_SCALE+=0.0001;
+        }
+        if (e.key=='-'){
+            SCREENSHOT_SCALE-=0.0001;
+        }
+        texture_loader.load(screenshot_filepath, function ( image_texture ) {
+            image_texture.rotation = SCREENSHOT_ROT;
+            let image_material = new THREE.MeshLambertMaterial({
+                map: image_texture
+            });
+            image_material.transparent = true;
+            image_material.opacity = 0.9;
+            
+            let scale = SCREENSHOT_SCALE;
+            let w = image_texture.image.width * scale;
+            let h = image_texture.image.height * scale;
+            let image_geometry = new THREE.PlaneGeometry(w, h); // width height
+            scene.remove(screenshot_mesh);
+            screenshot_mesh = new THREE.Mesh(image_geometry, image_material);
+            screenshot_mesh.position.set(SCREENSHOT_DX,SCREENSHOT_DY,-0.01);
+            scene.add(screenshot_mesh);
+        });
+        if (e.key=='p'){
+            let print_string = "";
+            print_string+="SCREENSHOT_ROT = "+SCREENSHOT_ROT+';\n';
+            print_string+="SCREENSHOT_SCALE = "+SCREENSHOT_SCALE+';\n';
+            print_string+="SCREENSHOT_DX = "+SCREENSHOT_DX+';\n';
+            print_string+="SCREENSHOT_DY = "+SCREENSHOT_DY+';\n';
+            console.log(print_string);
+        }
+        if (e.key=='Escape'){
+            setMode(DEFAULT);
+        }
+    }
     else if (MapmakerMode === DEFAULT){
         if (e.key=='e'){
             setMode(EXTEND);
@@ -238,6 +292,9 @@ function onKeyDown(e){
         if (e.key=='r'){
             resetLaneWidths();
             setMode(REFLINE);
+        }
+        if (e.key=='z'){
+            setMode(SCREENSHOT_ADJUST);
         }
     }
     else if (MapmakerMode === JUNCTION){

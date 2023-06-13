@@ -844,7 +844,17 @@ function init_dat_gui(){
 
 function load_vector_data(){
     // Load vector lines
-    fetch("KCITY/KCITY_LINES.bin")
+    let vector_data_filepath = null;
+    if (MAP_SELECT == "KCITY"){
+        vector_data_filepath = "KCITY/KCITY_LINES.bin";
+    }
+    else if (MAP_SELECT == "WATER"){
+        vector_data_filepath = "WATER_CENTER/WATER_CENTER.bin";
+    }
+    if (vector_data_filepath===null){
+        return;
+    }
+    fetch(vector_data_filepath)
     .then(response => response.arrayBuffer())
     .then(buffer => {
         const view = new Float32Array(buffer);
@@ -855,16 +865,16 @@ function load_vector_data(){
         for (let i=0;i<view.length/5;i++){
             let type = view[i*5+0+offset_idx];
             let id = view[i*5+1+offset_idx];
-            let x = view[i*5+2+offset_idx];
-            let y = view[i*5+3+offset_idx];
+            let x = view[i*5+2+offset_idx]+POINTS_OFFSET_X;
+            let y = view[i*5+3+offset_idx]+POINTS_OFFSET_Y;
             let z = view[i*5+4+offset_idx];
 
             if (id in lines_dict){
-                lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 ));
+                lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0.1 ));
             }
             else{
                 lines_dict[id] = {};
-                lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0 )];
+                lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0.1 )];
                 lines_dict[id]['type'] = type;
             }
         }
@@ -912,11 +922,11 @@ function load_vector_data(){
             // }
         }
     });
+
 }
 
 function load_image(){
     // Load screenshot of map
-    let texture_loader = new THREE.TextureLoader();
 
     // EPSG:5181
     // texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
@@ -938,26 +948,24 @@ function load_image(){
     // });
 
     // UTM 52
-    if (VIEW_MODE){
-        texture_loader.load('map_screenshots/katech_satellite.png', function ( image_texture ) {
-            image_texture.rotation = -0.026;
+    if (screenshot_filepath !== null){
+        texture_loader.load(screenshot_filepath, function ( image_texture ) {
+            image_texture.rotation = SCREENSHOT_ROT;
             let image_material = new THREE.MeshLambertMaterial({
                 map: image_texture
             });
             image_material.transparent = true;
             image_material.opacity = 0.9;
             
-            let scale = 0.1270;
+            let scale = SCREENSHOT_SCALE;
             let w = image_texture.image.width * scale;
             let h = image_texture.image.height * scale;
-            let dx = 297;
-            let dy = -154.5;
             let image_geometry = new THREE.PlaneGeometry(w, h); // width height
-            let image_mesh = new THREE.Mesh(image_geometry, image_material);
-            image_mesh.position.set(dx,dy,-0.01);
-            scene.add(image_mesh);
+            screenshot_mesh = new THREE.Mesh(image_geometry, image_material);
+            screenshot_mesh.position.set(SCREENSHOT_DX,SCREENSHOT_DY,-0.01);
+            scene.add(screenshot_mesh);
         });
-    }   
+    }
 }
 
 function line2axy(line){
@@ -994,21 +1002,23 @@ function load_gps(){
     // });
 
 
-    // fetch('gps_data/GPS_CALIBRATION.txt')
+    // fetch('gps_data/GPS_CALIBRATION_KATECH.txt')
+    // fetch('gps_data/GPS_CALIBRATION_WATER.txt')
+    // fetch('mt_log_data/water_center.beyless')
     // .then(response => response.text())
     // .then(function(text){
     //     const vertices = [];
     //     let lines = text.split('\r\n');
     //     console.log(lines.length);
-    //     for (let i=0;i<lines.length;i++){
+    //     for (let i=0;i<lines.length;i+=1){
     //         let [azi,x,y] = line2axy(lines[i]);
-    //         vertices.push( x, y, 0 );
+    //         vertices.push( x, y, 0.5 );
     //         console.log(x,y);
     //     }
 
     //     const geometry = new THREE.BufferGeometry();
     //     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-    //     const material = new THREE.PointsMaterial( { color: 0xff0000 } );
+    //     const material = new THREE.PointsMaterial( { color: 0xff0000, size : 1 } );
     //     const points = new THREE.Points( geometry, material );
     //     scene.add( points );
             
@@ -1021,7 +1031,7 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    load_vector_data();
+    // load_vector_data();
     load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();

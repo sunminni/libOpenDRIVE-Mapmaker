@@ -319,20 +319,21 @@ function loadOdrMap(clear_map = true)
     // odr_roadmarks_mesh.delete();
     odr_lanes_mesh.delete();
     spotlight_info.style.display = "none";
+    if (VIEW_MODE){
+        let vehicle_geometry = new THREE.BoxGeometry( VEHICLE_L, VEHICLE_W, VEHICLE_H); 
+        let vehicle_material = new THREE.MeshBasicMaterial( {color: 0xffff00} ); 
+        vehicle_box = new THREE.Mesh( vehicle_geometry, vehicle_material );
+        scene.add( vehicle_box );
 
-    let vehicle_geometry = new THREE.BoxGeometry( VEHICLE_L, VEHICLE_W, VEHICLE_H); 
-    let vehicle_material = new THREE.MeshBasicMaterial( {color: 0xffff00} ); 
-    vehicle_box = new THREE.Mesh( vehicle_geometry, vehicle_material ); 
-    scene.add( vehicle_box );
-
-    let target_geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2); 
-    let target_material = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
-    
-    for (let i=0;i<80;i++){
-        target_box = new THREE.Mesh( target_geometry, target_material ); 
-        scene.add( target_box );
-        target_boxes.push(target_box);
-    }
+        let target_geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2); 
+        let target_material = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
+        
+        for (let i=0;i<80;i++){
+            target_box = new THREE.Mesh( target_geometry, target_material ); 
+            scene.add( target_box );
+            target_boxes.push(target_box);
+        }
+    } 
     
     animate();
 }
@@ -482,17 +483,11 @@ function fitViewToBbox(bbox, restrict_zoom = false)
     // const fov2r = (camera.fov * 0.5) * (Math.PI / 180.0);
     // const dz = l2xy / Math.tan(fov2r);
     
-    //K-CITY
-    center_pt.x = 720;
-    center_pt.y = 1592;
-    //KATECH
-    // center_pt.x = 700;
-    // center_pt.y = -340;
-    
+    center_pt.x = CAMERA_OFFSET_X;
+    center_pt.y = CAMERA_OFFSET_Y;
     center_pt.z = 0;
-    const dz = 30;
 
-    camera.position.set(center_pt.x, center_pt.y, bbox.max.z + dz);
+    camera.position.set(center_pt.x, center_pt.y, bbox.max.z + CAMERA_OFFSET_Z);
     controls.target.set(center_pt.x, center_pt.y, center_pt.z);
     if (restrict_zoom)
         controls.maxDistance = center_pt.distanceTo(bbox.max) * 1.2;
