@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d2f977782f04dde71d4e7656f833bf56"></script>
+        <style>
+            body{
+                margin: 0;
+            }
+            #map{
+                width:400px;
+                height:300px;
+            }
+            #car{
+                width: 0; 
+                height: 0; 
+                border: 4px solid transparent;
+                border-left: 8px solid red; /* border * 1.73 */
+                position: fixed;
+                left: 196px; /* width/2-borderleft/2 */
+                top: 146px; /* height/2-border */
+                z-index: 10;
+            }
+            #box{   
+                width:200px;
+                height:150px;
+                background-color: yellow;
+                z-index: 9;
+                position: fixed;
+                top:0;
+                left:0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div id="car"></div>
+        <!-- <div id="box"></div> -->
+    </body>
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        var car = document.getElementById('car');
+        var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+        var options = {
+            center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표
+            level: 0, //지도의 레벨(확대, 축소 정도), 0 = maximum magnification
+            mapTypeId: kakao.maps.MapTypeId.SKYVIEW
+        };
+
+        var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+
+        function myCallback1() {
+            fetch('http://localhost:5000/get_alatlon', {
+                method: 'GET',
+            }).then(function (response) {
+                return response.json();
+            }).then(function (json) {
+                let datas = json['data_history'];
+                let data = datas[10];
+                let yaw = (data['a'])*180/Math.PI;
+                car.style.transform = "rotate("+yaw.toString()+");";
+                let lat = data['lat'];
+                let lon = data['lon'];
+                var moveLatLon = new kakao.maps.LatLng(lat, lon);
+                map.setCenter(moveLatLon);
+            });
+        }
+
+        const intervalID1 = setInterval(myCallback1, 100);
+
+    </script>
+</html>
