@@ -11,14 +11,24 @@
                 height:300px;
             }
             #car{
+                width: 12px;
+                height: 6px;
+                background-color: red;
+                position: fixed;
+                left: 194px; /* width/2-borderleft/2 */
+                top: 147px; /* height/2-border */
+                z-index: 10;
+            }
+            #arrow{
                 width: 0; 
                 height: 0; 
-                border: 4px solid transparent;
-                border-left: 8px solid red; /* border * 1.73 */
-                position: fixed;
-                left: 196px; /* width/2-borderleft/2 */
-                top: 146px; /* height/2-border */
-                z-index: 10;
+                border: 2px solid transparent;
+                border-left: 4px solid white; /* border * 1.73 */
+                position: relative;
+                left: 5px; /* width/2-borderleft/2 */
+                top: 1px; /* height/2-border */
+                z-index: 11;
+                transform-origin: 4px 4px;
             }
             #box{   
                 width:200px;
@@ -33,7 +43,7 @@
     </head>
     <body>
         <div id="map"></div>
-        <div id="car"></div>
+        <div id="car"><div id="arrow"></div></div>
         <!-- <div id="box"></div> -->
     </body>
     <script>
@@ -59,9 +69,10 @@
                 let datas = json['data_history'];
                 let data = datas[10];
                 let yaw = (data['a'])*180/Math.PI;
-                car.style.transform = "rotate("+yaw.toString()+");";
+                car.style.transform = "rotate("+yaw.toString()+"deg)";
                 let lat = data['lat'];
                 let lon = data['lon'];
+                console.log(yaw,lat,lon);
                 var moveLatLon = new kakao.maps.LatLng(lat, lon);
                 map.setCenter(moveLatLon);
             });
