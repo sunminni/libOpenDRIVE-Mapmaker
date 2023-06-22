@@ -165,4 +165,4 @@ var VEHICLE_YAW = 0;
 // var VEHICLE_LOG = [];
 var log_idx = 0;
 
-var VIEW_MODE = false;
+var VIEW_MODE = true;

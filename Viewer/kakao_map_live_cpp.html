@@ -68,7 +68,7 @@
             }).then(function (json) {
                 let datas = json['data_history'];
                 let data = datas[10];
-                let yaw = (data['a'])*180/Math.PI;
+                let yaw = (data['a'])*-180/Math.PI;
                 car.style.transform = "rotate("+yaw.toString()+"deg)";
                 let lat = data['lat'];
                 let lon = data['lon'];

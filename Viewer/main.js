@@ -425,19 +425,19 @@ function animate()
             return response.json();
         }).then(function (json) {
             // VEHICLE_YAW = json['a']*-Math.PI/180+Math.PI/2;
-            let send_lonlats = json['send_lonlats'];
-            for (let i=0;i<send_lonlats.length;i++){
-                let lon = send_lonlats[i][0];
-                let lat = send_lonlats[i][1];
-                let [TARGET_X,TARGET_Y] = proj4(PROJ_STR,[lon,lat]);
-                TARGET_X -= REF_X;
-                TARGET_Y -= REF_Y;
-                // console.log(TARGET_X,TARGET_X);
-                target_boxes[i].position.set(TARGET_X, TARGET_Y, 2);
-            }
+            // let send_lonlats = json['send_lonlats'];
+            // for (let i=0;i<send_lonlats.length;i++){
+            //     let lon = send_lonlats[i][0];
+            //     let lat = send_lonlats[i][1];
+            //     let [TARGET_X,TARGET_Y] = proj4(PROJ_STR,[lon,lat]);
+            //     TARGET_X -= REF_X;
+            //     TARGET_Y -= REF_Y;
+            //     // console.log(TARGET_X,TARGET_X);
+            //     target_boxes[i].position.set(TARGET_X, TARGET_Y, 2);
+            // }
             let datas = json['data_history'];
             let data = datas[10];
-            VEHICLE_YAW = (data['a'])*Math.PI/180;
+            VEHICLE_YAW = (data['a'])*-Math.PI/180;
             let lat = data['lat'];
             let lon = data['lon'];
             // let [TARGET_X,TARGET_Y] = proj4(PROJ_STR,[data['target_lon'],data['target_lat']]);
