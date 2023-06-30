@@ -1023,6 +1023,65 @@ function load_gps(){
     //     scene.add( points );
             
     // });
+
+    const url = 'http://localhost:8086/query';
+    const query = 'SELECT * FROM "test_log"';
+
+    const params = new URLSearchParams();
+    params.append('u', "admin");
+    params.append('p', "asdf");
+    params.append('db', "test_log");
+    params.append('q', query);
+
+    fetch(url + '?' + params.toString())
+    .then(response => response.json())
+    .then(data => {
+        // Process the response data here
+        let arr = data['results'][0]['series'][0]['values'];
+        
+        for (let i=0;i<arr.length;i++){
+            if (i%10==0){
+                // console.log(i);
+                let [timestamp, lat, lon, speed, yaw] = arr[i];
+                lat /= 100000000;
+                lon /= 100000000;
+                yaw /= 100000000;
+                
+                let [x,y] = proj4(PROJ_STR,[lon,lat]);
+                x -= REF_X;
+                y -= REF_Y;
+                let from = new THREE.Vector3(x, y, 0);
+                let direction = new THREE.Vector3(Math.cos(yaw),Math.sin(yaw), 0);
+                let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
+                arrow.line.material.linewidth = 5;
+                    scene.add(arrow);
+            }
+        }
+    })
+    .catch(error => {
+        // Handle any errors that occur during the fetch request
+        console.error('Error:', error);
+    });
+
+    // fetch('mt_log_data/water_center.beyless')
+    // .then(response => response.text())
+    // .then(function(text){
+    //     const vertices = [];
+    //     let lines = text.split('\r\n');
+    //     console.log(lines.length);
+    //     for (let i=0;i<lines.length;i+=1){
+    //         let [azi,x,y] = line2axy(lines[i]);
+    //         vertices.push( x, y, 0.5 );
+    //         console.log(x,y);
+    //     }
+
+    //     const geometry = new THREE.BufferGeometry();
+    //     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+    //     const material = new THREE.PointsMaterial( { color: 0xff0000, size : 1 } );
+    //     const points = new THREE.Points( geometry, material );
+    //     scene.add( points );
+            
+    // });
 }
 
 

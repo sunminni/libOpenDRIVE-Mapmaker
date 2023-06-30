@@ -97,10 +97,10 @@ var flip = false;
 // const PROJ_STR = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs";
 
 // Kakao Map
-// const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
+const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
 
 // Naver Map
-const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs";
+// const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs";
 
 // var MAP_SELECT = "KATECH"
 // var MAP_SELECT = "PANGYO"
@@ -146,10 +146,17 @@ else if (MAP_SELECT == "WATER"){
     // SCREENSHOT_DX = -195.7;
     // SCREENSHOT_DY = -318.7;
     // naver
+    // SCREENSHOT_ROT = 0;
+    // SCREENSHOT_SCALE = 0.20579999999999993;
+    // SCREENSHOT_DX = -195.30000000000004;
+    // SCREENSHOT_DY = -333.2999999999999;
+
+    //naver screenshot, kakao proj
     SCREENSHOT_ROT = 0;
     SCREENSHOT_SCALE = 0.20579999999999993;
-    SCREENSHOT_DX = -195.30000000000004;
-    SCREENSHOT_DY = -333.2999999999999;
+    SCREENSHOT_DX = -207.09999999999937;
+    SCREENSHOT_DY = -338.40000000000106;
+
     POINTS_OFFSET_X = -372;
     POINTS_OFFSET_Y = -616.2;
 }
@@ -165,4 +172,4 @@ var VEHICLE_YAW = 0;
 // var VEHICLE_LOG = [];
 var log_idx = 0;
 
-var VIEW_MODE = true;
+var VIEW_MODE = false;
