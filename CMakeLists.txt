@@ -65,4 +65,7 @@ endif()
 if(NOT EMSCRIPTEN)
     add_executable(test-xodr test.cpp)
     target_link_libraries(test-xodr OpenDrive)
+
+    add_executable(make_fixed_trajectory make_fixed_trajectory.cpp)
+    target_link_libraries(make_fixed_trajectory OpenDrive)
 endif()
