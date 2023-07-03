@@ -865,8 +865,8 @@ function load_vector_data(){
         for (let i=0;i<view.length/5;i++){
             let type = view[i*5+0+offset_idx];
             let id = view[i*5+1+offset_idx];
-            let x = view[i*5+2+offset_idx]+POINTS_OFFSET_X;
-            let y = view[i*5+3+offset_idx]+POINTS_OFFSET_Y;
+            let x = view[i*5+2+offset_idx];
+            let y = view[i*5+3+offset_idx];
             let z = view[i*5+4+offset_idx];
 
             if (id in lines_dict){
@@ -1090,7 +1090,7 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    // load_vector_data();
+    load_vector_data();
     load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();

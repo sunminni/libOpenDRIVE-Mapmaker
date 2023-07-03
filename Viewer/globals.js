@@ -91,21 +91,21 @@ var flip = false;
 
 
 // UTM 52
-// const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
+const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
 
 // Google Maps
 // const PROJ_STR = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs";
 
 // Kakao Map
-const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
+// const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs";
 
 // Naver Map
 // const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs";
 
 // var MAP_SELECT = "KATECH"
 // var MAP_SELECT = "PANGYO"
-// var MAP_SELECT = "KCITY"
-var MAP_SELECT = "WATER"
+var MAP_SELECT = "KCITY"
+// var MAP_SELECT = "WATER"
 var GPS_REFERENCE_LAT, GPS_REFERENCE_LON;
 var CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z;
 var SCREENSHOT_DX, SCREENSHOT_DY, SCREENSHOT_ROT, SCREENSHOT_SCALE;
