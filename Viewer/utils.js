@@ -1025,7 +1025,7 @@ function load_gps(){
     // });
 
     const url = 'http://localhost:8086/query';
-    const query = 'SELECT * FROM "test_log"';
+    const query = 'SELECT * FROM "test_log_kcity"';
 
     const params = new URLSearchParams();
     params.append('u', "admin");
@@ -1090,7 +1090,7 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    load_vector_data();
+    // load_vector_data();
     load_image();
     load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
