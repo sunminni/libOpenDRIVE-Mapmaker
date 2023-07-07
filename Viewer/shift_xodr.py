@@ -4,8 +4,8 @@ import random
 import math
 import numpy as np
 
-filepath = 'maps/JWaterCenter/JWaterCenter_20230703_085511.xodr'
-dx,dy=0.2,0
+filepath = 'maps/Kcity/Kcity_20230706_173735.xodr'
+dx,dy=0,-0.3
 tree = ET.parse(filepath)
 OpenDRIVE = tree.getroot()
 for road in OpenDRIVE:

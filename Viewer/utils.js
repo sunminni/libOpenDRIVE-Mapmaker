@@ -1038,9 +1038,10 @@ function load_gps(){
     .then(data => {
         // Process the response data here
         let arr = data['results'][0]['series'][0]['values'];
+        const vertices = [];
         
         for (let i=0;i<arr.length;i++){
-            if (i%10==0){
+            if (i%2==0){
                 // console.log(i);
                 let [timestamp, lat, lon, speed, yaw] = arr[i];
                 lat /= 100000000;
@@ -1050,13 +1051,22 @@ function load_gps(){
                 let [x,y] = proj4(PROJ_STR,[lon,lat]);
                 x -= REF_X;
                 y -= REF_Y;
-                let from = new THREE.Vector3(x, y, 0);
-                let direction = new THREE.Vector3(Math.cos(yaw),Math.sin(yaw), 0);
-                let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
-                arrow.line.material.linewidth = 5;
-                    scene.add(arrow);
+
+                vertices.push( x, y, 0 );
+
+                
+                // let from = new THREE.Vector3(x, y, 0);
+                // let direction = new THREE.Vector3(Math.cos(yaw),Math.sin(yaw), 0);
+                // let arrow = new THREE.ArrowHelper(direction.normalize(), from, 1, 0x00ffff, 1, 1);
+                // arrow.line.material.linewidth = 5;
+                // scene.add(arrow);
             }
         }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+        const material = new THREE.PointsMaterial( { color: 0xff0000, size : 0.5 } );
+        const points = new THREE.Points( geometry, material );
+        scene.add( points );
     })
     .catch(error => {
         // Handle any errors that occur during the fetch request

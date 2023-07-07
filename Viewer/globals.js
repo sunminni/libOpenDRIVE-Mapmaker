@@ -90,8 +90,11 @@ var selected_line_id = -1;
 var flip = false;
 
 
+// utmk
+const PROJ_STR = "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43";
+
 // UTM 52
-const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
+// const PROJ_STR = "+proj=utm +zone=52 +datum=WGS84 +units=m +no_defs +type=crs";
 
 // Google Maps
 // const PROJ_STR = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs";
@@ -135,7 +138,7 @@ else if (MAP_SELECT == "PANGYO"){
 }
 else if (MAP_SELECT == "KCITY"){
     [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [37.238323,126.76788];
-    [CAMERA_OFFSET_X,CAMERA_OFFSET_Y ]= [720,1592];
+    [CAMERA_OFFSET_X,CAMERA_OFFSET_Y ]= [500,500];
 }
 else if (MAP_SELECT == "WATER"){
     [GPS_REFERENCE_LAT,GPS_REFERENCE_LON ]= [37.465590,127.12433];
