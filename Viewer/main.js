@@ -93,7 +93,7 @@ const road_network_material = new THREE.MeshPhongMaterial({
     wireframe : PARAMS.wireframe,
     shininess : 20.0,
     transparent : true,
-    opacity : 0.1
+    opacity : 0.3
 });
 const lane_outlines_material = new THREE.LineBasicMaterial({
     color : COLORS.lane_outline,

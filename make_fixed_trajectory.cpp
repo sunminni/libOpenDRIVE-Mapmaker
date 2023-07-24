@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         return -1;
     }
     odr::OpenDriveMap odr_map(argv[1]);
-    const double      eps = 0.5;
+    const double      eps = 0.1;
     int roadlane_type = 0;
     int roadline_type = 1;
     int data_type = 2;

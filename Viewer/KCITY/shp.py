@@ -6,41 +6,29 @@ import time
 # color = ['black', 'darkorange', 'red', 'green', 'yellow', 'saddlebrown', 'cyan', 'purple', 'violet']
 # address = './SEC01_첨단주행시험로/HDMap_UTM52N_타원체고/'
 # address = './SEC01_첨단주행시험로/HDMap_UTMK_정표고/'
-# address = './SEC01_첨단주행시험로/HDMap_UTMK_타원체고/'
-address = '../WATER_CENTER/'
+address = './SEC01_첨단주행시험로/HDMap_UTMK_타원체고/'   # NAVER MAP!!
 
-# info = list(filter(lambda x: 'SURFACELINEMARK.shp' in x, os.listdir(address)))
-info = list(filter(lambda x: '.shp' in x, os.listdir(address)))
+info = list(filter(lambda x: 'SURFACELINEMARK.shp' in x, os.listdir(address)))
 datas = []
 # plt.rcParams['figure.figsize'] = (10, 10) 
 # plt.rcParams['lines.linewidth'] = 1 
 # plt.rcParams['lines.markersize'] = 3 
 lineID = 0
 for i in info:
-    # datas.append(gpd.read_file(address + i, encoding='utf-8'))
-# print(datas)
-# df = datas[0][['Type','geometry']]
-    df = gpd.read_file(address + i)[['UFID','geometry']]
+    print(i)
+    df = gpd.read_file(address + i)[['Type','geometry']]
     for index, row in df.iterrows():
         lineString = row['geometry']
         if "LINESTRING" in str(lineString):
             lineID += 1
-            for x, y in lineString.coords:
-                # data.append([float(row['Type']),lineID,float(x),float(y),float(z)])
-                datas.append([0,lineID,float(x),float(y),0])
-        elif "POLYGON" in str(lineString):
-            lineID += 1
-            pts = lineString.wkt.replace('(','').replace(')','').replace('POLYGON','').split(',')
-            for p in pts:
-                x,y=p.strip().split(' ')
-                datas.append([200,lineID,float(x),float(y),0])
+            for x, y, z in lineString.coords:
+                datas.append([float(row['Type']),lineID,float(x),float(y),float(z)])
 np_data = np.array(datas)
 np_data = np_data.astype(np.float32)
-mins = np.min(np_data,0)
+# mins = np.min(np_data,0)
 np_data = np_data.flatten()
-np_data = np.insert(np_data, 0, mins[2:4], axis=None)
-# np_data.tofile("KCITY_LINES.bin")
-np_data.tofile("../WATER_CENTER/WATER_CENTER.bin")
+# np_data = np.insert(np_data, 0, mins[2:4], axis=None)
+np_data.tofile("KCITY_LINES.bin")
 
 # x = 935655
 # y = 1916235
@@ -54,3 +42,48 @@ np_data.tofile("../WATER_CENTER/WATER_CENTER.bin")
 # plt.axis('off')
 # plt.show()
 # print(dd - time.time())
+
+address = './SEC01_첨단주행시험로/HDMap_UTMK_타원체고/'   # NAVER MAP!!
+info = list(filter(lambda x: 'SPEEDBUMP.shp' in x, os.listdir(address)))
+
+datas = []
+for i in info:
+    print(i)
+    df = gpd.read_file(address + i)[['Type','geometry']]
+    print(df)
+    for index, row in df.iterrows():
+        polygon = row['geometry']
+        if "POLYGON" in str(polygon):
+            lineID += 1
+            # print(type(polygon))
+            # for i in dir(polygon):
+            #     print(i)
+            for i in polygon.exterior.coords:
+                x,y,z = i
+                datas.append([float(row['Type']),lineID,float(x),float(y),float(z)])
+            # print(polygon.exterior.coords)
+            # for x, y, z in polygon.coords:
+            #     datas.append([float(row['Type']),lineID,float(x),float(y),float(z)])
+np_data = np.array(datas)
+np_data = np_data.astype(np.float32)
+np_data = np_data.flatten()
+np_data.tofile("KCITY_SPEEDBUMPS.bin")
+
+
+address = './SEC01_첨단주행시험로/HDMap_UTMK_타원체고/'   # NAVER MAP!!
+info = list(filter(lambda x: 'SURFACEMARK.shp' in x, os.listdir(address))) 
+
+datas = []
+for i in info:
+    print(i)
+    df = gpd.read_file(address + i)[['Type','geometry']]
+    for index, row in df.iterrows():
+        polygon = row['geometry']
+        if "POLYGON" in str(polygon):
+            lineID += 1
+            for x, y, z in polygon.exterior.coords:
+                datas.append([float(row['Type']),lineID,float(x),float(y),float(z)])
+np_data = np.array(datas)
+np_data = np_data.astype(np.float32)
+np_data = np_data.flatten()
+np_data.tofile("KCITY_SURFACEMARKS.bin")

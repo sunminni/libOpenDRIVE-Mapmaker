@@ -858,23 +858,20 @@ function load_vector_data(){
     .then(response => response.arrayBuffer())
     .then(buffer => {
         const view = new Float32Array(buffer);
-        
-        map_offset_x = view[0];
-        map_offset_y = view[1];
-        let offset_idx = 2;
+        console.log(view.length);
         for (let i=0;i<view.length/5;i++){
-            let type = view[i*5+0+offset_idx];
-            let id = view[i*5+1+offset_idx];
-            let x = view[i*5+2+offset_idx];
-            let y = view[i*5+3+offset_idx];
-            let z = view[i*5+4+offset_idx];
+            let type = view[i*5+0];
+            let id = view[i*5+1];
+            let x = view[i*5+2];
+            let y = view[i*5+3];
+            let z = view[i*5+4];
 
             if (id in lines_dict){
-                lines_dict[id]['points'].push(new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0.1 ));
+                lines_dict[id]['points'].push(new THREE.Vector3( x-REF_X, y-REF_Y, 0.1 ));
             }
             else{
                 lines_dict[id] = {};
-                lines_dict[id]['points'] = [new THREE.Vector3( x-map_offset_x, y-map_offset_y, 0.1 )];
+                lines_dict[id]['points'] = [new THREE.Vector3( x-REF_X, y-REF_Y, 0.1 )];
                 lines_dict[id]['type'] = type;
             }
         }
@@ -1100,9 +1097,9 @@ function afterModuleLoad(){
     getMapList();
     init_dat_gui();
     setMode(DEFAULT);
-    // load_vector_data();
-    load_image();
-    load_gps();
+    load_vector_data();
+    // load_image();
+    // load_gps();
     preview_geometries = new ModuleOpenDrive.vectorVectorDouble();
 }
 
